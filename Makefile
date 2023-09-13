@@ -1,11 +1,5 @@
 # Makefile for running uvicorn with app and --reload
 
-# Set the default target to 'init'
-# .DEFAULT_GOAL := init
-
-# Define the Poetry command
-POETRY_CMD = poetry
-
 # Define the UVicorn command
 UVICORN_CMD = uvicorn $(MAIN_FILE):$(APP_NAME) --reload
 
@@ -13,11 +7,6 @@ UVICORN_CMD = uvicorn $(MAIN_FILE):$(APP_NAME) --reload
 MAIN_FILE = main
 APP_NAME = app
 
-# Define the 'init' target to create a virtual environment and run the server
-init:
-	$(POETRY_CMD) install
-	$(POETRY_CMD) shell
-
-# Define the 'run' target to run the UVicorn server
+# Define the 'run' target to run the UVicorn server within the virtual environment
 run:
-	$(POETRY_CMD) run $(UVICORN_CMD)
+	$(UVICORN_CMD)

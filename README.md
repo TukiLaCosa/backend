@@ -41,3 +41,10 @@ poetry remove packageName
 ```console
 poetry shell
 ```
+
+## To execute the application
+```console
+poetry install
+poetry shell
+make run
+```
