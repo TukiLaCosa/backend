@@ -1,39 +1,44 @@
-# backend
+# La Cosa (backend)
 Backend of the game "La Cosa"
 
-# Poetry
-## installation
+## Poetry
+### installation
 ```console
 curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-## To see version
+### To see version
 ```console
 poetry --version
 ```
 
-## To update
+### To update
 ```console
 poetry self update
 ```
 
-## To uninstall
+### To uninstall
 ```console
 curl -sSL https://install.python-poetry.org | python3 - --uninstall
 curl -sSL https://install.python-poetry.org | POETRY_UNINSTALL=1 python3 -
 ```
 
-## Specifying dependencies
+### Specifying dependencies
 ```console
 poetry add dependencyName
 ```
 
-## Installing dependencies
+### Installing dependencies
 ```console
 poetry install
 ```
 
-## Removing an installed package
+### Removing an installed package
 ```console
 poetry remove packageName
+```
+
+### Run environment
+```console
+poetry shell
 ```
