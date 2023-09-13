@@ -1,8 +1,7 @@
 # La Cosa (backend)
-Backend of the game "La Cosa"
 
-## Poetry
-### installation
+## Poetry (Python dependency management and packaging tool)
+### Installation
 ```console
 curl -sSL https://install.python-poetry.org | python3 -
 ```
