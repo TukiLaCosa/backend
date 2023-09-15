@@ -37,6 +37,11 @@ poetry install
 poetry remove packageName
 ```
 
+### To set the desired Python version (example 3.10)
+```console
+poetry env use 3.10
+```
+
 ### Run environment
 ```console
 poetry shell
