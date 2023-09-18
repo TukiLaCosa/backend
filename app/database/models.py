@@ -4,6 +4,7 @@ from app.database import db
 
 class Player(db.Entity):
     id = PrimaryKey(int, auto=True)
+    name = Required(str)
 
 
 class Game(db.Entity):
