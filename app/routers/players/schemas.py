@@ -23,4 +23,4 @@ class PlayerIn(BasePlayer):
 
 class PlayerOut(BasePlayer):
     id: int
-    rol: Optional[PlayerRol] = None
+    rol: Optional[PlayerRol] = 'ELIMINATED'
