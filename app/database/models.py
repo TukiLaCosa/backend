@@ -7,7 +7,7 @@ class Player(db.Entity):
     game = Optional('Game', reverse='players')
     game_hosting = Optional('Game', reverse='host')
     name = Required(str)
-    rol = Optional(str)
+    rol = Optional(str, nullable=True)
     position = Required(int, default="-1")
     hand = Set('Card')
 
@@ -18,7 +18,7 @@ class Game(db.Entity):
     host = Required(Player, reverse='game_hosting')
     min_players = Required(int)
     max_players = Required(int)
-    password = Optional(str)
+    password = Optional(str, nullable=True)
     turn = Required(int, default="-1")
     status = Required(str, default='UNSTARTED')
     discard_deck = Set('Card', reverse='games_discard_deck')

@@ -11,11 +11,10 @@ router = APIRouter(
 
 
 @router.get("/")
-async def get_all() -> List[PlayerOut]:
+def get_all() -> List[PlayerResponse]:
     return services.get_all()
 
 
-@router.post('/', status_code=status.HTTP_201_CREATED)
-async def create(new_person: PlayerIn):
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=PlayerCreationOut)
+def create(new_person: PlayerCreationIn):
     return services.create(new_person)
-    

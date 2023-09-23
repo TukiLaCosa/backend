@@ -1,5 +1,4 @@
 from pydantic import BaseModel, ConfigDict, Field
-from pydantic.alias_generators import to_camel
 from typing import List, Optional
 from enum import Enum
 
@@ -12,15 +11,19 @@ class PlayerRol(str, Enum):
 
 
 class BasePlayer(BaseModel):
-    model_config = ConfigDict(from_attributes=True, alias_generator=to_camel)
+    model_config = ConfigDict(from_attributes=True)
 
     name: str = Field(min_length=3, max_length=30)
 
 
-class PlayerIn(BasePlayer):
+class PlayerCreationIn(BasePlayer):
     pass
 
 
-class PlayerOut(BasePlayer):
+class PlayerCreationOut(BasePlayer):
     id: int
-    rol: Optional[PlayerRol] = 'ELIMINATED'
+
+
+class PlayerResponse(BasePlayer):
+    id: int
+    position: int
