@@ -5,7 +5,7 @@ from app.database import db
 class Player(db.Entity):
     id = PrimaryKey(int, auto=True)
     game = Optional('Game', reverse='players')
-    game_hosting = Optional('Game', reverse='host')
+    game_hosting = Optional('Game', reverse='host', cascade_delete=True)
     name = Required(str)
     rol = Optional(str, nullable=True)
     position = Required(int, default="-1")

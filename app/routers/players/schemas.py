@@ -24,6 +24,10 @@ class PlayerCreationOut(BasePlayer):
     id: int
 
 
+class PlayerUpdateIn(BaseModel):
+    name: Optional[str] = None
+
+
 class PlayerResponse(BasePlayer):
     id: int
     position: int
