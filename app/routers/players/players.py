@@ -16,6 +16,6 @@ async def get_all() -> List[PlayerOut]:
 
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
-async def create(new_person: PlayerIn) -> PlayerOut:
+async def create(new_person: PlayerIn):
     return services.create(new_person)
     
