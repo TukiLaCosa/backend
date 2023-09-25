@@ -37,6 +37,7 @@ class GameCreationOut(BaseGame):
     host_player_id: int
     is_private: bool
 
+
 class GameUpdateIn(BaseGame):
     password: Optional[str] = Field(
         None, min_length=3, max_length=50, description="Optional password to join the game.")
