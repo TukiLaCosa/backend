@@ -36,3 +36,32 @@ class GameCreationOut(BaseGame):
     status: GameStatus
     host_player_id: int
     is_private: bool
+
+
+class GameUpdateIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    min_players: int = Field(
+        ge=4, le=12, description="The minimum number of players allowed.")
+    max_players: int = Field(
+        ge=4, le=12, description="The maximum number of players allowed.")
+    password: Optional[str] = Field(
+        None, min_length=3, max_length=50, description="Optional password to join the game.")
+
+    @model_validator(mode='after')
+    def check_min_lte_max(self) -> 'BaseModel':
+        if self.max_players < self.min_players:
+            raise ValueError('max_players can not be less than min_players')
+        return self
+
+
+class GameUpdateOut(BaseGame):
+    is_private: bool
+    status: GameStatus
+
+
+class GameResponse(BaseGame):
+    host_player_id: int
+    status: GameStatus
+    is_private: bool
+    players_joined: int
