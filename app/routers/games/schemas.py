@@ -36,3 +36,10 @@ class GameCreationOut(BaseGame):
     status: GameStatus
     host_player_id: int
     is_private: bool
+
+
+class GameResponse(BaseGame):
+    host_player_id: int
+    status: GameStatus
+    is_private: bool
+    players_joined: int

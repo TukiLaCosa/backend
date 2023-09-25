@@ -5,6 +5,21 @@ from fastapi import HTTPException, status
 
 
 @db_session
+def get_games() -> list[GameResponse]:
+    games = Game.select()
+    games_list = [GameResponse(
+        name=game.name,
+        min_players=game.min_players,
+        max_players=game.max_players,
+        host_player_id=game.host.id,
+        status=game.status,
+        is_private=game.password is not None,
+        players_joined=len(game.players)
+    ) for game in games]
+    return games_list
+
+
+@db_session
 def create_game(game_data: GameCreationIn) -> GameCreationOut:
 
     host = Player.get(id=game_data.host_player_id)
