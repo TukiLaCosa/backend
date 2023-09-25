@@ -23,7 +23,7 @@ class Game(db.Entity):
     status = Required(str, default='UNSTARTED')
     discard_deck = Set('Card', reverse='games_discard_deck')
     draw_deck = Set('Card', reverse='games_draw_deck')
-    round_direction = Required(str, default='clockwise')
+    round_direction = Required(str, default='CLOCKWISE')
 
 
 class Card(db.Entity):
