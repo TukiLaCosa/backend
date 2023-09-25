@@ -20,7 +20,7 @@ def create_game(game_data: GameCreationIn):
     return services.create_game(game_data)
 
 
-@router.put("/{game_name}", status_code=status.HTTP_200_OK)
+@router.put("/{game_name}", response_model=GameUpdateOut, status_code=status.HTTP_200_OK)
 def update_game(game_name: str, game_data: GameUpdateIn):
     return services.update_game(game_name, game_data)
 

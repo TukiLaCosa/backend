@@ -55,18 +55,22 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
 
 
 @db_session
-def update_game(game_name: str, request_data: GameUpdateIn):
+def update_game(game_name: str, request_data: GameUpdateIn) -> GameUpdateOut:
     game = Game.get(name=game_name)
     if game is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
-    if game_name != request_data.name:
+    if game_name != game.name:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
     game.min_players = request_data.min_players
     game.max_players = request_data.max_players
     game.password = request_data.password
-    return {"message": "Game updated"}
+    return GameUpdateOut(name=game.name,
+                         min_players=game.min_players,
+                         max_players=game.max_players,
+                         is_private=game.password is not None,
+                         status=game.status)
 
 
 @db_session
