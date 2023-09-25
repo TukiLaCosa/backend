@@ -52,3 +52,31 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
         is_private=new_game.password is not None,
         host_player_id=new_game.host.id
     )
+
+
+@db_session
+def update_game(game_name: str, request_data: GameUpdateIn):
+    game = Game.get(name=game_name)
+    if game is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
+    if game_name != request_data.name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
+    game.min_players = request_data.min_players
+    game.max_players = request_data.max_players
+    game.password = request_data.password
+    return {"message": "Game updated"}
+
+
+@db_session
+def delete_game(game_name: str):
+    game = Game.get(name=game_name)
+    if game is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
+    if game_name != game.name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
+    game.delete()
+    return {"message": "Game deleted"}
