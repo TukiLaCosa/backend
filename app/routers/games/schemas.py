@@ -9,6 +9,11 @@ class GameStatus(str, Enum):
     ENDED = 'ENDED'
 
 
+class RoundDirection(str, Enum):
+    CLOCKWISE = 'CLOCKWISE'
+    COUNTERCLOCKWISE = 'COUNTERCLOCKWISE'
+
+
 class BaseGame(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
