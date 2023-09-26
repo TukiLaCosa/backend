@@ -65,3 +65,15 @@ class GameResponse(BaseGame):
     status: GameStatus
     is_private: bool
     players_joined: int
+
+
+class GameInformationIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    password: Optional[str] = Field(
+        None, min_length=3, max_length=50, description="Optional password to join the game.")
+
+
+class GameInformationOut(GameUpdateOut):
+    players_joined: int
