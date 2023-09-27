@@ -56,16 +56,36 @@ poetry env use 3.10
 ```
 
 ## Running the Application
-To execute the application, follow these steps:
-1. Install project dependencies:
-```bash
-poetry install
-```
-2. Activate the virtual environment:
-```bash
-poetry shell
-```
-3. Run the application:
+In the Makefile, you have the following targets:
+
 ```bash
 make run
 ```
+Starts the Uvicorn server with the application. If it's not defined in the .env file, de default port is 8000.
+
+```bash
+make delete-db
+```
+Deletes the application's database file if it exists. It will request confirmation before deletion.
+
+```bash
+make test
+```
+Runs the application's tests using pytest and tracks code coverage.
+
+```bash
+make coverage-report
+```
+Generates code coverage reports and opens them in a web browser (Firefox)
+
+```bash
+make coverage-clean
+```
+Deletes previously generated coverage reports.
+
+```bash
+make install
+```
+Installs project dependencies and creates the virtual environment using Poetry.
+
+**Remember to create a .env file with the necessary environment variables before using the Makefile**
