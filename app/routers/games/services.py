@@ -21,16 +21,14 @@ def get_games() -> list[GameResponse]:
 
 @db_session
 def create_game(game_data: GameCreationIn) -> GameCreationOut:
-
     host = Player.get(id=game_data.host_player_id)
-    if host is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="player not found")
 
-    if host.game_hosting is not None:
+    if not host:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
+    if host.game_hosting:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="The host is already hosting a game")
-
     if Game.exists(name=game_data.name):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="The game name is already used")
@@ -42,7 +40,6 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
         password=game_data.password,
         host=host
     )
-
     host.game = new_game.name
     return GameCreationOut(
         name=new_game.name,
@@ -57,12 +54,14 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
 @db_session
 def update_game(game_name: str, request_data: GameUpdateIn) -> GameUpdateOut:
     game = Game.get(name=game_name)
-    if game is None:
+
+    if not game:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
     if game_name != game.name:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
+
     game.min_players = request_data.min_players
     game.max_players = request_data.max_players
     game.password = request_data.password
@@ -76,12 +75,14 @@ def update_game(game_name: str, request_data: GameUpdateIn) -> GameUpdateOut:
 @db_session
 def delete_game(game_name: str):
     game = Game.get(name=game_name)
-    if game is None:
+
+    if not game:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
     if game_name != game.name:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
+
     game.delete()
     return {"message": "Game deleted"}
 
@@ -90,39 +91,31 @@ def delete_game(game_name: str):
 def join_player(game_name: str, game_data: GameInformationIn) -> GameInformationOut:
     game = Game.get(name=game_name)
     player = Player.get(id=game_data.player_id)
-    if game is None:
+
+    if not game:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found"
-        )
+            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
     if game_name != game.name:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name"
-        )
-    if game.max_players == len(game.players):
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
+    if not player:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="The game is full"
-        )
-    if player is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Player not found"
-        )
+            status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
     if player in game.players:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Player already in the game")
+    if game.max_players <= len(game.players):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Player already in the game"
-        )
-    if game.password == game_data.password:
-        game.players.add(player)
-    else:
-        if game.password is not None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid password"
-            )
-        else:
-            game.players.add(player)
+            status_code=status.HTTP_400_BAD_REQUEST, detail="The game is full")
+    if game.password and game.password != game_data.password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid password")
 
+    game.players.add(player)
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
                               max_players=game.max_players,
                               is_private=game.password is not None,
                               status=game.status,
-                              players_joined=len(game.players))
+                              players_joined=len(game.players)
+                              )
