@@ -65,7 +65,11 @@ poetry install
 ```bash
 poetry shell
 ```
-3. Run the application:
+3. Generate environment configuration file from file `.env.example`:
+```bash
+cp .env.example .env
+```
+4. Run the application:
 ```bash
 make run
 ```
