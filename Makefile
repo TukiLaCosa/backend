@@ -1,5 +1,5 @@
 # Makefile for running uvicorn with app and --reload
-include .env
+-include .env
 
 # Define a default value for PORT in case it's not defined in .env
 ifndef PORT

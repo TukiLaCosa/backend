@@ -66,6 +66,7 @@ Starts the Uvicorn server with the application. If it's not defined in the .env 
 ```bash
 make delete-db
 ```
+
 Deletes the application's database file if it exists. It will request confirmation before deletion.
 
 ```bash
