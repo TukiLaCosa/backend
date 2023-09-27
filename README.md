@@ -50,6 +50,8 @@ In the Makefile, you have the following targets:
 
 `make coverage-clean` deletes previously generated coverage reports.
 
+`make autopep8` formats all the Python files to the PEP8 standard.
+
 `make install` installs project dependencies and creates the virtual environment using poetry.
 
 **Remember to create a .env file with the necessary environment variables before using the Makefile**
