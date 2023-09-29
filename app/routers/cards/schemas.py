@@ -3,65 +3,49 @@ from typing import List, Optional
 from enum import Enum
 
 
-class GameStatus(str, Enum):
-    UNSTARTED = 'UNSTARTED'
-    STARTED = 'STARTED'
-    ENDED = 'ENDED'
+class CardType(str, Enum):
+    PANIC = 'PANIC'
+    GET_AWAY = 'GET_AWAY'
 
 
-class BaseGame(BaseModel):
+class BaseCard(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    name: str = Field(min_length=3, max_length=30,
-                      description="The name of the game")
-    min_players: int = Field(
-        ge=4, le=12, description="The minimum number of players allowed.")
-    max_players: int = Field(
-        ge=4, le=12, description="The maximum number of players allowed.")
-
-    @model_validator(mode='after')
-    def check_min_lte_max(self) -> 'BaseGame':
-        if self.max_players < self.min_players:
-            raise ValueError('max_players can not be less than min_players')
-        return self
+    number: int = Field(
+        ge=1, le=109)
+    type: CardType
+    name: str = Field(
+        min_length=3, max_length=50)
+    description: str = Field(
+        min_length=3, max_length=50)
 
 
-class GameCreationIn(BaseGame):
-    password: Optional[str] = Field(
-        None, min_length=3, max_length=50, description="Optional password to join the game.")
-    host_player_id: int
+class CardCreationIn(BaseCard):
+    pass
+
+    # esto tiene que estar acá o en base?
+    # type: CardType
+    # name: str = Field(min_length=3, max_length=50)
+    # description: str = Field(min_length=3, max_length=50)
+
+#el número podría ser el id
+class CardCreationOut(BaseCard):
+    id: int
 
 
-class GameCreationOut(BaseGame):
-    status: GameStatus
-    host_player_id: int
-    is_private: bool
-
-
-class GameUpdateIn(BaseModel):
+class CardUpdateIn(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    min_players: int = Field(
-        ge=4, le=12, description="The minimum number of players allowed.")
-    max_players: int = Field(
-        ge=4, le=12, description="The maximum number of players allowed.")
-    password: Optional[str] = Field(
-        None, min_length=3, max_length=50, description="Optional password to join the game.")
-
-    @model_validator(mode='after')
-    def check_min_lte_max(self) -> 'BaseModel':
-        if self.max_players < self.min_players:
-            raise ValueError('max_players can not be less than min_players')
-        return self
+    game_discard_deck_name: Optional[str] = Field(
+        None, min_length=3, max_length=50)
+    game_draw_deck_name: Optional[str] = Field(
+        None, min_length=3, max_length=50)
+    players_hand_id: Optional[int]
 
 
-class GameUpdateOut(BaseGame):
-    is_private: bool
-    status: GameStatus
+class CardUpdateOut(BaseCard):
+    pass
 
 
-class GameResponse(BaseGame):
-    host_player_id: int
-    status: GameStatus
-    is_private: bool
-    players_joined: int
+class CardResponse(BaseCard):
+    pass

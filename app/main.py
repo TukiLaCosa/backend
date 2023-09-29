@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config.config import settings
 from app.routers.players import players
 from app.routers.games import games
+from app.routers.cards import cards
 
 app = FastAPI()
 
@@ -18,6 +19,7 @@ app.add_middleware(
 # Mapping api routers
 app.include_router(players.router)
 app.include_router(games.router)
+app.include_router(cards.router)
 
 
 @app.get("/")

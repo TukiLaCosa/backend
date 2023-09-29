@@ -1,86 +1,107 @@
 from pony.orm import *
 from app.database.models import Game, Player, Card
+from app.routers.games.services import find_game_by_name
+from app.routers.players.services import find_player_by_id
 from .schemas import *
 from fastapi import HTTPException, status
 
 
 @db_session
-def get_games() -> list[GameResponse]:
-    games = Game.select()
-    games_list = [GameResponse(
-        name=game.name,
-        min_players=game.min_players,
-        max_players=game.max_players,
-        host_player_id=game.host.id,
-        status=game.status,
-        is_private=game.password is not None,
-        players_joined=len(game.players)
-    ) for game in games]
-    return games_list
+def get_cards() -> list[CardResponse]:
+    cards = Card.select()
+    cards_list = [CardResponse(
+        number=card.number,
+        type=card.type,
+        name=card.name,
+        description=card.description
+    ) for card in cards]
+    return cards_list
 
 
 @db_session
-def create_game(game_data: GameCreationIn) -> GameCreationOut:
-
-    host = Player.get(id=game_data.host_player_id)
-    if host is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="player not found")
-
-    if host.game_hosting is not None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="The host is already hosting a game")
-
-    if Game.exists(name=game_data.name):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="The game name is already used")
-
-    new_game = Game(
-        name=game_data.name,
-        min_players=game_data.min_players,
-        max_players=game_data.max_players,
-        password=game_data.password,
-        host=host
+def create_card(card_data: CardCreationIn) -> Card:
+    new_card = Card(
+        number=card_data.number,
+        type=card_data.type,
+        name=card_data.name,
+        description=card_data.description
     )
 
-    host.game = new_game.name
-    return GameCreationOut(
-        name=new_game.name,
-        status=new_game.status,
-        min_players=new_game.min_players,
-        max_players=new_game.max_players,
-        is_private=new_game.password is not None,
-        host_player_id=new_game.host.id
-    )
+    return new_card
 
 
 @db_session
-def update_game(game_name: str, request_data: GameUpdateIn) -> GameUpdateOut:
-    game = Game.get(name=game_name)
-    if game is None:
+def find_card_by_id(id: int) -> Card:
+    card = Card.get(id=id)
+
+    if not card:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
-    if game_name != game.name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
-    game.min_players = request_data.min_players
-    game.max_players = request_data.max_players
-    game.password = request_data.password
-    return GameUpdateOut(name=game.name,
-                         min_players=game.min_players,
-                         max_players=game.max_players,
-                         is_private=game.password is not None,
-                         status=game.status)
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Card with id '{id}' not found."
+        )
+
+    return card
 
 
 @db_session
-def delete_game(game_name: str):
-    game = Game.get(name=game_name)
-    if game is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
-    if game_name != game.name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
-    game.delete()
-    return {"message": "Game deleted"}
+def delete_card(card_id: int) -> None:
+    find_card_by_id(card_id)
+    Card[card_id].delete()
+
+
+@db_session
+def update_card_add(id: int, update_data: CardUpdateIn) -> Card:
+    card = find_card_by_id(id)
+
+    if not update_data.game_draw_deck_name:
+        game = find_game_by_name(update_data.game_draw_deck_name)
+        if game in card.games_draw_deck:
+            raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, # ?? no se que código usar
+            detail=f"the card has already been added to the deck."
+        )
+        card.games_draw_deck.add(game)
+
+    if not update_data.game_discard_deck_name:
+        game = find_game_by_name(update_data.game_discard_deck_name)
+        if game in card.games_discard_deck:
+            raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, # ?? no se que código usar
+            detail=f"the card has already been added to the deck."
+        )
+        card.games_discard_deck.add(game)
+
+    if not update_data.players_hand_id:
+        player = find_player_by_id(update_data.players_hand_id)
+        card.players_hand.add(player)
+
+    return card
+
+
+@db_session
+def update_card_remove(id: int, update_data: CardUpdateIn) -> Card:
+    card = find_card_by_id(id)
+
+    if not update_data.game_draw_deck_name:
+        game = find_game_by_name(update_data.game_draw_deck_name)
+        if game not in card.games_draw_deck:
+            raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, # ?? no se que código usar
+            detail=f"the card has already been removed from the deck."
+        )
+        card.games_draw_deck.remove(game)
+
+    if not update_data.game_discard_deck_name:
+        game = find_game_by_name(update_data.game_discard_deck_name)
+        if game not in card.games_discard_deck:
+            raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, # ?? no se que código usar
+            detail=f"the card has already been removed from the deck."
+        )
+        card.games_discard_deck.remove(game)
+
+    if not update_data.players_hand_id:
+        player = find_player_by_id(update_data.players_hand_id)
+        card.players_hand.remove(player)
+
+    return card
