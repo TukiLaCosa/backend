@@ -28,3 +28,8 @@ def update_game(game_name: str, game_data: GameUpdateIn):
 @router.delete("/{game_name}", status_code=status.HTTP_200_OK)
 def delete_game(game_name: str):
     return services.delete_game(game_name)
+
+
+@router.patch("/join/{game_name}", response_model=GameInformationOut, status_code=status.HTTP_200_OK)
+def join_player(game_name: str, game_data: GameInformationIn):
+    return services.join_player(game_name, game_data)

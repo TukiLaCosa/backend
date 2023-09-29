@@ -161,3 +161,6 @@ cython_debug/
 
 
 **.sqlite
+
+# HTML Coverage files from tests
+htmlcov/

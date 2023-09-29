@@ -5,26 +5,20 @@ and packaging tool.
 
 ## Getting Started
 ### Installation
-To get started, you'll need to install Poetry. You can do this by running the following
+To get started, you'll need to install poetry. You can do this by running the following
 command in your terminal:
 ```bash
 curl -sSL https://install.python-poetry.org | python3 -
 ```
 
 ### Verify Installation
-You can verify the installation by checking the Poetry version:
-```bash
-poetry --version
-```
+You can verify the installation by checking the poetry version with `poetry --version`
 
 ### Updating Poetry
-Keep Poetry up to date by running:
-```bash
-poetry self update
-```
+Keep poetry up to date by running `poetry self update`
 
 ### Uninstalling Poetry
-If you ever need to uninstall Poetry, you can do so with the following commands:
+If you ever need to uninstall poetry, you can do so with the following commands:
 ```bash
 curl -sSL https://install.python-poetry.org | python3 - --uninstall
 curl -sSL https://install.python-poetry.org | POETRY_UNINSTALL=1 python3 -
@@ -32,44 +26,32 @@ curl -sSL https://install.python-poetry.org | POETRY_UNINSTALL=1 python3 -
 
 ## Managing Dependencies
 ### Adding a Dependency
-To add a new Python dependency, simply use the following command:
-```bash
-poetry add dependencyName
-```
+To add a new Python dependency, simply use the following command: `poetry add dependencyName`
 
 ### Installing Dependencies
-Install all project dependencies by running:
-```bash
-poetry install
-```
+`poetry install` installs all project dependencies.
 
 ### Removing a Dependency
-If you need to remove an installed dependency, you can do so with:
-```bash
-poetry remove dependencyName
-```
+`poetry remove dependencyName` remove an installed dependency.
 
 ### Setting the Python Version
-You can specify the desired Python version for your project. For example, to set it to Python 3.10:
-```bash
-poetry env use 3.10
-```
+`poetry env use 3.10` specify the desired Python version for your project. For example, to set it to Python 3.10
 
 ## Running the Application
-To execute the application, follow these steps:
-1. Install project dependencies:
-```bash
-poetry install
-```
-2. Activate the virtual environment:
-```bash
-poetry shell
-```
-3. Generate environment configuration file from file `.env.example`:
-```bash
-cp .env.example .env
-```
-4. Run the application:
-```bash
-make run
-```
+In the Makefile, you have the following targets:
+
+`make run` starts the Uvicorn server with the application. If it's not defined in the .env file, de default port is 8000.
+
+`make delete-db` deletes the application's database file if it exists. It will request confirmation before deletion.
+
+`make test` runs the application's tests using pytest and tracks code coverage.
+
+`make coverage-report` generates code coverage reports and opens them in a web browser (Firefox)
+
+`make coverage-clean` deletes previously generated coverage reports.
+
+`make autopep8` formats all the Python files to the PEP8 standard.
+
+`make install` installs project dependencies and creates the virtual environment using poetry.
+
+**Remember to create a .env file with the necessary environment variables before using the Makefile**
