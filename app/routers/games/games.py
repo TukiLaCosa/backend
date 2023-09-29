@@ -18,8 +18,8 @@ def get_games():
 
 @router.get("/{name}/players", response_model=list[PlayerResponse])
 def get_players_joined(name: str):
-    joined_players = services.get_players_joined(name)
-    return [PlayerResponse.model_validate(p) for p in joined_players]
+    players_joined = services.get_players_joined(name)
+    return [PlayerResponse.model_validate(p) for p in players_joined]
 
 
 @router.post("/", response_model=GameCreationOut, status_code=status.HTTP_201_CREATED)
