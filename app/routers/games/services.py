@@ -119,3 +119,14 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
                               status=game.status,
                               players_joined=len(game.players)
                               )
+
+
+@db_session
+def get_players_joined(name: str) -> list[Player]:
+    game = Game.get(name=name)
+
+    if game is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail='Game not found')
+
+    return game.players.select()[:]
