@@ -1,5 +1,5 @@
 from pony.orm import *
-from app.database.models import Game, Player
+from app.database.models import Game, Player, Card
 from .schemas import *
 from fastapi import HTTPException, status
 
@@ -22,6 +22,8 @@ def get_games() -> list[GameResponse]:
 @db_session
 def create_game(game_data: GameCreationIn) -> GameCreationOut:
     host = Player.get(id=game_data.host_player_id)
+    deck_cards = [card for card in Card.select(
+        lambda c: c.number <= game_data.max_players)]
 
     if not host:
         raise HTTPException(
@@ -40,6 +42,10 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
         password=game_data.password,
         host=host
     )
+
+    for card in deck_cards:
+        new_game.draw_deck.add(card)
+
     host.game = new_game.name
     return GameCreationOut(
         name=new_game.name,

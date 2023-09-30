@@ -29,7 +29,7 @@ run: install
 delete-db:
 	@if [ -f $(DB_FILE) ]; then \
 		read -p "Are you sure you want to delete the database? [y/N]: " confirm; \
-		if [ "$$confirm" == "y" ]; then \
+		if [ "$$confirm" = "y" ]; then \
 			rm -f $(DB_FILE); \
 			echo "Database deleted."; \
 		else \
