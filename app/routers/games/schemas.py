@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List, Optional
 from enum import Enum
+from ..players.schemas import PlayerResponse
 
 
 class GameStatus(str, Enum):
@@ -69,7 +70,7 @@ class GameResponse(BaseGame):
     host_player_id: int
     status: GameStatus
     is_private: bool
-    players_joined: int
+    num_of_players: int
 
 
 class GameInformationIn(BaseModel):
@@ -81,4 +82,6 @@ class GameInformationIn(BaseModel):
 
 
 class GameInformationOut(GameUpdateOut):
-    players_joined: int
+    num_of_players: int
+    list_of_players: List[PlayerResponse]
+

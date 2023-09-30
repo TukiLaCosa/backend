@@ -13,6 +13,9 @@ APP_NAME = app
 # Define the path to the database file
 DB_FILE = ./app/database/*.sqlite
 
+# Define the path to the test database file
+TEST_DB_FILE = ./app/database/database_test.sqlite
+
 # Define the UVicorn command
 UVICORN_CMD = uvicorn $(MAIN_FILE):$(APP_NAME) --port $(PORT) --reload
 
@@ -26,7 +29,7 @@ run: install
 delete-db:
 	@if [ -f $(DB_FILE) ]; then \
 		read -p "Are you sure you want to delete the database? [y/N]: " confirm; \
-		if [ "$$confirm" == "y" ]; then \
+		if [ "$$confirm" = "y" ]; then \
 			rm -f $(DB_FILE); \
 			echo "Database deleted."; \
 		else \
@@ -36,9 +39,11 @@ delete-db:
 		echo "Database file not found. No action taken."; \
 	fi
 
-# Define the 'test' target to run tests
+# Define the 'test' target to run tests in the test environment
 test: install
-	poetry run coverage run -m pytest
+	ENVIRONMENT=test poetry run coverage run -m pytest
+	rm -f $(TEST_DB_FILE)
+	unset ENVIRONMENT
 
 # Define the 'coverage-report' target to generate coverage reports
 coverage-report:
@@ -60,4 +65,4 @@ install: pyproject.toml
 
 # .env file dependency
 .env:
-	@echo "Please create a .env file with the necessary environment variables." && exit 1
+	@echo "Please create a .env file with the necessary environment variables (see in .env.example file)." && exit 1

@@ -1,5 +1,5 @@
 from pony.orm import *
-from app.database.models import Game, Player
+from app.database.models import Game, Player, Card
 from .schemas import *
 from fastapi import HTTPException, status
 
@@ -14,7 +14,7 @@ def get_games() -> list[GameResponse]:
         host_player_id=game.host.id,
         status=game.status,
         is_private=game.password is not None,
-        players_joined=len(game.players)
+        num_of_players=len(game.players)
     ) for game in games]
     return games_list
 
@@ -22,6 +22,8 @@ def get_games() -> list[GameResponse]:
 @db_session
 def create_game(game_data: GameCreationIn) -> GameCreationOut:
     host = Player.get(id=game_data.host_player_id)
+    deck_cards = [card for card in Card.select(
+        lambda c: c.number <= game_data.max_players)]
 
     if not host:
         raise HTTPException(
@@ -40,6 +42,10 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
         password=game_data.password,
         host=host
     )
+
+    for card in deck_cards:
+        new_game.draw_deck.add(card)
+
     host.game = new_game.name
     return GameCreationOut(
         name=new_game.name,
@@ -110,14 +116,39 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
     if game.password and game.password != game_data.password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid password")
+    if player.game is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="The player is already in another game")
 
     game.players.add(player)
+    players_joined = game.players.select()[:]
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
                               max_players=game.max_players,
                               is_private=game.password is not None,
                               status=game.status,
-                              players_joined=len(game.players)
+                              num_of_players=len(game.players),
+                              list_of_players=[PlayerResponse.model_validate(
+                                  p) for p in players_joined]
+                              )
+
+
+@db_session
+def get_game_information(game_name: str) -> GameInformationOut:
+    game = Game.get(name=game_name)
+
+    if game is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail='Game not found')
+    players_joined = game.players.select()[:]
+    return GameInformationOut(name=game.name,
+                              min_players=game.min_players,
+                              max_players=game.max_players,
+                              is_private=game.password is not None,
+                              status=game.status,
+                              num_of_players=len(game.players),
+                              list_of_players=[PlayerResponse.model_validate(
+                                  p) for p in players_joined]
                               )
 
 
