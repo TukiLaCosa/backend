@@ -38,10 +38,10 @@ class CardUpdateIn(BaseModel):
         None, description="Optional card type."
     )
     name: Optional[str] = Field(
-        None, min_length=3, max_length=50, desctiption="Optional name of the card."
+        None, min_length=3, max_length=50, description="Optional name of the card."
     )
     description: Optional[str] = Field(
-        None, min_length=3, max_length=1000, description="Optional description of the card."
+        None, min_length=3, max_length=1000
     )
 
 
