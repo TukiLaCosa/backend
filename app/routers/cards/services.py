@@ -30,6 +30,7 @@ def create_card(card_data: CardCreationIn) -> Card:
     return new_card
 
 
+'''
 @db_session
 def find_card_by_id(id: int) -> Card:
     card = Card.get(id=id)
@@ -41,14 +42,50 @@ def find_card_by_id(id: int) -> Card:
         )
 
     return card
+'''
 
 
 @db_session
-def delete_card(card_id: int) -> None:
-    find_card_by_id(card_id)
-    Card[card_id].delete()
+def update_card(card_id: int, request_data: CardUpdateIn) -> CardUpdateOut:
+    card = Card.get(id=card_id)
+
+    if not card:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Card not found"
+        )
+    if card_id != card.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid card id"
+        )
+
+    card.number = request_data.number
+    card.type = request_data.type
+    card.name = request_data.name
+    card.description = request_data.description
+    return CardUpdateOut(
+        number=card.number,
+        type=card.type,
+        name=card.name,
+        description=card.description
+    )
 
 
+@db_session
+def delete_card(card_id: int):
+    card = Card.get(id=card_id)
+    if not card:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Card not found"
+        )
+    if card_id != card.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid card id"
+        )
+    card.delete()
+    return {"message": "Card deleted"}
+
+
+'''
 @db_session
 def update_card_add(id: int, update_data: CardUpdateIn) -> Card:
     card = find_card_by_id(id)
@@ -78,6 +115,7 @@ def update_card_add(id: int, update_data: CardUpdateIn) -> Card:
     return card
 
 
+
 @db_session
 def update_card_remove(id: int, update_data: CardUpdateIn) -> Card:
     card = find_card_by_id(id)
@@ -104,4 +142,4 @@ def update_card_remove(id: int, update_data: CardUpdateIn) -> Card:
         player = find_player_by_id(update_data.players_hand_id)
         card.players_hand.remove(player)
 
-    return card
+    return card'''

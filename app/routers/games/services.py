@@ -120,6 +120,7 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
                               players_joined=len(game.players)
                               )
 
+
 @db_session
 def find_game_by_name(game_name: str):
     game = Game.get(name=game_name)
@@ -129,4 +130,3 @@ def find_game_by_name(game_name: str):
             status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
 
     return game
-
