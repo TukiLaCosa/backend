@@ -110,6 +110,9 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
     if game.password and game.password != game_data.password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid password")
+    if player.game is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="The player is already in another game")
 
     game.players.add(player)
     players_joined = game.players.select()[:]
