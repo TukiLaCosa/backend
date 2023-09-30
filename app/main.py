@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config.config import settings
 from app.routers.players import players
 from app.routers.games import games
+from pony.orm import *
 
 app = FastAPI()
 
