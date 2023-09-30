@@ -55,3 +55,4 @@ In the Makefile, you have the following targets:
 `make install` installs project dependencies and creates the virtual environment using poetry.
 
 **Remember to create a .env file with the necessary environment variables before using the Makefile**
+**To know the necessary environment variables you can see the `.env.example` file.**
