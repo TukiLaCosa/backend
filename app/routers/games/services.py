@@ -14,7 +14,7 @@ def get_games() -> list[GameResponse]:
         host_player_id=game.host.id,
         status=game.status,
         is_private=game.password is not None,
-        players_joined=len(game.players)
+        num_of_players=len(game.players)
     ) for game in games]
     return games_list
 
@@ -112,21 +112,32 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid password")
 
     game.players.add(player)
+    players_joined = game.players.select()[:]
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
                               max_players=game.max_players,
                               is_private=game.password is not None,
                               status=game.status,
-                              players_joined=len(game.players)
+                              num_of_players=len(game.players),
+                              list_of_players=[PlayerResponse.model_validate(
+                                  p) for p in players_joined]
                               )
 
 
 @db_session
-def get_players_joined(name: str) -> list[Player]:
-    game = Game.get(name=name)
+def get_game_information(game_name: str) -> GameInformationOut:
+    game = Game.get(name=game_name)
 
     if game is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail='Game not found')
-
-    return game.players.select()[:]
+    players_joined = game.players.select()[:]
+    return GameInformationOut(name=game.name,
+                              min_players=game.min_players,
+                              max_players=game.max_players,
+                              is_private=game.password is not None,
+                              status=game.status,
+                              num_of_players=len(game.players),
+                              list_of_players=[PlayerResponse.model_validate(
+                                  p) for p in players_joined]
+                              )
