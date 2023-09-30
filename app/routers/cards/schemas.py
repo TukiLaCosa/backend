@@ -12,35 +12,36 @@ class BaseCard(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     number: int = Field(
-        ge=1, le=109)
+        ge=4, le=12)
     type: CardType
     name: str = Field(
         min_length=3, max_length=50)
     description: str = Field(
-        min_length=3, max_length=50)
+        min_length=3, max_length=250)
 
 
 class CardCreationIn(BaseCard):
     pass
 
-    # esto tiene que estar acá o en base?
-    # type: CardType
-    # name: str = Field(min_length=3, max_length=50)
-    # description: str = Field(min_length=3, max_length=50)
 
-#el número podría ser el id
 class CardCreationOut(BaseCard):
-    id: int
+    pass
 
 
 class CardUpdateIn(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
-    game_discard_deck_name: Optional[str] = Field(
-        None, min_length=3, max_length=50)
-    game_draw_deck_name: Optional[str] = Field(
-        None, min_length=3, max_length=50)
-    players_hand_id: Optional[int]
+    number: Optional[int] = Field(
+        None, ge=4, le=12, description="Optional number of the card."
+    )
+    type: Optional[CardType] = Field(
+        None, description="Optional card type."
+    )
+    name: Optional[str] = Field(
+        None, min_length=3, max_length=50, desctiption="Optional name of the card."
+    )
+    description: Optional[str] = Field(
+        None, min_length=3, max_length=250, description="Optional description of the card."
+    )
 
 
 class CardUpdateOut(BaseCard):
