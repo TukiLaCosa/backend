@@ -6,6 +6,7 @@ from enum import Enum
 class CardType(str, Enum):
     PANIC = 'PANIC'
     GET_AWAY = 'GET_AWAY'
+    THE_THING = 'THE_THING'
 
 
 class BaseCard(BaseModel):
@@ -17,7 +18,7 @@ class BaseCard(BaseModel):
     name: str = Field(
         min_length=3, max_length=50)
     description: str = Field(
-        min_length=3, max_length=250)
+        min_length=3, max_length=1000)
 
 
 class CardCreationIn(BaseCard):
@@ -40,7 +41,7 @@ class CardUpdateIn(BaseModel):
         None, min_length=3, max_length=50, desctiption="Optional name of the card."
     )
     description: Optional[str] = Field(
-        None, min_length=3, max_length=250, description="Optional description of the card."
+        None, min_length=3, max_length=1000, description="Optional description of the card."
     )
 
 
