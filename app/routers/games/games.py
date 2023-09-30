@@ -2,6 +2,7 @@ from fastapi import APIRouter, status, HTTPException
 from typing import List
 from . import services
 from .schemas import *
+from ..players.schemas import PlayerResponse
 
 
 router = APIRouter(
@@ -13,6 +14,12 @@ router = APIRouter(
 @router.get("/", response_model=list[GameResponse], status_code=status.HTTP_200_OK)
 def get_games():
     return services.get_games()
+
+
+@router.get("/{name}/players", response_model=list[PlayerResponse])
+def get_players_joined(name: str):
+    players_joined = services.get_players_joined(name)
+    return [PlayerResponse.model_validate(p) for p in players_joined]
 
 
 @router.post("/", response_model=GameCreationOut, status_code=status.HTTP_201_CREATED)
