@@ -47,11 +47,10 @@ def find_card_by_id(id: int) -> Card:
     return card
 
 
-
 @db_session
 def update_card(card_id: int, request_data: CardUpdateIn) -> CardUpdateOut:
     card = find_card_by_id(card_id)
-    
+
     card.number = request_data.number
     card.type = request_data.type
     card.name = request_data.name

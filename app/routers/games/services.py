@@ -27,7 +27,7 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
 
     if not host:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
+            status_code=status.HTTP_404_NON_AUTHORITATIVE_INFORMATION, detail="Player not found")
     if host.game_hosting:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="The host is already hosting a game")

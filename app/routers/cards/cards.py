@@ -28,4 +28,3 @@ def update_card(card_id: int, card_data: CardUpdateIn):
 @router.delete("/{card_id}", status_code=status.HTTP_200_OK)
 def delete_card(card_id: int):
     return services.delete_card(card_id)
-
