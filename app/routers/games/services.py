@@ -150,3 +150,14 @@ def get_game_information(game_name: str) -> GameInformationOut:
                               list_of_players=[PlayerResponse.model_validate(
                                   p) for p in players_joined]
                               )
+
+
+@db_session
+def find_game_by_name(game_name: str):
+    game = Game.get(name=game_name)
+
+    if not game:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
+
+    return game

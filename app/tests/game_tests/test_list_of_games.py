@@ -73,6 +73,6 @@ def test_get_one_game(mocker):
             "host_player_id": 1,
             "status": "UNSTARTED",
             "is_private": False,
-            "players_joined": 3
+            "num_of_players": 3
         }
     ]

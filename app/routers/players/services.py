@@ -15,7 +15,7 @@ def create(new_person: PlayerCreationIn) -> Player:
 
 
 @db_session
-def find_by_id(id: int) -> Player:
+def find_player_by_id(id: int) -> Player:
     player = Player.get(id=id)
 
     if player is None:
@@ -29,12 +29,12 @@ def find_by_id(id: int) -> Player:
 
 @db_session
 def delete(id: int) -> None:
-    find_by_id(id)
+    find_player_by_id(id)
     Player[id].delete()
 
 
 @db_session
 def update(id: int, update_data: PlayerUpdateIn) -> Player:
-    player = find_by_id(id)
+    player = find_player_by_id(id)
     player.set(name=update_data.name)
     return player
