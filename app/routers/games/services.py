@@ -27,7 +27,7 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
 
     if not host:
         raise HTTPException(
-            status_code=status.HTTP_404_NON_AUTHORITATIVE_INFORMATION, detail="Player not found")
+            status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
     if host.game_hosting:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="The host is already hosting a game")
@@ -101,9 +101,6 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
     if not game:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
-    if game_name != game.name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
     if not player:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
@@ -158,6 +155,7 @@ def find_game_by_name(game_name: str):
 
     if not game:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
+            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found"
+        )
 
     return game
