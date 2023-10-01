@@ -51,6 +51,8 @@ def test_join_player_succesfully():
     assert game_join_response.min_players == 4
     assert game_join_response.max_players == 6
     assert game_join_response.is_private == True
+    assert game_join_response.host_player_id == test_player1.id
+    assert game_join_response.host_player_name == "Ignacio"
     assert game_join_response.num_of_players == 2
 
     cleanup_database()

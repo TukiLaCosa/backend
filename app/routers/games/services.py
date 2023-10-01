@@ -124,6 +124,8 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
                               max_players=game.max_players,
                               is_private=game.password is not None,
                               status=game.status,
+                              host_player_name=game.host.name,
+                              host_player_id=game.host.id,
                               num_of_players=len(game.players),
                               list_of_players=[PlayerResponse.model_validate(
                                   p) for p in players_joined]
@@ -143,6 +145,8 @@ def get_game_information(game_name: str) -> GameInformationOut:
                               max_players=game.max_players,
                               is_private=game.password is not None,
                               status=game.status,
+                              host_player_name=game.host.name,
+                              host_player_id=game.host.id,
                               num_of_players=len(game.players),
                               list_of_players=[PlayerResponse.model_validate(
                                   p) for p in players_joined]

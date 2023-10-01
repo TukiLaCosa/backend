@@ -43,6 +43,8 @@ def test_information_of_created_game():
     assert game_information_response.min_players == 4
     assert game_information_response.max_players == 6
     assert game_information_response.is_private == True
+    assert game_information_response.host_player_id == test_player.id
+    assert game_information_response.host_player_name == test_player.name
     assert game_information_response.num_of_players == 1
     cleanup_database()
 
