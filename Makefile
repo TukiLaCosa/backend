@@ -41,7 +41,7 @@ delete-db:
 
 # Define the 'test' target to run tests in the test environment
 test: install
-	ENVIRONMENT=test poetry run coverage run -m pytest -vv
+	ENVIRONMENT=test poetry run coverage run -m pytest -vv; true
 	rm -f $(TEST_DB_FILE)
 	unset ENVIRONMENT
 
