@@ -20,6 +20,7 @@ TEST_DB_FILE = ./app/database/database_test.sqlite
 COV_FILE = .coverage
 COV_PLAYERS_FILE = .coverage.players
 COV_GAMES_FILE = .coverage.games
+COV_CARDS_FILE = .coverage.cards
 
 # Define the UVicorn command
 UVICORN_CMD = uvicorn $(MAIN_FILE):$(APP_NAME) --port $(PORT) --reload
