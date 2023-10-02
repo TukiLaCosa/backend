@@ -59,9 +59,14 @@ test-players: install
 	rm -f $(TEST_DB_FILE)
 	unset ENVIRONMENT
 
+# Define the 'test-cards' target to run cards tests in the test environment
+test-cards: install
+	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_CARDS_FILE) -m pytest -vv $(TEST_DIRECTORY)/card_tests; true
+	rm -f $(TEST_DB_FILE)
+	unset ENVIRONMENT
 
 # Define the 'test-all' target to run all tests sequentially
-test-all: test-games test-players
+test-all: test-games test-players test-cards
 
 # Define the 'coverage-report' target to generate coverage reports
 coverage-report:
@@ -70,6 +75,9 @@ coverage-report:
 	fi
 	@if [ -f $(COV_PLAYERS_FILE) ]; then \
 		poetry run coverage combine --append $(COV_PLAYERS_FILE); \
+	fi
+	@if [ -f $(COV_CARDS_FILE) ]; then \
+		poetry run coverage combine --append $(COV_CARDS_FILE); \
 	fi
 	poetry run coverage html
 	@firefox htmlcov/index.html
