@@ -24,7 +24,7 @@ def create(new_person: PlayerCreationIn) -> PlayerCreationOut:
 
 @router.get('/{id}')
 def find_by_id(id: int) -> PlayerResponse:
-    player = services.find_by_id(id)
+    player = services.find_player_by_id(id)
     return PlayerResponse.model_validate(player)
 
 
