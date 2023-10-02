@@ -44,7 +44,7 @@ In the Makefile, you have the following targets:
 
 `make delete-db` deletes the application's database file if it exists. It will request confirmation before deletion.
 
-`make test` runs the application's tests using pytest and tracks code coverage.
+`make test-all` runs the application's tests using pytest and tracks code coverage.
 
 `make coverage-report` generates code coverage reports and opens them in a web browser (Firefox)
 
