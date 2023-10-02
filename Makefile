@@ -39,11 +39,24 @@ delete-db:
 		echo "Database file not found. No action taken."; \
 	fi
 
-# Define the 'test' target to run tests in the test environment
-test: install
-	ENVIRONMENT=test poetry run coverage run -m pytest -vv
+# Define the path to the tests directory
+TEST_DIRECTORY = ./app/tests
+
+# Define the 'test-games' target to run game tests in the test environment
+test-games: install
+	ENVIRONMENT=test poetry run coverage run -m pytest -vv $(TEST_DIRECTORY)/game_tests; true
 	rm -f $(TEST_DB_FILE)
 	unset ENVIRONMENT
+
+# Define the 'test-players' target to run player tests in the test environment
+test-players: install
+	ENVIRONMENT=test poetry run coverage run -m pytest -vv $(TEST_DIRECTORY)/player_tests; true
+	rm -f $(TEST_DB_FILE)
+	unset ENVIRONMENT
+
+
+# Define the 'test-all' target to run all tests sequentially
+test-all: test-games test-players
 
 # Define the 'coverage-report' target to generate coverage reports
 coverage-report:
