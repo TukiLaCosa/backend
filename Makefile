@@ -16,10 +16,15 @@ DB_FILE = ./app/database/*.sqlite
 # Define the path to the test database file
 TEST_DB_FILE = ./app/database/database_test.sqlite
 
+# Define the name of the coverage files
+COV_FILE = .coverage
+COV_PLAYERS_FILE = .coverage.players
+COV_GAMES_FILE = .coverage.games
+
 # Define the UVicorn command
 UVICORN_CMD = uvicorn $(MAIN_FILE):$(APP_NAME) --port $(PORT) --reload
 
-.PHONY: run delete-db test coverage-report coverage-clean
+.PHONY: run delete-db coverage-report coverage-clean test-all test-players test-games
 
 # Define the 'run' target to run the UVicorn server within the virtual environment
 run: install
@@ -44,13 +49,13 @@ TEST_DIRECTORY = ./app/tests
 
 # Define the 'test-games' target to run game tests in the test environment
 test-games: install
-	ENVIRONMENT=test poetry run coverage run -m pytest -vv $(TEST_DIRECTORY)/game_tests; true
+	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_GAMES_FILE) -m pytest -vv $(TEST_DIRECTORY)/game_tests; true
 	rm -f $(TEST_DB_FILE)
 	unset ENVIRONMENT
 
 # Define the 'test-players' target to run player tests in the test environment
 test-players: install
-	ENVIRONMENT=test poetry run coverage run -m pytest -vv $(TEST_DIRECTORY)/player_tests; true
+	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_PLAYERS_FILE) -m pytest -vv $(TEST_DIRECTORY)/player_tests; true
 	rm -f $(TEST_DB_FILE)
 	unset ENVIRONMENT
 
@@ -60,13 +65,19 @@ test-all: test-games test-players
 
 # Define the 'coverage-report' target to generate coverage reports
 coverage-report:
+	@if [ -f $(COV_GAMES_FILE) ]; then \
+		poetry run coverage combine --append $(COV_GAMES_FILE); \
+	fi
+	@if [ -f $(COV_PLAYERS_FILE) ]; then \
+		poetry run coverage combine --append $(COV_PLAYERS_FILE); \
+	fi
 	poetry run coverage html
 	@firefox htmlcov/index.html
 
 # Define the 'coverage-clean' target to remove coverage reports
 coverage-clean:
-	@rm -rf htmlcov
-	@echo "Coverage report deleted."
+	@rm -rf htmlcov $(COV_FILE) $(COV_GAMES_FILE) $(COV_PLAYERS_FILE)
+	@echo "Coverage report files deleted."
 
 # Define the 'autopep8' target for running autopep8
 autopep8:
