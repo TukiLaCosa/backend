@@ -1,9 +1,10 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Literal
+from typing import Literal, List
 
 
 class Settings(BaseSettings):
     environment: Literal["test", "production", "development"] = "development"
+    CORS_origins: List[str] = ["*"]
 
     model_config = SettingsConfigDict(env_file=".env", extra='allow')
 

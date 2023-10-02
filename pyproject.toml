@@ -11,6 +11,12 @@ fastapi = "^0.103.1"
 uvicorn = "^0.15.0"
 pony = "^0.7.16"
 pydantic-settings = "^2.0.3"
+coverage = "^7.3.1"
+pytest = "^7.4.2"
+pytest-mock = "^3.11.1"
+autopep8 = "^2.0.4"
+httpx = "^0.25.0"
+pytest-cov = "^4.1.0"
 
 [build-system]
 requires = ["poetry-core"]

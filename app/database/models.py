@@ -1,11 +1,12 @@
 from pony.orm import PrimaryKey, Required, Set, Optional
 from app.database import db
+from app.routers.games.schemas import GameStatus, RoundDirection
 
 
 class Player(db.Entity):
     id = PrimaryKey(int, auto=True)
     game = Optional('Game', reverse='players')
-    game_hosting = Optional('Game', reverse='host')
+    game_hosting = Optional('Game', reverse='host', cascade_delete=True)
     name = Required(str)
     rol = Optional(str, nullable=True)
     position = Required(int, default="-1")
@@ -20,10 +21,10 @@ class Game(db.Entity):
     max_players = Required(int)
     password = Optional(str, nullable=True)
     turn = Required(int, default="-1")
-    status = Required(str, default='UNSTARTED')
+    status = Required(str, default=GameStatus.UNSTARTED)
     discard_deck = Set('Card', reverse='games_discard_deck')
     draw_deck = Set('Card', reverse='games_draw_deck')
-    round_direction = Required(str, default='clockwise')
+    round_direction = Required(str, default=RoundDirection.CLOCKWISE)
 
 
 class Card(db.Entity):
