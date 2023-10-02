@@ -66,7 +66,7 @@ test-cards: install
 	unset ENVIRONMENT
 
 # Define the 'test-all' target to run all tests sequentially
-test-all: test-games test-players
+test-all: test-games test-players test-cards
 
 # Define the 'coverage-report' target to generate coverage reports
 coverage-report:
