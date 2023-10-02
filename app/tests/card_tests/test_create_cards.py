@@ -174,7 +174,7 @@ def test_create_card_bad_name():
 def test_create_card_short_name():
     cleanup_database()
     response = client.post(
-        "/card",
+        "/cards",
         json={
         "number": 4,
         "type":"THE_THING",
@@ -189,11 +189,11 @@ def test_create_card_short_name():
 def test_create_card_large_name():
     cleanup_database()
     response = client.post(
-        "/card",
+        "/cards",
         json={
         "number": 4,
         "type":"THE_THING",
-        "name":"a"*31,
+        "name":"a"*51,
         "description":"You are the thing, infect or kill everyone"
     },
     )
@@ -234,7 +234,7 @@ def test_create_card_bad_description():
 def test_create_card_short_description():
     cleanup_database()
     response = client.post(
-        "/card",
+        "/cards",
         json={
         "number": 4,
         "type":"THE_THING",
@@ -249,7 +249,7 @@ def test_create_card_short_description():
 def test_create_card_large_description():
     cleanup_database()
     response = client.post(
-        "/card",
+        "/cards",
         json={
         "number": 4,
         "type":"THE_THING",
