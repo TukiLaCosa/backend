@@ -82,6 +82,7 @@ class GameInformationIn(BaseModel):
 
 
 class GameInformationOut(GameUpdateOut):
+    host_player_name: str
+    host_player_id: int
     num_of_players: int
     list_of_players: List[PlayerResponse]
-

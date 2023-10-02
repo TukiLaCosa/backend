@@ -23,7 +23,7 @@ def get_games() -> list[GameResponse]:
 def create_game(game_data: GameCreationIn) -> GameCreationOut:
     host = Player.get(id=game_data.host_player_id)
     deck_cards = [card for card in Card.select(
-        lambda c: c.number <= game_data.max_players)]
+        lambda c: c.number == game_data.min_players)]
 
     if not host:
         raise HTTPException(
@@ -71,6 +71,7 @@ def update_game(game_name: str, request_data: GameUpdateIn) -> GameUpdateOut:
     game.min_players = request_data.min_players
     game.max_players = request_data.max_players
     game.password = request_data.password
+
     return GameUpdateOut(name=game.name,
                          min_players=game.min_players,
                          max_players=game.max_players,
@@ -101,9 +102,6 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
     if not game:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
-    if game_name != game.name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
     if not player:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Player not found")
@@ -122,12 +120,23 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
 
     game.players.add(player)
     players_joined = game.players.select()[:]
+    num_players_joined = len(players_joined)
+
+    # Here we add the cards for the player that joins the game
+    if (num_players_joined > game.min_players):
+        cards_to_add = [card for card in Card.select(
+            lambda c: c.number == num_players_joined)]
+        for card in cards_to_add:
+            game.draw_deck.add(card)
+
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
                               max_players=game.max_players,
                               is_private=game.password is not None,
                               status=game.status,
-                              num_of_players=len(game.players),
+                              host_player_name=game.host.name,
+                              host_player_id=game.host.id,
+                              num_of_players=num_players_joined,
                               list_of_players=[PlayerResponse.model_validate(
                                   p) for p in players_joined]
                               )
@@ -146,6 +155,8 @@ def get_game_information(game_name: str) -> GameInformationOut:
                               max_players=game.max_players,
                               is_private=game.password is not None,
                               status=game.status,
+                              host_player_name=game.host.name,
+                              host_player_id=game.host.id,
                               num_of_players=len(game.players),
                               list_of_players=[PlayerResponse.model_validate(
                                   p) for p in players_joined]
@@ -158,6 +169,7 @@ def find_game_by_name(game_name: str):
 
     if not game:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
+            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found"
+        )
 
     return game
