@@ -3,6 +3,7 @@ from app.main import app
 from app.database.models import Game, Player
 from app.routers.games.schemas import GameCreationOut
 from pony.orm import db_session
+import pytest
 
 client = TestClient(app)
 
@@ -45,7 +46,6 @@ def test_create_successfull_game():
     assert game_creation_response.max_players == game_data["max_players"]
     assert game_creation_response.is_private == True
     assert game_creation_response.host_player_id == test_player.id
-
     cleanup_database()
 
 
@@ -59,7 +59,6 @@ def test_create_without_player_in_ddbb():
         "host_player_id": 1
     }
     response = client.post("/games", json=game_data)
-
     assert response.status_code == 404
     cleanup_database()
 

@@ -16,12 +16,12 @@ def cleanup_database():
 
 def test_create_cards_succesfully():
     cleanup_database()
-    for i in range(4,13):
+    for i in range(4, 13):
         card_data = {
             "number": i,
-            "type":'THE_THING',
-            "name":"The Thing",
-            "description":"You are the thing, infect or kill everyone"
+            "type": 'THE_THING',
+            "name": "The Thing",
+            "description": "You are the thing, infect or kill everyone"
         }
 
         response = client.post("/cards", json=card_data)
@@ -34,9 +34,9 @@ def test_create_cards_succesfully():
 
         assert response.json() == {
             "number": i,
-            "type":"THE_THING",
-            "name":"The Thing",
-            "description":"You are the thing, infect or kill everyone"
+            "type": "THE_THING",
+            "name": "The Thing",
+            "description": "You are the thing, infect or kill everyone"
         }
         cleanup_database()
 
@@ -57,14 +57,13 @@ def test_create_card_missing_number():
     response = client.post(
         "/cards",
         json={
-        "type":"THE_THING",
-        "name":"The Thing",
-        "description":"You are the thing, infect or kill everyone"
-    },
+            "type": "THE_THING",
+            "name": "The Thing",
+            "description": "You are the thing, infect or kill everyone"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
-
 
 
 def test_create_card_bad_number():
@@ -72,11 +71,11 @@ def test_create_card_bad_number():
     response = client.post(
         "/cards",
         json={
-        "number": "bad",
-        "type":"THE_THING",
-        "name":"The Thing",
-        "description":"You are the thing, infect or kill everyone"
-    },
+            "number": "bad",
+            "type": "THE_THING",
+            "name": "The Thing",
+            "description": "You are the thing, infect or kill everyone"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
@@ -87,25 +86,26 @@ def test_create_card_low_number():
     response = client.post(
         "/cards",
         json={
-        "number": 3,
-        "type":"THE_THING",
-        "name":"The Thing",
-        "description":"You are the thing, infect or kill everyone"
-    },
+            "number": 3,
+            "type": "THE_THING",
+            "name": "The Thing",
+            "description": "You are the thing, infect or kill everyone"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
+
 
 def test_create_card_high_number():
     cleanup_database()
     response = client.post(
         "/cards",
         json={
-        "number": 13,
-        "type":"THE_THING",
-        "name":"The Thing",
-        "description":"You are the thing, infect or kill everyone"
-    },
+            "number": 13,
+            "type": "THE_THING",
+            "name": "The Thing",
+            "description": "You are the thing, infect or kill everyone"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
@@ -117,11 +117,11 @@ def test_create_card_missing_type():
     response = client.post(
         "/cards",
         json={
-        "number": 4,
-        "name":"The Thing",
-        "name":"The Thing",
-        "description":"You are the thing, infect or kill everyone"
-    },
+            "number": 4,
+            "name": "The Thing",
+            "name": "The Thing",
+            "description": "You are the thing, infect or kill everyone"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
@@ -132,25 +132,27 @@ def test_create_card_bad_type():
     response = client.post(
         "/cards",
         json={
-        "number": 4,
-        "type":"THE_THIN",
-        "name":"The Thing",
-        "description":"You are the thing, infect or kill everyone"
-    },
+            "number": 4,
+            "type": "THE_THIN",
+            "name": "The Thing",
+            "description": "You are the thing, infect or kill everyone"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
 
 #   Test card names
+
+
 def test_create_card_missing_name():
     cleanup_database()
     response = client.post(
         "/cards",
         json={
-        "number": 4,
-        "type":"THE_THING",
-        "description":"You are the thing, infect or kill everyone"
-    },
+            "number": 4,
+            "type": "THE_THING",
+            "description": "You are the thing, infect or kill everyone"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
@@ -161,11 +163,11 @@ def test_create_card_bad_name():
     response = client.post(
         "/cards",
         json={
-        "number": 4,
-        "type":"THE_THING",
-        "name":3,
-        "description":"You are the thing, infect or kill everyone"
-    },
+            "number": 4,
+            "type": "THE_THING",
+            "name": 3,
+            "description": "You are the thing, infect or kill everyone"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
@@ -176,11 +178,11 @@ def test_create_card_short_name():
     response = client.post(
         "/cards",
         json={
-        "number": 4,
-        "type":"THE_THING",
-        "name":"a",
-        "description":"You are the thing, infect or kill everyone"
-    },
+            "number": 4,
+            "type": "THE_THING",
+            "name": "a",
+            "description": "You are the thing, infect or kill everyone"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
@@ -191,11 +193,11 @@ def test_create_card_large_name():
     response = client.post(
         "/cards",
         json={
-        "number": 4,
-        "type":"THE_THING",
-        "name":"a"*51,
-        "description":"You are the thing, infect or kill everyone"
-    },
+            "number": 4,
+            "type": "THE_THING",
+            "name": "a"*51,
+            "description": "You are the thing, infect or kill everyone"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
@@ -207,10 +209,10 @@ def test_create_card_missing_description():
     response = client.post(
         "/cards",
         json={
-        "number": 4,
-        "type":"THE_THING",
-        "name":"The Thing"
-    },
+            "number": 4,
+            "type": "THE_THING",
+            "name": "The Thing"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
@@ -221,11 +223,11 @@ def test_create_card_bad_description():
     response = client.post(
         "/cards",
         json={
-        "number": 4,
-        "type":"THE_THING",
-        "name":"The Thing",
-        "description":22
-    },
+            "number": 4,
+            "type": "THE_THING",
+            "name": "The Thing",
+            "description": 22
+        },
     )
     assert response.status_code == 422
     cleanup_database()
@@ -236,11 +238,11 @@ def test_create_card_short_description():
     response = client.post(
         "/cards",
         json={
-        "number": 4,
-        "type":"THE_THING",
-        "name":"The Thing",
-        "description":"ee"
-    },
+            "number": 4,
+            "type": "THE_THING",
+            "name": "The Thing",
+            "description": "ee"
+        },
     )
     assert response.status_code == 422
     cleanup_database()
@@ -251,11 +253,11 @@ def test_create_card_large_description():
     response = client.post(
         "/cards",
         json={
-        "number": 4,
-        "type":"THE_THING",
-        "name":"The Thing",
-        "description":"You are the thing, infect or kill everyone"*1000
-    },
+            "number": 4,
+            "type": "THE_THING",
+            "name": "The Thing",
+            "description": "You are the thing, infect or kill everyone"*1000
+        },
     )
     assert response.status_code == 422
     cleanup_database()

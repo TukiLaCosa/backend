@@ -16,6 +16,7 @@ def test_create_player():
         'name': 'pepito',
     }
 
+
 def test_create_player_with_same_name():
     response = client.post(
         '/players',
@@ -26,6 +27,7 @@ def test_create_player_with_same_name():
         'id': 2,
         'name': 'pepito',
     }
+
 
 def test_create_player_bad_body():
     response = client.post(

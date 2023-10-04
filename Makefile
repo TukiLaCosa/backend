@@ -90,7 +90,8 @@ coverage-clean:
 
 # Define the 'autopep8' target for running autopep8
 autopep8:
-	poetry run autopep8 --in-place --recursive .
+	@echo "Standarizing all files to pep8..."
+	@poetry run autopep8 --in-place --recursive .
 
 # Define the 'install' target to install dependencies and create the virtual environment
 install: pyproject.toml
