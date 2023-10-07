@@ -30,6 +30,7 @@ class CardCreationOut(BaseCard):
 
 
 class CardUpdateIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     number: Optional[int] = Field(
         None, ge=4, le=12, description="Optional number of the card."
     )
