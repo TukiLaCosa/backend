@@ -71,13 +71,13 @@ test-games: install
 
 # Define the 'test-players' target to run player tests in the test environment
 test-players: install
-	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_PLAYERS_FILE) -m pytest -vv $(TEST_DIRECTORY)/player_tests; true
+	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_PLAYERS_FILE) -m pytest --tb=no -vv $(TEST_DIRECTORY)/player_tests; true
 	rm -f $(TEST_DB_FILE)
 	unset ENVIRONMENT
 
 # Define the 'test-cards' target to run cards tests in the test environment
 test-cards: install
-	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_CARDS_FILE) -m pytest -vv $(TEST_DIRECTORY)/card_tests; true
+	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_CARDS_FILE) -m pytest --tb=no -vv $(TEST_DIRECTORY)/card_tests; true
 	rm -f $(TEST_DB_FILE)
 	unset ENVIRONMENT
 

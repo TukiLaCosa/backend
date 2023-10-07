@@ -3,7 +3,6 @@ from app.main import app
 from app.database.models import Game, Player
 from app.routers.games.schemas import GameCreationOut
 from pony.orm import db_session
-import pytest
 
 client = TestClient(app)
 

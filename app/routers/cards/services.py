@@ -10,6 +10,7 @@ from fastapi import HTTPException, status
 def get_cards() -> list[CardResponse]:
     cards = Card.select()
     cards_list = [CardResponse(
+        id=card.id,
         number=card.number,
         type=card.type,
         name=card.name,
