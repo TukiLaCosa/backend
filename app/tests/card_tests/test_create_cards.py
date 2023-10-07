@@ -26,7 +26,7 @@ def test_create_cards_succesfully():
 
         response = client.post("/cards", json=card_data)
 
-        assert response.status_code == 201
+        assert response.status_code == 201, "El código de estado de la respuesta no es 201 (Created)."
 
         with db_session:
             created_card = Card.get(name=card_data["name"])
@@ -37,7 +37,7 @@ def test_create_cards_succesfully():
             "type": "THE_THING",
             "name": "The Thing",
             "description": "You are the thing, infect or kill everyone"
-        }
+        }, "El contenido de la respuesta no coincide con los datos de la carta creada."
         cleanup_database()
 
 
@@ -47,7 +47,7 @@ def test_create_card_bad_body():
         "/cards",
         json={"bad": "body"},
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -62,7 +62,7 @@ def test_create_card_missing_number():
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -77,7 +77,7 @@ def test_create_card_bad_number():
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -92,7 +92,7 @@ def test_create_card_low_number():
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -107,7 +107,7 @@ def test_create_card_high_number():
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -123,7 +123,7 @@ def test_create_card_missing_type():
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -138,7 +138,7 @@ def test_create_card_bad_type():
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 #   Test card names
@@ -154,7 +154,7 @@ def test_create_card_missing_name():
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -169,7 +169,7 @@ def test_create_card_bad_name():
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -184,7 +184,7 @@ def test_create_card_short_name():
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -199,7 +199,7 @@ def test_create_card_large_name():
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -214,7 +214,7 @@ def test_create_card_missing_description():
             "name": "The Thing"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -229,7 +229,7 @@ def test_create_card_bad_description():
             "description": 22
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -244,7 +244,7 @@ def test_create_card_short_description():
             "description": "ee"
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()
 
 
@@ -259,5 +259,5 @@ def test_create_card_large_description():
             "description": "You are the thing, infect or kill everyone"*1000
         },
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
     cleanup_database()

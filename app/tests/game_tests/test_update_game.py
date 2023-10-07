@@ -63,14 +63,14 @@ def test_update_game_successful(mocker):
     }
 
     response = client.patch("games/game1", json=request_data)
-    assert response.status_code == 200
+    assert response.status_code == 200, "El código de estado de la respuesta no es 200 (OK)."
     assert response.json() == {
         "name": "game1",
         "min_players": 5,
         "max_players": 7,
         "is_private": True,
         "status": "UNSTARTED"
-    }
+    }, "El contenido de la respuesta no coincide con los datos actualizados."
 
 
 def test_update_non_existing_game(mocker):
@@ -81,7 +81,7 @@ def test_update_non_existing_game(mocker):
         "password": "new_password"
     }
     response = client.patch("/games/non_existing_game", json=request_data)
-    assert response.status_code == 404
+    assert response.status_code == 404, "El código de estado de la respuesta no es 404 (Not Found)."
 
 
 def test_update_game_with_wrong_name(mocker):
@@ -92,4 +92,4 @@ def test_update_game_with_wrong_name(mocker):
         "password": "new_password"
     }
     response = client.patch("/games/wrong_game_name", json=request_data)
-    assert response.status_code == 400
+    assert response.status_code == 400, "El código de estado de la respuesta no es 400 (Bad Request)."

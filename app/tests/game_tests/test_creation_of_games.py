@@ -33,19 +33,22 @@ def test_create_successfull_game():
 
     response = client.post("/games", json=game_data)
 
-    assert response.status_code == 201
+    assert response.status_code == 201, "El codigo de estado de la respuesta no es 201(Created)"
 
     with db_session:
         created_game = Game.get(name=game_data["name"])
     assert created_game is not None
 
     game_creation_response = GameCreationOut(**response.json())
-    assert game_creation_response.name == game_data["name"]
-    assert game_creation_response.status == "UNSTARTED"
-    assert game_creation_response.min_players == game_data["min_players"]
-    assert game_creation_response.max_players == game_data["max_players"]
-    assert game_creation_response.is_private == True
-    assert game_creation_response.host_player_id == test_player.id
+    assert game_creation_response.name == game_data[
+        "name"], "El nombre del juego en la respuesta no coincide con el nombre proporcionado."
+    assert game_creation_response.status == "UNSTARTED", "El estado del juego en la respuesta no es 'UNSTARTED'."
+    assert game_creation_response.min_players == game_data[
+        "min_players"], "El número mínimo de jugadores en la respuesta no coincide con el valor proporcionado."
+    assert game_creation_response.max_players == game_data[
+        "max_players"], "El número máximo de jugadores en la respuesta no coincide con el valor proporcionado."
+    assert game_creation_response.is_private == True, "El juego no se creó como privado en la respuesta."
+    assert game_creation_response.host_player_id == test_player.id, "El ID del jugador anfitrión en la respuesta no coincide con el ID del jugador de prueba."
     cleanup_database()
 
 
@@ -59,7 +62,7 @@ def test_create_without_player_in_ddbb():
         "host_player_id": 1
     }
     response = client.post("/games", json=game_data)
-    assert response.status_code == 404
+    assert response.status_code == 404, "Se esperaba un código de estado 404 (Not Found) ya que el jugador no existe en la base de datos."
     cleanup_database()
 
 
@@ -75,7 +78,7 @@ def test_create_game_with_a_host_already_hosting():
     }
     for i in range(2):
         response = client.post("/games", json=game_data)
-    assert response.status_code == 400
+    assert response.status_code == 400, "Se esperaba un código de estado 400 (Bad Request) ya que el jugador ya está hospedando un juego."
     cleanup_database()
 
 
@@ -100,5 +103,5 @@ def test_create_game_with_same_name():
     ]
     for i in game_data:
         response = client.post("/games", json=i)
-    assert response.status_code == 400
+    assert response.status_code == 400, "Se esperaba un código de estado 400 (Bad Request) ya que un juego con el mismo nombre ya existe."
     cleanup_database()

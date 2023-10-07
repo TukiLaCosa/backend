@@ -38,19 +38,19 @@ def test_information_of_created_game():
     response = client.get("/games/TestGame")
     assert response.status_code == 200
     game_information_response = GameInformationOut(**response.json())
-    assert game_information_response.name == "TestGame"
-    assert game_information_response.status == "UNSTARTED"
-    assert game_information_response.min_players == 4
-    assert game_information_response.max_players == 6
-    assert game_information_response.is_private == True
-    assert game_information_response.host_player_id == test_player.id
-    assert game_information_response.host_player_name == test_player.name
-    assert game_information_response.num_of_players == 1
+    assert game_information_response.name == "TestGame", "El nombre del juego no coincide con el esperado."
+    assert game_information_response.status == "UNSTARTED", "El estado del juego no coincide con el esperado."
+    assert game_information_response.min_players == 4, "El número mínimo de jugadores no coincide con el esperado."
+    assert game_information_response.max_players == 6, "El número máximo de jugadores no coincide con el esperado."
+    assert game_information_response.is_private == True, "El juego no se marcó como privado en la respuesta."
+    assert game_information_response.host_player_id == test_player.id, "El ID del jugador anfitrión no coincide con el esperado."
+    assert game_information_response.host_player_name == test_player.name, "El nombre del jugador anfitrión no coincide con el esperado."
+    assert game_information_response.num_of_players == 1, "El número de jugadores no coincide con el esperado."
     cleanup_database()
 
 
 def test_information_of_game_not_found():
     cleanup_database()
     response = client.get("/games/InexistentGame")
-    assert response.status_code == 404
+    assert response.status_code == 404, "El código de estado de la respuesta no es 404 (Not Found)."
     cleanup_database()

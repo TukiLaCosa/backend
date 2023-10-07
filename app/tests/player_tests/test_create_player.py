@@ -10,11 +10,11 @@ def test_create_player():
         '/players',
         json={'name': 'pepito'}
     )
-    assert response.status_code == 201
+    assert response.status_code == 201, "El código de estado de la respuesta no es 201 (Created)."
     assert response.json() == {
         'id': 1,
         'name': 'pepito',
-    }
+    }, "El contenido de la respuesta no coincide con los datos del jugador creado."
 
 
 def test_create_player_with_same_name():
@@ -22,11 +22,11 @@ def test_create_player_with_same_name():
         '/players',
         json={'name': 'pepito'}
     )
-    assert response.status_code == 201
+    assert response.status_code == 201, "El código de estado de la respuesta no es 201 (Created)."
     assert response.json() == {
         'id': 2,
         'name': 'pepito',
-    }
+    }, "El contenido de la respuesta no coincide con los datos del jugador creado."
 
 
 def test_create_player_bad_body():
@@ -34,7 +34,7 @@ def test_create_player_bad_body():
         "/players",
         json={"bad": "body"},
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
 
 
 def test_create_player_bad_name():
@@ -42,7 +42,7 @@ def test_create_player_bad_name():
         "/players",
         json={"name": 3},
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
 
 
 def test_create_player_short_name():
@@ -50,7 +50,7 @@ def test_create_player_short_name():
         "/players",
         json={"name": "a"},
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
 
 
 def test_create_player_large_name():
@@ -58,4 +58,4 @@ def test_create_player_large_name():
         "/players",
         json={"name": "a"*31},
     )
-    assert response.status_code == 422
+    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
