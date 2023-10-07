@@ -62,17 +62,18 @@ def test_delete_game_success(mocker):
     mocker.patch.object(FakeGame, "delete", return_value=None)
 
     response = client.delete("/games/game1")
-    assert response.status_code == 200
-    assert response.json() == {"message": "Game deleted"}
+    assert response.status_code == 200, "El código de estado de la respuesta no es 200 (OK)."
+    assert response.json() == {
+        "message": "Game deleted"}, "El mensaje de la respuesta no es 'Game deleted' (Juego eliminado)."
 
 
 def test_delete_game_with_invalid_name(mocker):
     mocker.patch.object(Game, "get", return_value=games[0])
     response = client.delete("/games/game2")
-    assert response.status_code == 400
+    assert response.status_code == 400, "El código de estado de la respuesta no es 400 (Bad Request)."
 
 
 def test_delete_non_existing_game(mocker):
     mocker.patch.object(Game, "get", return_value=None)
     response = client.delete("/games/non_existing_game")
-    assert response.status_code == 404
+    assert response.status_code == 404,  "El código de estado de la respuesta no es 404 (Not Found)."

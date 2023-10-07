@@ -43,17 +43,17 @@ def test_join_player_succesfully():
 
     response = client.patch("/games/join/TestGame", json=game_data)
 
-    assert response.status_code == 200
+    assert response.status_code == 200, "El código de estado de la respuesta no es 200 (OK)."
 
     game_join_response = GameInformationOut(**response.json())
-    assert game_join_response.name == "TestGame"
-    assert game_join_response.status == "UNSTARTED"
-    assert game_join_response.min_players == 4
-    assert game_join_response.max_players == 6
-    assert game_join_response.is_private == True
-    assert game_join_response.host_player_id == test_player1.id
-    assert game_join_response.host_player_name == "Ignacio"
-    assert game_join_response.num_of_players == 2
+    assert game_join_response.name == "TestGame", "El nombre del juego no coincide con el esperado."
+    assert game_join_response.status == "UNSTARTED", "El estado del juego no coincide con el esperado."
+    assert game_join_response.min_players == 4, "El número mínimo de jugadores no coincide con el esperado."
+    assert game_join_response.max_players == 6, "El número máximo de jugadores no coincide con el esperado."
+    assert game_join_response.is_private == True, "El juego no se marcó como privado en la respuesta."
+    assert game_join_response.host_player_id == test_player1.id, "El ID del jugador anfitrión no coincide con el esperado."
+    assert game_join_response.host_player_name == "Ignacio", "El nombre del jugador anfitrión no coincide con el esperado."
+    assert game_join_response.num_of_players == 2, "El número de jugadores no coincide con el esperado."
 
     cleanup_database()
 
@@ -66,7 +66,7 @@ def test_join_game_not_found():
         "password": "secret"
     }
     response = client.patch("/games/join/TestGame", json=game_data)
-    assert response.status_code == 404
+    assert response.status_code == 404, "El código de estado de la respuesta no es 404 (Not Found)."
     cleanup_database()
 
 
@@ -81,7 +81,7 @@ def test_join_game_player_not_found():
         "password": "secret"
     }
     response = client.patch("/games/join/TestGame", json=game_data)
-    assert response.status_code == 404
+    assert response.status_code == 404, "El código de estado de la respuesta no es 404 (Not Found)."
     cleanup_database()
 
 
@@ -97,7 +97,7 @@ def test_join_game_player_already_in_game():
     }
     for i in range(2):
         response = client.patch("/games/join/TestGame", json=game_data)
-    assert response.status_code == 400
+    assert response.status_code == 400, "El código de estado de la respuesta no es 400 (Bad Request)."
     cleanup_database()
 
 
@@ -117,7 +117,7 @@ def test_join_game_full_of_players():
             "password": "secret"
         }
         response = client.patch("/games/join/TestGame", json=game_data)
-    assert response.status_code == 400
+    assert response.status_code == 400, "El código de estado de la respuesta no es 400 (Bad Request)."
     cleanup_database()
 
 
@@ -132,7 +132,7 @@ def test_join_game_with_invalid_password():
         "password": "wrong_password"
     }
     response = client.patch("/games/join/TestGame", json=game_data)
-    assert response.status_code == 400
+    assert response.status_code == 400, "El código de estado de la respuesta no es 400 (Bad Request)."
     cleanup_database()
 
 
@@ -151,5 +151,5 @@ def test_join_game_with_player_in_another_game():
     }
     client.patch("/games/join/TestGame1", json=game_data)
     response = client.patch("/games/join/TestGame2", json=game_data)
-    assert response.status_code == 400
+    assert response.status_code == 400, "El código de estado de la respuesta no es 400 (Bad Request)."
     cleanup_database()

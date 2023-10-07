@@ -20,11 +20,27 @@ TEST_DB_FILE = ./app/database/database_test.sqlite
 COV_FILE = .coverage
 COV_PLAYERS_FILE = .coverage.players
 COV_GAMES_FILE = .coverage.games
+COV_CARDS_FILE = .coverage.cards
 
 # Define the UVicorn command
 UVICORN_CMD = uvicorn $(MAIN_FILE):$(APP_NAME) --port $(PORT) --reload
 
-.PHONY: run delete-db coverage-report coverage-clean test-all test-players test-games
+.PHONY: run delete-db coverage-report coverage-clean test-all test-players test-games help
+
+# Define the 'help' target to display Makefile usage information
+help:
+	@echo "Usage: make [target]"
+	@echo "Targets:"
+	@echo "  run                - Run the UVicorn server"
+	@echo "  delete-db          - Delete the database file"
+	@echo "  coverage-report    - Generate coverage reports"
+	@echo "  coverage-clean     - Remove coverage reports"
+	@echo "  test-all           - Run all tests sequentially"
+	@echo "  test-players       - Run player tests"
+	@echo "  test-games         - Run game tests"
+	@echo "  test-cards         - Run card tests"
+	@echo "  autopep8           - Run autopep8 to format code"
+	@echo "  install            - Install dependencies and create virtual environment"
 
 # Define the 'run' target to run the UVicorn server within the virtual environment
 run: install
@@ -49,7 +65,7 @@ TEST_DIRECTORY = ./app/tests
 
 # Define the 'test-games' target to run game tests in the test environment
 test-games: install
-	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_GAMES_FILE) -m pytest -vv $(TEST_DIRECTORY)/game_tests; true
+	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_GAMES_FILE) -m pytest --tb=no -vv $(TEST_DIRECTORY)/game_tests; true
 	rm -f $(TEST_DB_FILE)
 	unset ENVIRONMENT
 
@@ -89,7 +105,8 @@ coverage-clean:
 
 # Define the 'autopep8' target for running autopep8
 autopep8:
-	poetry run autopep8 --in-place --recursive .
+	@echo "Standarizing all files to pep8..."
+	@poetry run autopep8 --in-place --recursive .
 
 # Define the 'install' target to install dependencies and create the virtual environment
 install: pyproject.toml
