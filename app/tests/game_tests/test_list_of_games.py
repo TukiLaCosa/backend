@@ -57,14 +57,14 @@ games = [
 def test_empty_get_games(mocker):
     mocker.patch.object(Game, "select", return_value=[])
     response = client.get("/games")
-    assert response.status_code == 200
-    assert response.json() == []
+    assert response.status_code == 200, "El código de estado de la respuesta no es 200 (OK)."
+    assert response.json() == [], "El contenido de la respuesta no está vacío como se esperaba."
 
 
 def test_get_one_game(mocker):
     mocker.patch.object(Game, "select", return_value=[games[0]])
     response = client.get("/games")
-    assert response.status_code == 200
+    assert response.status_code == 200, "El código de estado de la respuesta no es 200 (OK)."
     assert response.json() == [
         {
             "name": "game1",
@@ -75,4 +75,4 @@ def test_get_one_game(mocker):
             "is_private": False,
             "num_of_players": 3
         }
-    ]
+    ], "El contenido de la respuesta no coincide con el juego esperado."

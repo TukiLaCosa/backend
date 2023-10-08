@@ -50,4 +50,6 @@ class CardUpdateOut(BaseCard):
 
 
 class CardResponse(BaseCard):
-    pass
+    id: int = Field(
+        ge=1, le=110
+    )
