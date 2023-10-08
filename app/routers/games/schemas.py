@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List, Optional
 from enum import Enum
 from ..players.schemas import PlayerResponse
+from ..cards.schemas import CardType
 
 
 class GameStatus(str, Enum):
@@ -86,3 +87,9 @@ class GameInformationOut(GameUpdateOut):
     host_player_id: int
     num_of_players: int
     list_of_players: List[PlayerResponse]
+
+
+class GameStartOut(BaseModel):
+    list_of_players: List[PlayerResponse]
+    status: GameStatus
+    top_card_face: CardType

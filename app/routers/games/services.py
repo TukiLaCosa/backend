@@ -1,6 +1,7 @@
 from pony.orm import *
 from app.database.models import Game, Player, Card
 from .schemas import *
+from ..cards import services as cards_services
 from fastapi import HTTPException, status
 
 
@@ -22,8 +23,6 @@ def get_games() -> list[GameResponse]:
 @db_session
 def create_game(game_data: GameCreationIn) -> GameCreationOut:
     host = Player.get(id=game_data.host_player_id)
-    deck_cards = [card for card in Card.select(
-        lambda c: c.number == game_data.min_players)]
 
     if not host:
         raise HTTPException(
@@ -42,9 +41,6 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
         password=game_data.password,
         host=host
     )
-
-    for card in deck_cards:
-        new_game.draw_deck.add(card)
 
     host.game = new_game.name
     return GameCreationOut(
@@ -122,13 +118,6 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
     players_joined = game.players.select()[:]
     num_players_joined = len(players_joined)
 
-    # Here we add the cards for the player that joins the game
-    if (num_players_joined > game.min_players):
-        cards_to_add = [card for card in Card.select(
-            lambda c: c.number == num_players_joined)]
-        for card in cards_to_add:
-            game.draw_deck.add(card)
-
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
                               max_players=game.max_players,
@@ -164,7 +153,7 @@ def get_game_information(game_name: str) -> GameInformationOut:
 
 
 @db_session
-def find_game_by_name(game_name: str):
+def find_game_by_name(game_name: str) -> Game:
     game = Game.get(name=game_name)
 
     if not game:
@@ -173,3 +162,26 @@ def find_game_by_name(game_name: str):
         )
 
     return game
+
+
+@db_session
+def start_game(name: str) -> Game:
+    game: Game = find_game_by_name(name)
+    players_joined = count(game.players)
+
+    draw_deck = cards_services.build_deck(players_joined)
+    cards_services.deal_cards_to_players(game, draw_deck)
+    game.draw_deck.add(draw_deck)
+
+    # setting the position of the players
+    for idx, player in enumerate(game.players):
+        player.position = idx
+
+    game.status = GameStatus.STARTED
+    game.turn = 0
+
+    return GameStartOut(
+        list_of_players=game.players,
+        status=game.status,
+        top_card_face=list(game.draw_deck)[0].type
+    )

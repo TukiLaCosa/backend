@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, HTTPException
 from typing import List
 from . import services
+from . import utils
 from .schemas import *
 from ..players.schemas import PlayerResponse
 
@@ -24,6 +25,12 @@ def get_game_information(game_name: str):
 @router.post("/", response_model=GameCreationOut, status_code=status.HTTP_201_CREATED)
 def create_game(game_data: GameCreationIn):
     return services.create_game(game_data)
+
+
+@router.patch("/{name}/init")
+def start(name: str, host_player_id: int) -> GameStartOut:
+    utils.verify_game_can_start(name, host_player_id)
+    return services.start_game(name)
 
 
 @router.patch("/{game_name}", response_model=GameUpdateOut, status_code=status.HTTP_200_OK)
