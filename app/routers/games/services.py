@@ -1,7 +1,8 @@
 from pony.orm import *
 from app.database.models import Game, Player, Card
 from .schemas import *
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, WebSocket
+from .utils import gameManager
 
 
 @db_session
@@ -17,6 +18,27 @@ def get_games() -> list[GameResponse]:
         num_of_players=len(game.players)
     ) for game in games]
     return games_list
+
+
+@db_session
+def get_game_information(game_name: str) -> GameInformationOut:
+    game = Game.get(name=game_name)
+
+    if game is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail='Game not found')
+    players_joined = game.players.select()[:]
+    return GameInformationOut(name=game.name,
+                              min_players=game.min_players,
+                              max_players=game.max_players,
+                              is_private=game.password is not None,
+                              status=game.status,
+                              host_player_name=game.host.name,
+                              host_player_id=game.host.id,
+                              num_of_players=len(game.players),
+                              list_of_players=[PlayerResponse.model_validate(
+                                  p) for p in players_joined]
+                              )
 
 
 @db_session
@@ -47,6 +69,7 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
         new_game.draw_deck.add(card)
 
     host.game = new_game.name
+    gameManager.new_game(new_game.name)
     return GameCreationOut(
         name=new_game.name,
         status=new_game.status,
@@ -94,10 +117,12 @@ def delete_game(game_name: str):
     return {"message": "Game deleted"}
 
 
-@db_session
-def join_player(game_name: str, game_data: GameInformationIn) -> GameInformationOut:
-    game = Game.get(name=game_name)
-    player = Player.get(id=game_data.player_id)
+
+async def join_player(game_name: str, game_data: GameInformationIn) -> GameInformationOut:
+    with db_session:
+        game = Game.get(name=game_name)
+        player = Player.get(id=game_data.player_id)
+        commit()
 
     if not game:
         raise HTTPException(
@@ -128,7 +153,15 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
             lambda c: c.number == num_players_joined)]
         for card in cards_to_add:
             game.draw_deck.add(card)
-
+    
+    gameInformation = {
+        "type": "join",
+        "min_players": "4",
+        "max_players": "4"
+    }
+    connectionGame = gameManager.return_game(game.name)
+    await connectionGame.broadcast(gameInformation)
+    
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
                               max_players=game.max_players,
@@ -142,34 +175,14 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
                               )
 
 
-@db_session
-def get_game_information(game_name: str) -> GameInformationOut:
-    game = Game.get(name=game_name)
-
-    if game is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail='Game not found')
-    players_joined = game.players.select()[:]
-    return GameInformationOut(name=game.name,
-                              min_players=game.min_players,
-                              max_players=game.max_players,
-                              is_private=game.password is not None,
-                              status=game.status,
-                              host_player_name=game.host.name,
-                              host_player_id=game.host.id,
-                              num_of_players=len(game.players),
-                              list_of_players=[PlayerResponse.model_validate(
-                                  p) for p in players_joined]
-                              )
-
-
-@db_session
-def find_game_by_name(game_name: str):
-    game = Game.get(name=game_name)
-
-    if not game:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found"
-        )
-
-    return game
+async def websocket_endpoint(websocket: WebSocket, game_name: str):
+    try:
+        manager = gameManager.return_match(game_name)
+        await manager.connect(websocket)
+    except RuntimeError:
+        raise "Error estableshing connection"
+    while True:
+        try:
+            await websocket.receive()
+        except RuntimeError:
+            break
