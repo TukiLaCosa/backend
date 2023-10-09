@@ -2,7 +2,8 @@ from pony.orm import *
 from app.database.models import Game, Player, Card
 from .schemas import *
 from fastapi import HTTPException, status, WebSocket
-from .utils import gameManager
+from .utils import gameManager, find_game_by_name
+from ..cards import services as cards_services
 
 
 @db_session
@@ -44,8 +45,6 @@ def get_game_information(game_name: str) -> GameInformationOut:
 @db_session
 def create_game(game_data: GameCreationIn) -> GameCreationOut:
     host = Player.get(id=game_data.host_player_id)
-    deck_cards = [card for card in Card.select(
-        lambda c: c.number == game_data.min_players)]
 
     if not host:
         raise HTTPException(
@@ -64,9 +63,6 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
         password=game_data.password,
         host=host
     )
-
-    for card in deck_cards:
-        new_game.draw_deck.add(card)
 
     host.game = new_game.name
     gameManager.new_game(new_game.name)
@@ -117,7 +113,6 @@ def delete_game(game_name: str):
     return {"message": "Game deleted"}
 
 
-
 async def join_player(game_name: str, game_data: GameInformationIn) -> GameInformationOut:
     with db_session:
         game = Game.get(name=game_name)
@@ -147,13 +142,6 @@ async def join_player(game_name: str, game_data: GameInformationIn) -> GameInfor
     players_joined = game.players.select()[:]
     num_players_joined = len(players_joined)
 
-    # Here we add the cards for the player that joins the game
-    if (num_players_joined > game.min_players):
-        cards_to_add = [card for card in Card.select(
-            lambda c: c.number == num_players_joined)]
-        for card in cards_to_add:
-            game.draw_deck.add(card)
-    
     gameInformation = {
         "type": "join",
         "min_players": "4",
@@ -161,7 +149,7 @@ async def join_player(game_name: str, game_data: GameInformationIn) -> GameInfor
     }
     connectionGame = gameManager.return_game(game.name)
     await connectionGame.broadcast(gameInformation)
-    
+
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
                               max_players=game.max_players,
@@ -186,3 +174,26 @@ async def websocket_endpoint(websocket: WebSocket, game_name: str):
             await websocket.receive()
         except RuntimeError:
             break
+
+
+@db_session
+def start_game(name: str) -> Game:
+    game: Game = find_game_by_name(name)
+    players_joined = count(game.players)
+
+    draw_deck = cards_services.build_deck(players_joined)
+    cards_services.deal_cards_to_players(game, draw_deck)
+    game.draw_deck.add(draw_deck)
+
+    # setting the position of the players
+    for idx, player in enumerate(game.players):
+        player.position = idx
+
+    game.status = GameStatus.STARTED
+    game.turn = 0
+
+    return GameStartOut(
+        list_of_players=game.players,
+        status=game.status,
+        top_card_face=list(game.draw_deck)[0].type
+    )
