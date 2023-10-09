@@ -90,6 +90,8 @@ class GameInformationOut(GameUpdateOut):
 
 
 class GameStartOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     list_of_players: List[PlayerResponse]
     status: GameStatus
     top_card_face: CardType
