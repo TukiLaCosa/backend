@@ -16,6 +16,7 @@ def find_game_by_name(game_name: str):
 
     return game
 
+
 @db_session
 def verify_game_can_start(name: str, host_player_id: int):
     game = find_game_by_name(name)
@@ -38,7 +39,8 @@ def verify_game_can_start(name: str, host_player_id: int):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Only the host player can start the game."
         )
-    
+
+
 @db_session
 def list_of_games():
     games = Game.select()

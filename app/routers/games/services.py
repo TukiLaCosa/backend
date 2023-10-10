@@ -59,8 +59,11 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
 
     host.game = new_game.name
 
-    games_json = json.dumps(list_of_games(), default=lambda x: x.__dict__)
-    asyncio.run(player_connections.broadcast(games_json))
+    json_msg = {
+        "event": "game_created",
+        "game_name": new_game.name
+    }
+    asyncio.run(player_connections.broadcast(json_msg))
 
     return GameCreationOut(
         name=new_game.name,
@@ -87,8 +90,11 @@ def update_game(game_name: str, request_data: GameUpdateIn) -> GameUpdateOut:
     game.max_players = request_data.max_players
     game.password = request_data.password
 
-    games_json = json.dumps(list_of_games(), default=lambda x: x.__dict__)
-    asyncio.run(player_connections.broadcast(games_json))
+    json_msg = {
+        "event": "game_updated",
+        "game_name": game.name
+    }
+    asyncio.run(player_connections.broadcast(json_msg))
 
     return GameUpdateOut(name=game.name,
                          min_players=game.min_players,
@@ -107,9 +113,12 @@ def delete_game(game_name: str):
     if game_name != game.name:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
-    
-    games_json = json.dumps(list_of_games(), default=lambda x: x.__dict__)
-    asyncio.run(player_connections.broadcast(games_json))
+
+    json_msg = {
+        "event": "game_deleted",
+        "game_name": game.name
+    }
+    asyncio.run(player_connections.broadcast(json_msg))
 
     game.delete()
     return {"message": "Game deleted"}
@@ -143,8 +152,12 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
     players_joined = game.players.select()[:]
     num_players_joined = len(players_joined)
 
-    games_json = json.dumps(list_of_games(), default=lambda x: x.__dict__)
-    asyncio.run(player_connections.broadcast(games_json))
+    json_msg = {
+        "event": "player_join",
+        "player_id": player.id,
+        "game_name": game.name
+    }
+    asyncio.run(player_connections.broadcast(json_msg))
 
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
@@ -175,8 +188,11 @@ def start_game(name: str) -> Game:
     game.status = GameStatus.STARTED
     game.turn = 0
 
-    games_json = json.dumps(list_of_games(), default=lambda x: x.__dict__)
-    asyncio.run(player_connections.broadcast(games_json))
+    json_msg = {
+        "event": "game_started",
+        "game_name": game.name
+    }
+    asyncio.run(player_connections.broadcast(json_msg))
 
     return GameStartOut(
         list_of_players=game.players,
