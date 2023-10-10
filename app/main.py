@@ -4,6 +4,7 @@ from app.config.config import settings
 from app.routers.players import players
 from app.routers.games import games
 from app.routers.cards import cards
+from app.routers.websockets import websockets
 
 app = FastAPI()
 
@@ -20,6 +21,7 @@ app.add_middleware(
 app.include_router(players.router)
 app.include_router(games.router)
 app.include_router(cards.router)
+app.include_router(websockets.router)
 
 
 @app.get("/")

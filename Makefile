@@ -23,7 +23,7 @@ COV_GAMES_FILE = .coverage.games
 COV_CARDS_FILE = .coverage.cards
 
 # Define the UVicorn command
-UVICORN_CMD = uvicorn $(MAIN_FILE):$(APP_NAME) --port $(PORT) --reload
+UVICORN_CMD = uvicorn $(MAIN_FILE):$(APP_NAME) --port $(PORT) --reload --ws websockets
 
 .PHONY: run delete-db coverage-report coverage-clean test-all test-players test-games help
 

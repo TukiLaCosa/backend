@@ -2,22 +2,15 @@ from pony.orm import *
 from app.database.models import Game, Player
 from .schemas import *
 from fastapi import HTTPException, status
-from .utils import find_game_by_name
+from .utils import find_game_by_name, list_of_games
 from ..cards import services as cards_services
+from ..websockets.utils import player_connections
+import asyncio
+import json
 
 
-@db_session
 def get_games() -> list[GameResponse]:
-    games = Game.select()
-    games_list = [GameResponse(
-        name=game.name,
-        min_players=game.min_players,
-        max_players=game.max_players,
-        host_player_id=game.host.id,
-        status=game.status,
-        is_private=game.password is not None,
-        num_of_players=len(game.players)
-    ) for game in games]
+    games_list = list_of_games()
     return games_list
 
 
@@ -65,6 +58,10 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
     )
 
     host.game = new_game.name
+
+    games_json = json.dumps(list_of_games(), default=lambda x: x.__dict__)
+    asyncio.run(player_connections.broadcast(games_json))
+
     return GameCreationOut(
         name=new_game.name,
         status=new_game.status,
@@ -90,6 +87,9 @@ def update_game(game_name: str, request_data: GameUpdateIn) -> GameUpdateOut:
     game.max_players = request_data.max_players
     game.password = request_data.password
 
+    games_json = json.dumps(list_of_games(), default=lambda x: x.__dict__)
+    asyncio.run(player_connections.broadcast(games_json))
+
     return GameUpdateOut(name=game.name,
                          min_players=game.min_players,
                          max_players=game.max_players,
@@ -107,6 +107,9 @@ def delete_game(game_name: str):
     if game_name != game.name:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
+    
+    games_json = json.dumps(list_of_games(), default=lambda x: x.__dict__)
+    asyncio.run(player_connections.broadcast(games_json))
 
     game.delete()
     return {"message": "Game deleted"}
@@ -140,6 +143,9 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
     players_joined = game.players.select()[:]
     num_players_joined = len(players_joined)
 
+    games_json = json.dumps(list_of_games(), default=lambda x: x.__dict__)
+    asyncio.run(player_connections.broadcast(games_json))
+
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
                               max_players=game.max_players,
@@ -168,6 +174,9 @@ def start_game(name: str) -> Game:
 
     game.status = GameStatus.STARTED
     game.turn = 0
+
+    games_json = json.dumps(list_of_games(), default=lambda x: x.__dict__)
+    asyncio.run(player_connections.broadcast(games_json))
 
     return GameStartOut(
         list_of_players=game.players,
