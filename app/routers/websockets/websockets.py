@@ -7,6 +7,6 @@ router = APIRouter(
 )
 
 
-@router.websocket("/games")
-def websockets_games(websocket: WebSocket):
-    return services.websocket_games(websocket)
+@router.websocket("/{player_id}")
+def websockets_games(player_id: int, websocket: WebSocket):
+    return services.websocket_games(player_id, websocket)
