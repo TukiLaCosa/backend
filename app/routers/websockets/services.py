@@ -1,5 +1,7 @@
+from pony.orm import db_session
+from app.database.models import Game, Player
 from fastapi import WebSocket, WebSocketDisconnect
-from .utils import player_connections
+from .utils import player_connections, get_players_id
 
 
 async def websocket_games(player_id: int, websocket: WebSocket):
@@ -7,12 +9,13 @@ async def websocket_games(player_id: int, websocket: WebSocket):
 
     try:
         while True:
-            data = await websocket.receive()
-            '''
-            Aca si recibimo data.event == message entonces mandamos el mensaje
-            al resto de los jugadores por ejemplo.
-            O si es un data.event == disconnect entonces debemos sacar el websocket
-            de la lista de player_connections.
-            '''
+            data = await websocket.receive_json()
+            if (data["event"] == "message"):
+                message_from = data["from"]
+                message = data["message"]
+                players = get_players_id(data["game_name"])
+                for i in players:
+                    if i != player_id:
+                        await player_connections.send_message(player_id=i, message_from=message_from, message=message)
     except WebSocketDisconnect:
         player_connections.disconnect(player_id)

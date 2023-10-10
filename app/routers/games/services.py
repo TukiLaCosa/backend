@@ -6,7 +6,6 @@ from .utils import find_game_by_name, list_of_games
 from ..cards import services as cards_services
 from ..websockets.utils import player_connections
 import asyncio
-import json
 
 
 def get_games() -> list[GameResponse]:
