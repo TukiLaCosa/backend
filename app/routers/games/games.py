@@ -46,7 +46,3 @@ def delete_game(game_name: str):
 @router.patch("/join/{game_name}", response_model=GameInformationOut, status_code=status.HTTP_200_OK)
 def join_player(game_name: str, game_data: GameInformationIn):
     return services.join_player(game_name, game_data)
-
-@router.websocket("/{game_name}/ws")
-def websocket_endpoint(websocket:WebSocket, game_name: str):
-    return services.list_games(websocket, game_name)

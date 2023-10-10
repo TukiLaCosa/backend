@@ -1,8 +1,8 @@
 from pony.orm import *
-from app.database.models import Game, Player, Card
+from app.database.models import Game, Player
 from .schemas import *
-from fastapi import HTTPException, status, WebSocket
-from .utils import gameManager, find_game_by_name
+from fastapi import HTTPException, status
+from .utils import find_game_by_name
 from ..cards import services as cards_services
 
 
@@ -65,7 +65,6 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
     )
 
     host.game = new_game.name
-    gameManager.new_game(new_game.name)
     return GameCreationOut(
         name=new_game.name,
         status=new_game.status,
@@ -113,11 +112,10 @@ def delete_game(game_name: str):
     return {"message": "Game deleted"}
 
 
-async def join_player(game_name: str, game_data: GameInformationIn) -> GameInformationOut:
-    with db_session:
-        game = Game.get(name=game_name)
-        player = Player.get(id=game_data.player_id)
-        commit()
+@db_session
+def join_player(game_name: str, game_data: GameInformationIn) -> GameInformationOut:
+    game = Game.get(name=game_name)
+    player = Player.get(id=game_data.player_id)
 
     if not game:
         raise HTTPException(
@@ -142,14 +140,6 @@ async def join_player(game_name: str, game_data: GameInformationIn) -> GameInfor
     players_joined = game.players.select()[:]
     num_players_joined = len(players_joined)
 
-    gameInformation = {
-        "type": "join",
-        "min_players": "4",
-        "max_players": "4"
-    }
-    connectionGame = gameManager.return_game(game.name)
-    await connectionGame.broadcast(gameInformation)
-
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
                               max_players=game.max_players,
@@ -161,19 +151,6 @@ async def join_player(game_name: str, game_data: GameInformationIn) -> GameInfor
                               list_of_players=[PlayerResponse.model_validate(
                                   p) for p in players_joined]
                               )
-
-
-async def websocket_endpoint(websocket: WebSocket, game_name: str):
-    try:
-        manager = gameManager.return_match(game_name)
-        await manager.connect(websocket)
-    except RuntimeError:
-        raise "Error estableshing connection"
-    while True:
-        try:
-            await websocket.receive()
-        except RuntimeError:
-            break
 
 
 @db_session
