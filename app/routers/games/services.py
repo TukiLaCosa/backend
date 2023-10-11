@@ -4,8 +4,6 @@ from .schemas import *
 from fastapi import HTTPException, status
 from .utils import find_game_by_name, list_of_games
 from ..cards import services as cards_services
-from ..websockets.utils import player_connections
-import asyncio
 
 
 def get_games() -> list[GameResponse]:
@@ -58,12 +56,6 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
 
     host.game = new_game.name
 
-    json_msg = {
-        "event": "game_created",
-        "game_name": new_game.name
-    }
-    asyncio.run(player_connections.broadcast(json_msg))
-
     return GameCreationOut(
         name=new_game.name,
         status=new_game.status,
@@ -89,12 +81,6 @@ def update_game(game_name: str, request_data: GameUpdateIn) -> GameUpdateOut:
     game.max_players = request_data.max_players
     game.password = request_data.password
 
-    json_msg = {
-        "event": "game_updated",
-        "game_name": game.name
-    }
-    asyncio.run(player_connections.broadcast(json_msg))
-
     return GameUpdateOut(name=game.name,
                          min_players=game.min_players,
                          max_players=game.max_players,
@@ -113,14 +99,7 @@ def delete_game(game_name: str):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
 
-    json_msg = {
-        "event": "game_deleted",
-        "game_name": game.name
-    }
-    asyncio.run(player_connections.broadcast(json_msg))
-
     game.delete()
-    return {"message": "Game deleted"}
 
 
 @db_session
@@ -151,13 +130,6 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
     players_joined = game.players.select()[:]
     num_players_joined = len(players_joined)
 
-    json_msg = {
-        "event": "player_join",
-        "player_id": player.id,
-        "game_name": game.name
-    }
-    asyncio.run(player_connections.broadcast(json_msg))
-
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
                               max_players=game.max_players,
@@ -186,12 +158,6 @@ def start_game(name: str) -> Game:
 
     game.status = GameStatus.STARTED
     game.turn = 0
-
-    json_msg = {
-        "event": "game_started",
-        "game_name": game.name
-    }
-    asyncio.run(player_connections.broadcast(json_msg))
 
     return GameStartOut(
         list_of_players=game.players,
