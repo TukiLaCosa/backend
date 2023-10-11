@@ -13,8 +13,8 @@ router = APIRouter(
 
 
 @router.get("/", response_model=list[GameResponse], status_code=status.HTTP_200_OK)
-def get_games():
-    return services.get_games()
+def get_unstarted_games():
+    return services.get_unstarted_games()
 
 
 @router.get("/{game_name}", response_model=GameInformationOut, status_code=status.HTTP_200_OK)
