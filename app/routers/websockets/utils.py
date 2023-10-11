@@ -30,6 +30,7 @@ class ConnectionManager:
     async def send_message(self, player_id: int, message_from: str, message: str):
         try:
             json_msg = {
+                "event": "message",
                 "from": message_from,
                 "message": message
             }
