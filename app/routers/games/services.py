@@ -1,23 +1,37 @@
 from pony.orm import *
-from app.database.models import Game, Player, Card
+from app.database.models import Game, Player
 from .schemas import *
-from ..cards import services as cards_services
 from fastapi import HTTPException, status
+from .utils import find_game_by_name, list_of_games
+from ..cards import services as cards_services
+from ..websockets.utils import player_connections
+import asyncio
+
+
+def get_games() -> list[GameResponse]:
+    games_list = list_of_games()
+    return games_list
 
 
 @db_session
-def get_games() -> list[GameResponse]:
-    games = Game.select()
-    games_list = [GameResponse(
-        name=game.name,
-        min_players=game.min_players,
-        max_players=game.max_players,
-        host_player_id=game.host.id,
-        status=game.status,
-        is_private=game.password is not None,
-        num_of_players=len(game.players)
-    ) for game in games]
-    return games_list
+def get_game_information(game_name: str) -> GameInformationOut:
+    game = Game.get(name=game_name)
+
+    if game is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail='Game not found')
+    players_joined = game.players.select()[:]
+    return GameInformationOut(name=game.name,
+                              min_players=game.min_players,
+                              max_players=game.max_players,
+                              is_private=game.password is not None,
+                              status=game.status,
+                              host_player_name=game.host.name,
+                              host_player_id=game.host.id,
+                              num_of_players=len(game.players),
+                              list_of_players=[PlayerResponse.model_validate(
+                                  p) for p in players_joined]
+                              )
 
 
 @db_session
@@ -43,6 +57,13 @@ def create_game(game_data: GameCreationIn) -> GameCreationOut:
     )
 
     host.game = new_game.name
+
+    json_msg = {
+        "event": "game_created",
+        "game_name": new_game.name
+    }
+    asyncio.run(player_connections.broadcast(json_msg))
+
     return GameCreationOut(
         name=new_game.name,
         status=new_game.status,
@@ -68,6 +89,12 @@ def update_game(game_name: str, request_data: GameUpdateIn) -> GameUpdateOut:
     game.max_players = request_data.max_players
     game.password = request_data.password
 
+    json_msg = {
+        "event": "game_updated",
+        "game_name": game.name
+    }
+    asyncio.run(player_connections.broadcast(json_msg))
+
     return GameUpdateOut(name=game.name,
                          min_players=game.min_players,
                          max_players=game.max_players,
@@ -85,6 +112,12 @@ def delete_game(game_name: str):
     if game_name != game.name:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
+
+    json_msg = {
+        "event": "game_deleted",
+        "game_name": game.name
+    }
+    asyncio.run(player_connections.broadcast(json_msg))
 
     game.delete()
     return {"message": "Game deleted"}
@@ -118,6 +151,13 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
     players_joined = game.players.select()[:]
     num_players_joined = len(players_joined)
 
+    json_msg = {
+        "event": "player_join",
+        "player_id": player.id,
+        "game_name": game.name
+    }
+    asyncio.run(player_connections.broadcast(json_msg))
+
     return GameInformationOut(name=game.name,
                               min_players=game.min_players,
                               max_players=game.max_players,
@@ -129,39 +169,6 @@ def join_player(game_name: str, game_data: GameInformationIn) -> GameInformation
                               list_of_players=[PlayerResponse.model_validate(
                                   p) for p in players_joined]
                               )
-
-
-@db_session
-def get_game_information(game_name: str) -> GameInformationOut:
-    game = Game.get(name=game_name)
-
-    if game is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail='Game not found')
-    players_joined = game.players.select()[:]
-    return GameInformationOut(name=game.name,
-                              min_players=game.min_players,
-                              max_players=game.max_players,
-                              is_private=game.password is not None,
-                              status=game.status,
-                              host_player_name=game.host.name,
-                              host_player_id=game.host.id,
-                              num_of_players=len(game.players),
-                              list_of_players=[PlayerResponse.model_validate(
-                                  p) for p in players_joined]
-                              )
-
-
-@db_session
-def find_game_by_name(game_name: str) -> Game:
-    game = Game.get(name=game_name)
-
-    if not game:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found"
-        )
-
-    return game
 
 
 @db_session
@@ -179,6 +186,12 @@ def start_game(name: str) -> Game:
 
     game.status = GameStatus.STARTED
     game.turn = 0
+
+    json_msg = {
+        "event": "game_started",
+        "game_name": game.name
+    }
+    asyncio.run(player_connections.broadcast(json_msg))
 
     return GameStartOut(
         list_of_players=game.players,
