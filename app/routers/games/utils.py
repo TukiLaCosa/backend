@@ -50,7 +50,23 @@ def verify_game_can_start(name: str, host_player_id: int):
 
 
 @db_session
-def list_of_games():
+def list_of_unstarted_games() -> List[GameResponse]:
+    games = Game.select(lambda game: game.status !=
+                        GameStatus.STARTED and game.status != GameStatus.ENDED)
+    games_list = [GameResponse(
+        name=game.name,
+        min_players=game.min_players,
+        max_players=game.max_players,
+        host_player_id=game.host.id,
+        status=game.status,
+        is_private=game.password is not None,
+        num_of_players=len(game.players)
+    ) for game in games]
+    return games_list
+
+
+@db_session
+def list_of_games() -> List[GameResponse]:
     games = Game.select()
     games_list = [GameResponse(
         name=game.name,

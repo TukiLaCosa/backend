@@ -2,12 +2,12 @@ from pony.orm import *
 from app.database.models import Game, Player
 from .schemas import *
 from fastapi import HTTPException, status
-from .utils import find_game_by_name, list_of_games
+from .utils import find_game_by_name, list_of_unstarted_games
 from ..cards import services as cards_services
 
 
-def get_games() -> list[GameResponse]:
-    games_list = list_of_games()
+def get_unstarted_games() -> List[GameResponse]:
+    games_list = list_of_unstarted_games()
     return games_list
 
 
