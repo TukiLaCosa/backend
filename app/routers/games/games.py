@@ -90,8 +90,8 @@ async def join_player(game_name: str, game_data: GameInformationIn):
     return game
 
 
-@router.patch("/leave/{game_name}", status_code=status.HTTP_200_OK)
-async def leave_game(game_name: str, player_id: int):
+@router.patch("/cancel/{game_name}", status_code=status.HTTP_200_OK)
+async def cancel_game(game_name: str, player_id: int):
     utils.verify_game_can_be_canceled(game_name, player_id)
 
     json_msg = {
@@ -100,9 +100,40 @@ async def leave_game(game_name: str, player_id: int):
     }
     await player_connections.send_game_event(game_name, json_msg)
 
-    services.leave_game(game_name)
+    services.cancel_game(game_name)
 
     json_msg["event"] = utils.Events.GAME_DELETED
     await player_connections.broadcast(json_msg)
 
     return {"message": "Game canceled"}
+
+
+@router.patch("/leave/{game_name}", status_code=status.HTTP_200_OK)
+async def leave_game(game_name: str, player_id: int):
+    utils.verify_game_can_be_abandon(game_name, player_id)
+    json_msg = {
+        "event": utils.Events.PLAYER_LEFT,
+        "game_name": game_name
+    }
+    await player_connections.send_game_event(game_name, json_msg)
+
+    services.leave_game(game_name, player_id)
+
+    json_msg["event"] = utils.Events.GAME_UPDATED
+
+    await player_connections.broadcast(json_msg)
+
+    return {"message": "Player left game"}
+
+
+
+
+
+
+
+
+
+
+
+
+

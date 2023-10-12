@@ -167,6 +167,11 @@ def start_game(name: str) -> Game:
 
 
 @db_session
-def leave_game(game_name: str):
+def cancel_game(game_name: str):
     game = Game.get(name=game_name)
     game.delete()
+
+@db_session
+def leave_game(game_name: str, player_id: int):
+    #Falta implementacion para sacar al jugador de la partida
+    pass
