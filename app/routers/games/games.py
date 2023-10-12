@@ -88,3 +88,21 @@ async def join_player(game_name: str, game_data: GameInformationIn):
     await player_connections.broadcast(json_msg)
 
     return game
+
+
+@router.patch("/leave/{game_name}", status_code=status.HTTP_200_OK)
+async def leave_game(game_name: str, player_id: int):
+    utils.verify_game_can_be_canceled(game_name, player_id)
+
+    json_msg = {
+        "event": utils.Events.GAME_CANCELED,
+        "game_name": game_name
+    }
+    await player_connections.send_game_event(game_name, json_msg)
+
+    services.leave_game(game_name)
+
+    json_msg["event"] = utils.Events.GAME_DELETED
+    await player_connections.broadcast(json_msg)
+
+    return {"message": "Game canceled"}

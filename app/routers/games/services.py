@@ -164,3 +164,9 @@ def start_game(name: str) -> Game:
         status=game.status,
         top_card_face=list(game.draw_deck)[0].type
     )
+
+
+@db_session
+def leave_game(game_name: str):
+    game = Game.get(name=game_name)
+    game.delete()

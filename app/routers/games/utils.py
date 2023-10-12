@@ -10,6 +10,7 @@ class Events(str, Enum):
     GAME_UPDATED = 'game_updated'
     GAME_DELETED = 'game_deleted'
     GAME_STARTED = 'game_started'
+    GAME_CANCELED = 'game_canceled'
     PLAYER_JOINED = 'player_joined'
 
 
@@ -46,6 +47,26 @@ def verify_game_can_start(name: str, host_player_id: int):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Only the host player can start the game."
+        )
+
+
+@db_session
+def verify_game_can_be_canceled(game_name: str, host_player_id: int):
+    game = find_game_by_name(game_name)
+    if not game:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Game not found"
+        )
+    if game.status != GameStatus.UNSTARTED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The game is not in unstarted status"
+        )
+    if game.host.id != host_player_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only the host player can canceled the game."
         )
 
 
