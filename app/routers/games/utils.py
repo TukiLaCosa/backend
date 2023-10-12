@@ -5,6 +5,14 @@ from pony.orm import *
 from .schemas import *
 
 
+class Events(str, Enum):
+    GAME_CREATED = 'game_created'
+    GAME_UPDATED = 'game_updated'
+    GAME_DELETED = 'game_deleted'
+    GAME_STARTED = 'game_started'
+    PLAYER_JOINED = 'player_joined'
+
+
 @db_session
 def find_game_by_name(game_name: str):
     game = Game.get(name=game_name)
