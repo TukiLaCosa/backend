@@ -3,6 +3,7 @@ from fastapi import WebSocket, HTTPException, status
 from app.database.models import Game
 from pony.orm import *
 from .schemas import *
+from ..players.schemas import PlayerRol
 
 
 class Events(str, Enum):
@@ -46,6 +47,18 @@ def verify_game_can_start(name: str, host_player_id: int):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Only the host player can start the game."
+        )
+
+
+@db_session
+def verify_game_can_finish(game: Game):
+    players_eliminated = game.players.select(
+        lambda player: player.rol == PlayerRol.ELIMINATED)
+
+    if count(players_eliminated) < count(game.players) - 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"There must be exactly one player not eliminated."
         )
 
 

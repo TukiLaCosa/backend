@@ -100,3 +100,9 @@ def deal_cards_to_players(game: Game, deck: List[Card]):
         for player in game.players:
             card = deck.pop(0)
             player.hand.add(card)
+
+
+@db_session
+def card_is_in_player_hand(card_name: str, hand_player: list[Card]) -> bool:
+    card_names = map(lambda card: card.name, hand_player)
+    return card_name in card_names

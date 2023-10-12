@@ -1,8 +1,9 @@
 from pony.orm import *
 from app.database.models import Game, Player
 from .schemas import *
+from ..players.schemas import PlayerRol
 from fastapi import HTTPException, status
-from .utils import find_game_by_name, list_of_unstarted_games
+from .utils import *
 from ..cards import services as cards_services
 
 
@@ -152,9 +153,13 @@ def start_game(name: str) -> Game:
     cards_services.deal_cards_to_players(game, draw_deck)
     game.draw_deck.add(draw_deck)
 
-    # setting the position of the players
+    # setting the position and rol of the players
     for idx, player in enumerate(game.players):
         player.position = idx
+        if cards_services.card_is_in_player_hand('La Cosa', player.hand):
+            player.rol = PlayerRol.THE_THING
+        else:
+            player.rol = PlayerRol.HUMAN
 
     game.status = GameStatus.STARTED
     game.turn = 0
@@ -164,3 +169,12 @@ def start_game(name: str) -> Game:
         status=game.status,
         top_card_face=list(game.draw_deck)[0].type
     )
+
+
+@db_session
+def finish_game(name: str) -> Game:
+    game: Game = find_game_by_name(name)
+    verify_game_can_finish(game)
+    game.status = GameStatus.ENDED
+
+    return game
