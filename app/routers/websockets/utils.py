@@ -38,11 +38,12 @@ class ConnectionManager:
         except KeyError:
             pass
 
-    async def send_game_event(self, game_name: str, message):
+    async def send_event_to_other_players_in_game(self, game_name: str, message, excluded_id: int):
         players_to_send_message = get_players_id(game_name)
         for player_id, websocket in self.active_connections.items():
             if player_id in players_to_send_message:
-                await websocket.send_json(message)
+                if player_id != excluded_id:
+                    await websocket.send_json(message)
 
     async def broadcast(self, message):
         for player_id, websocket in self.active_connections.items():

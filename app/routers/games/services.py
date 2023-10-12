@@ -171,7 +171,22 @@ def cancel_game(game_name: str):
     game = Game.get(name=game_name)
     game.delete()
 
+
 @db_session
-def leave_game(game_name: str, player_id: int):
-    #Falta implementacion para sacar al jugador de la partida
-    pass
+def leave_game(game_name: str, player_id: int) -> GameInformationOut:
+    game = Game.get(name=game_name)
+    player = Player.get(id=player_id)
+    game.players.remove(player)
+    players_joined = game.players.select()[:]
+    num_players_joined = len(players_joined)
+    return GameInformationOut(name=game.name,
+                              min_players=game.min_players,
+                              max_players=game.max_players,
+                              is_private=game.password is not None,
+                              status=game.status,
+                              host_player_name=game.host.name,
+                              host_player_id=game.host.id,
+                              num_of_players=num_players_joined,
+                              list_of_players=[PlayerResponse.model_validate(
+                                  p) for p in players_joined]
+                              )

@@ -70,10 +70,11 @@ def verify_game_can_be_canceled(game_name: str, host_player_id: int):
             detail="Only the host player can canceled the game."
         )
 
+
 @db_session
 def verify_game_can_be_abandon(game_name: str, player_id: int):
     game = find_game_by_name(game_name)
-    player = Player.select(id=player_id)
+    player = Player.get(id=player_id)
 
     if not game:
         raise HTTPException(
@@ -95,6 +96,7 @@ def verify_game_can_be_abandon(game_name: str, player_id: int):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Player not in the game"
         )
+
 
 @db_session
 def list_of_unstarted_games() -> List[GameResponse]:
