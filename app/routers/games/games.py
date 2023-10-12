@@ -43,7 +43,7 @@ async def start(name: str, host_player_id: int) -> GameStartOut:
 
     json_msg = {
         "event": utils.Events.GAME_STARTED,
-        "game_name": game.name
+        "game_name": name
     }
     await player_connections.broadcast(json_msg)
 
@@ -56,7 +56,7 @@ async def update_game(game_name: str, game_data: GameUpdateIn):
 
     json_msg = {
         "event": utils.Events.GAME_UPDATED,
-        "game_name": game_updated.name
+        "game_name": game_name
     }
     await player_connections.broadcast(json_msg)
 
