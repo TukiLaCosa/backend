@@ -83,7 +83,7 @@ def test_leave_game_not_in_unstarted_state():
             "password": "secret"
         }
         client.patch("/games/join/TestGame", json=game_data)
-    
+
     # Change to STARTED status
     client.patch(f"/games/TestGame/init?host_player_id={players[0].id}")
     response = client.patch(
