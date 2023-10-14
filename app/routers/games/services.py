@@ -151,8 +151,11 @@ def start_game(name: str) -> Game:
     game: Game = find_game_by_name(name)
     players_joined = count(game.players)
 
-    draw_deck = cards_services.build_deck(players_joined)
-    cards_services.deal_cards_to_players(game, draw_deck)
+    deal_deck = cards_services.build_deal_deck(players_joined)
+    cards_services.deal_cards_to_players(game, deal_deck)
+
+    draw_deck = cards_services.build_draw_deck(
+        deal_deck=deal_deck, players=players_joined)
     game.draw_deck.add(draw_deck)
 
     # setting the position of the players
