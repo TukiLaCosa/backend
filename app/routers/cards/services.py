@@ -73,9 +73,11 @@ def delete_card(card_id: int):
 
 
 @db_session
-def build_deck(players: int) -> List[Card]:
-    deck = list(Card.select(lambda c: c.number <= players and
-                            c.name != 'La Cosa'))
+def build_deal_deck(players: int) -> list[Card]:
+    deal_deck = list(Card.select(lambda c: c.number <= players and
+                                 c.name != 'La Cosa' and
+                                 c.name != '¡Infectado!' and
+                                 c.type != 'PANIC'))
     the_thing = Card.get(name='La Cosa')
 
     if the_thing is None:
@@ -84,18 +86,27 @@ def build_deck(players: int) -> List[Card]:
             detail='The card "The Thing" not found.'
         )
 
-    random.shuffle(deck)
+    random.shuffle(deal_deck)
 
     # Insert the The Thing card making sure that
     # it will go to a player's hand on the first deal.
     random_index = random.randint(0, players - 1)
-    deck.insert(random_index, the_thing)
+    deal_deck.insert(random_index, the_thing)
 
-    return deck
+    return deal_deck
 
 
 @db_session
-def deal_cards_to_players(game: Game, deck: List[Card]):
+def build_draw_deck(deal_deck: list[Card], players: int) -> list[Card]:
+    draw_deck = list(Card.select(lambda c: c.number <= players and
+                                 (c.name == '¡Infectado!' or c.type == 'PANIC')))
+    draw_deck.extend(deal_deck)
+    random.shuffle(draw_deck)
+    return draw_deck
+
+
+@db_session
+def deal_cards_to_players(game: Game, deck: list[Card]):
     for _ in range(4):
         for player in game.players:
             card = deck.pop(0)
