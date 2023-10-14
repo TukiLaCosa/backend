@@ -3,6 +3,7 @@ from fastapi import WebSocket, HTTPException, status
 from app.database.models import Game, Player
 from pony.orm import *
 from .schemas import *
+from ..websockets.utils import player_connections, get_players_id
 
 
 class Events(str, Enum):
@@ -13,6 +14,7 @@ class Events(str, Enum):
     GAME_CANCELED = 'game_canceled'
     PLAYER_JOINED = 'player_joined'
     PLAYER_LEFT = 'player_left'
+    PLAYER_INIT_HAND = 'player_init_hand'
 
 
 @db_session
@@ -132,3 +134,19 @@ def list_of_games() -> List[GameResponse]:
         num_of_players=len(game.players)
     ) for game in games]
     return games_list
+
+
+@db_session
+async def send_initial_cards(game_name: str):
+    playersID = get_players_id(game_name)
+
+    for idx in playersID:
+        player = Player.get(id=idx)
+        hand_cards = [card.id for card in player.hand]
+        json_msg = {
+            "event": Events.PLAYER_INIT_HAND,
+            "game_name": game_name,
+            "player_id": player.id,
+            "hand_cards": hand_cards
+        }
+        await player_connections.send_event_to(player_id=player.id, message=json_msg)

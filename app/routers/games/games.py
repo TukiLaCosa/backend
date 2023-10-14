@@ -1,9 +1,8 @@
-from fastapi import APIRouter, status, HTTPException, WebSocket
-from typing import List
+from fastapi import APIRouter, status
+from app.database.models import Player
 from . import services
 from . import utils
 from .schemas import *
-from ..players.schemas import PlayerResponse
 from ..websockets.utils import player_connections
 
 
@@ -40,6 +39,8 @@ async def create_game(game_data: GameCreationIn):
 async def start(name: str, host_player_id: int) -> GameStartOut:
     utils.verify_game_can_start(name, host_player_id)
     game = services.start_game(name)
+
+    await utils.send_initial_cards(name)
 
     json_msg = {
         "event": utils.Events.GAME_STARTED,
