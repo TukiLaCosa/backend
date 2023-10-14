@@ -67,7 +67,7 @@ def verify_game_can_be_canceled(game_name: str, host_player_id: int):
     if game.host.id != host_player_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only the host player can canceled the game."
+            detail="Only the host player can cancel the game."
         )
 
 
@@ -95,6 +95,11 @@ def verify_game_can_be_abandon(game_name: str, player_id: int):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Player not in the game"
+        )
+    if player == game.host:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Host of the game can only cancel the game"
         )
 
 

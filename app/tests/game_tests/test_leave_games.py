@@ -130,3 +130,22 @@ def test_leave_game_twice():
     response = client.patch(f"/games/leave/TestGame?player_id={players[2].id}")
     assert response.status_code == 400, "El codigo de estado de la respuesta no es 400 (Bad Request)"
     cleanup_database()
+
+
+def test_leave_game_host_try():
+    cleanup_database()
+    players = []
+    names = ["Ignacio", "Anelio", "Ezequiel", "Amparo"]
+    for name in names:
+        players.append(create_test_player(name=name))
+    game = create_test_game(name="TestGame", min_players=4, max_players=4,
+                            password="secret", host_player_id=players[0].id)
+    for player in players[1:]:
+        game_data = {
+            "player_id": player.id,
+            "password": "secret"
+        }
+        client.patch("/games/join/TestGame", json=game_data)
+    response = client.patch(f"/games/leave/TestGame?player_id={players[0].id}")
+    assert response.status_code == 400, "El codigo de estado de la respuesta no es 400 (Bad Request)"
+    cleanup_database()
