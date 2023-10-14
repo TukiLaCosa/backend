@@ -27,7 +27,6 @@
 5;GET_AWAY;Análisis;Mira la mano de cartas de un jugador adyacente.
 6;GET_AWAY;Análisis;Mira la mano de cartas de un jugador adyacente.
 9;GET_AWAY;Análisis;Mira la mano de cartas de un jugador adyacente.
-11;GET_AWAY;Análisis;Mira la mano de cartas de un jugador adyacente.
 4;GET_AWAY;Hacha;Retira una carta “Puerta atrancada” o “Cuarentena” de ti mismo o de un jugador adyacente.
 9;GET_AWAY;Hacha;Retira una carta “Puerta atrancada” o “Cuarentena” de ti mismo o de un jugador adyacente.
 4;GET_AWAY;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
