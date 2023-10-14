@@ -99,6 +99,9 @@ def delete_game(game_name: str):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
 
+    for player in game.players:
+        player.hand.clear()
+
     game.delete()
 
 
