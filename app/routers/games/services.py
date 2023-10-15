@@ -1,5 +1,5 @@
 from pony.orm import *
-from app.database.models import Game, Player
+from app.database.models import Game, Player, Card
 from .schemas import *
 from fastapi import HTTPException, status
 from .utils import find_game_by_name, list_of_unstarted_games
@@ -196,3 +196,14 @@ def leave_game(game_name: str, player_id: int) -> GameInformationOut:
                               list_of_players=[PlayerResponse.model_validate(
                                   p) for p in players_joined]
                               )
+
+
+@db_session
+def discard_card(game_name: str, game_data: DiscardInformationIn):
+    game = Game.get(name=game_name)
+    player = Player.get(id=game_data.player_id)
+    card = Card.get(id=game_data.card_id)
+    if card in player.hand:
+        player.hand.remove(card)
+    if game and card:
+        game.discard_deck.add(card)
