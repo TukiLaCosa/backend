@@ -34,6 +34,11 @@ def create_card(card_data: CardCreationIn) -> Card:
 
 @db_session
 def find_card_by_id(id: int) -> Card:
+    if id < 1 or id > 109:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid card id, must be between 1 and 109."
+        )
+
     card = Card.get(id=id)
 
     if not card:
@@ -43,7 +48,7 @@ def find_card_by_id(id: int) -> Card:
         )
     if id != card.id:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid card id"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Something went wrong with the card id"
         )
 
     return card
