@@ -56,11 +56,7 @@ def verify_game_can_start(name: str, host_player_id: int):
 @db_session
 def verify_game_can_be_canceled(game_name: str, host_player_id: int):
     game = find_game_by_name(game_name)
-    if not game:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Game not found"
-        )
+
     if game.status != GameStatus.UNSTARTED:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -78,11 +74,6 @@ def verify_game_can_be_abandon(game_name: str, player_id: int):
     game = find_game_by_name(game_name)
     player = Player.get(id=player_id)
 
-    if not game:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Game not found"
-        )
     if game.status != GameStatus.UNSTARTED:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
