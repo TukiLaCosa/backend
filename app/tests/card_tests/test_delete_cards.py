@@ -7,8 +7,6 @@ from pony.orm import db_session
 
 client = TestClient(app)
 
-# Database functions
-
 
 @db_session
 def create_card_for_testing(id: int) -> Card:

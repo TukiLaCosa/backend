@@ -7,8 +7,6 @@ from pony.orm import db_session
 
 client = TestClient(app)
 
-# Database functions
-
 
 @db_session
 def create_card_for_testing(id: int) -> Card:
@@ -19,23 +17,6 @@ def create_card_for_testing(id: int) -> Card:
 @db_session
 def cleanup_database() -> None:
     Card.select().delete()
-
-
-# Fake classes
-class FakeCard:
-    def __init__(self, id, number, type, name, description):
-        self.id = id
-        self.number = number
-        self.type = type
-        self.name = name
-        self.description = description
-
-    def delete():
-        pass
-
-
-cards = [FakeCard(id=1, number=4, type="THE_THING", name="The Thing",
-                  description="You are the thing, infect or kill everyone")]
 
 
 # Parametrized functions
@@ -194,6 +175,7 @@ def test_patch_card_invalid_description():
         "1", status.HTTP_422_UNPROCESSABLE_ENTITY, invalid_description_request_data)
 
     cleanup_database()
+
 
 def test_patch_card_short_description():
     cleanup_database()
