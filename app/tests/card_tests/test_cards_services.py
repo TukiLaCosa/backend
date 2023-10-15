@@ -69,7 +69,6 @@ def test_build_deal_deck_with_the_thing_on_the_first_hand_4_players() -> None:
     cleanup_database()
 
 
-# Este está raro, renegué un toque y quedó muy hardcodeado
 @db_session
 def test_deal_cards_to_players_4_players() -> None:
     cleanup_database()
@@ -97,7 +96,6 @@ def test_deal_cards_to_players_4_players() -> None:
     cleanup_database()
 
 
-# lo mismo que el anterior.
 @db_session
 def test_build_draw_deck_4_players() -> None:
     cleanup_database()
