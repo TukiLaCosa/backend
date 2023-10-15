@@ -4,6 +4,7 @@ from app.database.models import Game, Player, Card
 from pony.orm import *
 from .schemas import *
 from ..websockets.utils import player_connections, get_players_id
+from ..players.schemas import PlayerRol
 
 
 class Events(str, Enum):
@@ -157,6 +158,7 @@ def verify_discard_can_be_done(game_name: str, game_data: DiscardInformationIn):
     game = Game.get(name=game_name)
     player = Player.get(id=game_data.player_id)
     card = Card.get(id=game_data.card_id)
+
     if not game:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -172,8 +174,17 @@ def verify_discard_can_be_done(game_name: str, game_data: DiscardInformationIn):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Card not found"
         )
+
+    is_player_in_game = select(
+        p for p in game.players if (p.id == player.id)).exists()
     is_card_in_hand = select(
         c for c in player.hand if (c.id == card.id)).exists()
+
+    if not is_player_in_game:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The player is not in the game"
+        )
     if not is_card_in_hand:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -184,3 +195,16 @@ def verify_discard_can_be_done(game_name: str, game_data: DiscardInformationIn):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The Thing cannot be discarded"
         )
+    if game.turn != player.position:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="It's not the turn of the player"
+        )
+    if player.role == PlayerRol.INFECTED and card.name == '¡Infectado!':
+        infected_count = select(count(c)
+                                for c in player.hand if c.name == '¡Infectado!')
+        if infected_count <= 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The player is infected and cannot discard the card"
+            )
