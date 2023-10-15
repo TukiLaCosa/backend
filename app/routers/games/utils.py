@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import WebSocket, HTTPException, status
-from app.database.models import Game, Player
+from app.database.models import Game, Player, Card
 from pony.orm import *
 from .schemas import *
 from ..websockets.utils import player_connections, get_players_id
@@ -150,3 +150,37 @@ async def send_initial_cards(game_name: str):
             "hand_cards": hand_cards
         }
         await player_connections.send_event_to(player_id=player.id, message=json_msg)
+
+
+@db_session
+def verify_discard_can_be_done(game_name: str, game_data: DiscardInformationIn):
+    game = Game.get(name=game_name)
+    player = Player.get(id=game_data.player_id)
+    card = Card.get(id=game_data.card_id)
+    if not game:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Game not found"
+        )
+    if not player:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Player not found"
+        )
+    if not card:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Card not found"
+        )
+    is_card_in_hand = select(
+        c for c in player.hand if (c.id == card.id)).exists()
+    if not is_card_in_hand:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The card doesn't belong to the player"
+        )
+    if card.type == CardType.THE_THING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The Thing cannot be discarded"
+        )

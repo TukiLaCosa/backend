@@ -129,3 +129,10 @@ async def leave_game(game_name: str, player_id: int):
     await player_connections.broadcast(message=json_msg)
 
     return gameInformation
+
+
+@router.patch("/{game_name}/discard", status_code=status.HTTP_200_OK)
+async def discard_card(game_name: str, game_data: DiscardInformationIn):
+    utils.verify_discard_can_be_done(game_name, game_data)
+    services.discard_card(game_name, game_data)
+    return {"message": "Card discarded"}

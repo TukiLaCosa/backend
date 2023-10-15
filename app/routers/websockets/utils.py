@@ -43,7 +43,7 @@ class ConnectionManager:
             await self.active_connections[player_id].send_json(message)
         except KeyError:
             pass
-          
+
     async def send_event_to_other_players_in_game(self, game_name: str, message, excluded_id: int):
         players_to_send_message = get_players_id(game_name)
         for player_id, websocket in self.active_connections.items():
