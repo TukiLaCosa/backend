@@ -95,3 +95,10 @@ class GameStartOut(BaseModel):
     list_of_players: List[PlayerResponse]
     status: GameStatus
     top_card_face: CardType
+
+
+class DiscardInformationIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    card_id: int
