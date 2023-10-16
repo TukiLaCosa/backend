@@ -38,3 +38,16 @@ def update(id: int, update_data: PlayerUpdateIn) -> Player:
     player = find_player_by_id(id)
     player.set(name=update_data.name)
     return player
+
+
+@db_session
+def get_player_hand(player_id: int) -> HandPlayer:
+    player = Player.get(id=player_id)
+    if not player:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Player with id '{id}' not found."
+        )
+    return HandPlayer(name=player.name,
+                      cards_id=[card.id for card in player.hand]
+                      )
