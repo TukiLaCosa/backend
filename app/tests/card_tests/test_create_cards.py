@@ -3,6 +3,7 @@ from app.main import app
 from app.database.models import Game, Player, Card
 from app.routers.cards.schemas import *
 from pony.orm import db_session
+from fastapi import status
 
 client = TestClient(app)
 
@@ -27,7 +28,7 @@ def test_create_cards_succesfully():
 
         response = client.post("/cards", json=card_data)
 
-        assert response.status_code == 201, "El código de estado de la respuesta no es 201 (Created)."
+        assert response.status_code == status.HTTP_201_CREATED, f"El código de estado de la respuesta no es 201 (Created). El código de estado obtenido es {response.status_code}."
 
         with db_session:
             created_card = Card.get(name=card_data["name"])
@@ -49,7 +50,7 @@ def test_create_card_bad_body():
         "/cards",
         json={"bad": "body"},
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es {response.status_code}."
     cleanup_database()
 
 
@@ -60,11 +61,12 @@ def test_create_card_missing_number():
         "/cards",
         json={
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "name": "The Thing",
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -75,11 +77,12 @@ def test_create_card_bad_number():
         json={
             "number": "bad",
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "name": "The Thing",
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -90,11 +93,12 @@ def test_create_card_low_number():
         json={
             "number": 3,
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "name": "The Thing",
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -105,11 +109,12 @@ def test_create_card_high_number():
         json={
             "number": 13,
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "name": "The Thing",
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -120,12 +125,13 @@ def test_create_card_missing_type():
         "/cards",
         json={
             "number": 4,
+            "subtype": 'CONTAGION',
             "name": "The Thing",
             "name": "The Thing",
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -136,16 +142,15 @@ def test_create_card_bad_type():
         json={
             "number": 4,
             "type": "THE_THIN",
+            "subtype": 'CONTAGION',
             "name": "The Thing",
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 #   Test card names
-
-
 def test_create_card_missing_name():
     cleanup_database()
     response = client.post(
@@ -153,10 +158,11 @@ def test_create_card_missing_name():
         json={
             "number": 4,
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -167,11 +173,12 @@ def test_create_card_bad_name():
         json={
             "number": 4,
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "name": 3,
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -182,11 +189,12 @@ def test_create_card_short_name():
         json={
             "number": 4,
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "name": "a",
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -197,11 +205,12 @@ def test_create_card_large_name():
         json={
             "number": 4,
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "name": "a"*51,
             "description": "You are the thing, infect or kill everyone"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -213,10 +222,11 @@ def test_create_card_missing_description():
         json={
             "number": 4,
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "name": "The Thing"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -227,11 +237,12 @@ def test_create_card_bad_description():
         json={
             "number": 4,
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "name": "The Thing",
             "description": 22
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -242,11 +253,12 @@ def test_create_card_short_description():
         json={
             "number": 4,
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "name": "The Thing",
             "description": "ee"
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
 
 
@@ -257,9 +269,42 @@ def test_create_card_large_description():
         json={
             "number": 4,
             "type": "THE_THING",
+            "subtype": 'CONTAGION',
             "name": "The Thing",
             "description": "You are the thing, infect or kill everyone"*1000
         },
     )
-    assert response.status_code == 422, "El código de estado de la respuesta no es 422 (Unprocessable Entity)."
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
+    cleanup_database()
+
+
+# Test card subtype
+def test_create_card_missing_subtype():
+    cleanup_database()
+    response = client.post(
+        "/cards",
+        json={
+            "number": 4,
+            "type": "THE_THING",
+            "name": "The Thing",
+            "description": "You are the thing, infect or kill everyone"
+        },
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
+    cleanup_database()
+
+
+def test_create_card_bad_subtype():
+    cleanup_database()
+    response = client.post(
+        "/cards",
+        json={
+            "number": 4,
+            "type": "THE_THING",
+            "subtype": 'CONTAGIOOO',
+            "name": "The Thing",
+            "description": "You are the thing, infect or kill everyone"
+        },
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, f"El código de estado de la respuesta no es 422(Unprocessable Entity). El código obtenido es { response} "
     cleanup_database()
