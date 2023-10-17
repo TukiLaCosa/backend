@@ -31,7 +31,3 @@ class PlayerUpdateIn(BaseModel):
 class PlayerResponse(BasePlayer):
     id: int
     position: int
-
-
-class HandPlayer(BasePlayer):
-    cards_id: List[int]

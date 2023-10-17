@@ -1,6 +1,6 @@
 from pony.orm import *
 from fastapi import HTTPException, status
-from app.database.models import Player
+from app.database.models import Player, Card
 from .schemas import *
 
 
@@ -41,13 +41,6 @@ def update(id: int, update_data: PlayerUpdateIn) -> Player:
 
 
 @db_session
-def get_player_hand(player_id: int) -> HandPlayer:
-    player = Player.get(id=player_id)
-    if not player:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Player with id '{id}' not found."
-        )
-    return HandPlayer(name=player.name,
-                      cards_id=[card.id for card in player.hand]
-                      )
+def get_player_hand(player_id: int) -> List[Card]:
+    player = find_player_by_id(player_id)
+    return player.hand.select()[:]
