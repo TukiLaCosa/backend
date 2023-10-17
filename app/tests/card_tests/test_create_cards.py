@@ -20,6 +20,7 @@ def test_create_cards_succesfully():
         card_data = {
             "number": i,
             "type": 'THE_THING',
+            "subtype": 'CONTAGION',
             "name": "The Thing",
             "description": "You are the thing, infect or kill everyone"
         }
@@ -35,6 +36,7 @@ def test_create_cards_succesfully():
         assert response.json() == {
             "number": i,
             "type": "THE_THING",
+            "subtype": "CONTAGION",
             "name": "The Thing",
             "description": "You are the thing, infect or kill everyone"
         }, "El contenido de la respuesta no coincide con los datos de la carta creada."

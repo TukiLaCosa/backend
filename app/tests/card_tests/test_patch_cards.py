@@ -10,7 +10,7 @@ client = TestClient(app)
 
 @db_session
 def create_card_for_testing(id: int) -> Card:
-    return Card(id=id, number=4, type="THE_THING", name="The Thing",
+    return Card(id=id, number=4, type="THE_THING", subtype="CONTAGION", name="The Thing",
                 description="You are the thing, infect or kill everyone")
 
 
@@ -27,6 +27,7 @@ def perform_a_valid_update_test(card_id, success_request_data):
     assert response.json() == {
         "number": 10,
         "type": "PANIC",
+        "subtype": "CONTAGION",
         "name": "PANIC",
         "description": "PANIC",
     }, "El contenido de la respuesta no coincide con los datos actualizados."
@@ -44,6 +45,7 @@ def test_patch_card_succesfully():
     success_request_data = {
         "number": 10,
         "type": "PANIC",
+        "subtype": "CONTAGION",
         "name": "PANIC",
         "description": "PANIC"
     }
@@ -59,6 +61,7 @@ def test_patch_card_greater_number():
     greater_number_request_data = {
         "number": 13,
         "type": "PANIC",
+        "subtype": "PANIC",
         "name": "PANIC",
         "description": "PANIC"
     }
@@ -72,6 +75,7 @@ def test_patch_card_lower_number():
     lower_number_request_data = {
         "number": 2,
         "type": "PANIC",
+        "subtype": "PANIC",
         "name": "PANIC",
         "description": "PANIC"
     }
@@ -85,6 +89,7 @@ def test_patch_card_invalid_number():
     invalid_number_request_data = {
         "number": "error",
         "type": "PANIC",
+        "subtype": "PANIC",
         "name": "PANIC",
         "description": "PANIC"
     }
@@ -101,7 +106,8 @@ def test_patch_card_invalid_type():
     invalid_type_request_data = {
         "number": 4,
         "type": "error",
-        "name": "PANIC",
+        "subtype": "CONTAGION",
+        "name": "La Cosa",
         "description": "PANIC"
     }
     perform_an_invalid_update_test(
@@ -118,6 +124,7 @@ def test_patch_card_invalid_name():
     invalid_name_request_data = {
         "number": 4,
         "type": "PANIC",
+        "subtype": "CONTAGION",
         "name": 123,
         "description": "PANIC"
     }
@@ -135,6 +142,7 @@ def test_patch_card_short_name():
     short_name_request_data = {
         "number": 4,
         "type": "PANIC",
+        "subtype": "CONTAGION",
         "name": "P",
         "description": "PANIC"
     }
@@ -168,6 +176,7 @@ def test_patch_card_invalid_description():
     invalid_description_request_data = {
         "number": 4,
         "type": "PANIC",
+        "subtype": "CONTAGION",
         "name": "PANIC",
         "description": 123
     }
@@ -185,6 +194,7 @@ def test_patch_card_short_description():
     short_description_request_data = {
         "number": 4,
         "type": "PANIC",
+        "subtype": "CONTAGION",
         "name": "PANIC",
         "description": "P"
     }
@@ -202,6 +212,7 @@ def test_patch_card_long_description():
     long_description_request_data = {
         "number": 4,
         "type": "PANIC",
+        "subtype": "CONTAGION",
         "name": "PANIC",
         "description": "PANIC"*1000
     }

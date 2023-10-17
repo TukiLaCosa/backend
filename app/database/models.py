@@ -31,6 +31,7 @@ class Card(db.Entity):
     id = PrimaryKey(int, auto=True)
     number = Required(int)
     type = Required(str)
+    subtype = Required(str)
     name = Required(str)
     description = Required(str)
     games_discard_deck = Set(Game, reverse='discard_deck')
