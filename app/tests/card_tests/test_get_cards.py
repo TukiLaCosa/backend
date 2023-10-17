@@ -10,7 +10,7 @@ client = TestClient(app)
 
 @db_session
 def create_card_for_testing(id: int) -> Card:
-    return Card(id=id, number=4, type="THE_THING", name="The Thing",
+    return Card(id=id, number=4, type="THE_THING", subtype="CONTAGION", name="The Thing",
                 description="You are the thing, infect or kill everyone")
 
 
@@ -37,6 +37,7 @@ def test_get_one_card(mocker):
             "id": 1,
             "number": 4,
             "type": "THE_THING",
+            "subtype": "CONTAGION",
             "name": "The Thing",
             "description": "You are the thing, infect or kill everyone"
         }

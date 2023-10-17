@@ -10,7 +10,7 @@ client = TestClient(app)
 
 @db_session
 def create_card_for_testing(id: int) -> Card:
-    return Card(id=id, number=4, type="THE_THING", name="The Thing",
+    return Card(id=id, number=4, type="THE_THING", subtype="CONTAGION", name="The Thing",
                 description="You are the thing, infect or kill everyone")
 
 
@@ -21,10 +21,11 @@ def cleanup_database() -> None:
 
 # Fake classes
 class FakeCard:
-    def __init__(self, id, number, type, name, description):
+    def __init__(self, id, number, type, subtype, name, description):
         self.id = id
         self.number = number
         self.type = type
+        self.subtype = subtype
         self.name = name
         self.description = description
 
@@ -32,7 +33,7 @@ class FakeCard:
         pass
 
 
-card = FakeCard(id=1, number=4, type="THE_THING", name="The Thing",
+card = FakeCard(id=1, number=4, type="THE_THING", subtype="CONTAGION", name="The Thing",
                 description="You are the thing, infect or kill everyone")
 
 

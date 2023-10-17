@@ -14,6 +14,7 @@ def get_cards() -> list[CardResponse]:
         id=card.id,
         number=card.number,
         type=card.type,
+        subtype=card.subtype,
         name=card.name,
         description=card.description
     ) for card in cards]
@@ -25,6 +26,7 @@ def create_card(card_data: CardCreationIn) -> Card:
     new_card = Card(
         number=card_data.number,
         type=card_data.type,
+        subtype=card_data.subtype,
         name=card_data.name,
         description=card_data.description
     )
@@ -60,11 +62,13 @@ def update_card(card_id: int, request_data: CardUpdateIn) -> CardUpdateOut:
 
     card.number = request_data.number
     card.type = request_data.type
+    card.subtype = request_data.subtype
     card.name = request_data.name
     card.description = request_data.description
     return CardUpdateOut(
         number=card.number,
         type=card.type,
+        subtype=card.subtype,
         name=card.name,
         description=card.description
     )

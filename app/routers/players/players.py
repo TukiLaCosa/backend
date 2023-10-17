@@ -2,6 +2,7 @@ from fastapi import APIRouter, status
 from typing import List
 from . import services
 from .schemas import *
+from ..cards.schemas import CardResponse
 
 
 router = APIRouter(
@@ -37,3 +38,9 @@ def delete(id: int) -> None:
 def update(id: str, update_data: PlayerUpdateIn) -> PlayerResponse:
     player = services.update(id, update_data)
     return PlayerResponse.model_validate(player)
+
+
+@router.get("/{player_id}/hand")
+def get_player_hand(player_id: int) -> List[CardResponse]:
+    cards = services.get_player_hand(player_id)
+    return [CardResponse.model_validate(c) for c in cards]
