@@ -3,7 +3,12 @@ from app.database.models import Game, Player, Card
 from .schemas import *
 from fastapi import HTTPException, status
 from .utils import find_game_by_name, list_of_unstarted_games
+from .utils import verify_player_in_game, verify_adjacent_players
 from ..cards import services as cards_services
+from ..cards.utils import find_card_by_id, verify_action_card
+from ..players.utils import find_player_by_id, verify_card_in_hand
+from ..cards.schemas import CardActionName
+from ..players.schemas import PlayerRol
 
 
 def get_unstarted_games() -> List[GameResponse]:
@@ -207,3 +212,65 @@ def discard_card(game_name: str, game_data: DiscardInformationIn):
         player.hand.remove(card)
     if game and card:
         game.discard_deck.add(card)
+
+
+@db_session
+def play_action_card(game_name: str, play_info: PlayInformation):
+    verify_player_in_game(play_info.player_id, game_name)
+    verify_player_in_game(play_info.objective_player_id, game_name)
+
+    game = find_game_by_name(game_name)
+
+    player = find_player_by_id(play_info.player_id)
+    objective_player = find_player_by_id(play_info.objective_player_id)
+
+    card = find_card_by_id(play_info.card_id)
+    verify_action_card(card)
+
+    verify_card_in_hand(player, card)
+
+    # Lanzallamas
+    if card.name == CardActionName.FLAMETHROWER:
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                len(game.players)-1)
+        objective_player.rol = PlayerRol.ELIMINATED
+
+    # Analisis
+    if card.name == CardActionName.ANALYSIS:
+        pass
+
+    # Hacha
+    if card.name == CardActionName.AXE:
+        pass
+
+    # Sospecha
+    if card.name == CardActionName.SUSPICIOUS:
+        pass
+
+    # Whisky
+    if card.name == CardActionName.WHISKEY:
+        pass
+
+    # Determinacion
+    if card.name == CardActionName.RESOLUTE:
+        pass
+
+    # Vigila tus espaldas
+    if card.name == CardActionName.WATCH_YOUR_BACK:
+        pass
+
+    # Cambio de lugar
+    if card.name == CardActionName.CHANGE_PLACES:
+        pass
+
+    # Mas vale que corras
+    if card.name == CardActionName.BETTER_RUN:
+        pass
+
+    # Seduccion
+    if card.name == CardActionName.SEDUCTION:
+        pass
+
+    game.discard_deck.add(card)
+    player.hand.remove(card)

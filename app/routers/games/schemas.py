@@ -102,3 +102,11 @@ class DiscardInformationIn(BaseModel):
 
     player_id: int
     card_id: int
+
+
+class PlayInformation(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    card_id: int
+    player_id: int
+    objective_player_id: int

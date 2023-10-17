@@ -8,12 +8,26 @@ class CardType(str, Enum):
     STAY_AWAY = 'STAY_AWAY'
     THE_THING = 'THE_THING'
 
+
 class CardSubtype(str, Enum):
     CONTACION = 'CONTAGION'
     ACTION = 'ACTION'
     DEFENSE = 'DEFENSE'
     OBSTACLE = 'OBSTACLE'
     PANIC = 'PANIC'
+
+
+class CardActionName(str, Enum):
+    FLAMETHROWER = 'Lanzallamas'
+    ANALYSIS = 'Análisis'
+    AXE = 'Hacha'
+    SUSPICIOUS = 'Sospecha'
+    WHISKEY = 'Whisky'
+    RESOLUTE = 'Determinación'
+    WATCH_YOUR_BACK = 'Vigila tus espaldas'
+    CHANGE_PLACES = '¡Cambio de lugar!'
+    BETTER_RUN = '¡Más vale que corras!'
+    SEDUCTION = 'Seducción'
 
 
 class BaseCard(BaseModel):

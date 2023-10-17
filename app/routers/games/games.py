@@ -136,3 +136,9 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
     utils.verify_discard_can_be_done(game_name, game_data)
     services.discard_card(game_name, game_data)
     return {"message": "Card discarded"}
+
+
+@router.post("/{game_name}/play-action-card", status_code=status.HTTP_200_OK)
+async def play_action_card(game_name: str, play_info: PlayInformation):
+    services.play_action_card(game_name, play_info)
+    return {"message": "Action card played"}
