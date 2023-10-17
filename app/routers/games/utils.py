@@ -1,3 +1,4 @@
+import random
 from typing import List
 from fastapi import WebSocket, HTTPException, status
 from app.database.models import Game, Player, Card
@@ -16,6 +17,7 @@ class Events(str, Enum):
     PLAYER_JOINED = 'player_joined'
     PLAYER_LEFT = 'player_left'
     PLAYER_INIT_HAND = 'player_init_hand'
+    PLAYER_DRAW_CARD = 'player_draw_card'
 
 
 @db_session
@@ -199,3 +201,73 @@ def verify_discard_can_be_done(game_name: str, game_data: DiscardInformationIn):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="The player is infected and cannot discard the card"
             )
+
+
+
+@db_session
+def re_build_draw_deck(game: Game) -> list[Card]:
+    if len(game.draw_deck) != 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The draw deck is not empty.'
+        )
+    game.draw_deck = game.discard_deck
+    game.discard_deck = []
+    
+    random.shuffle(game.draw_deck)
+    return game.draw_deck
+
+
+@db_session
+def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
+    game = Game.get(name=game_name)
+    player = Player.get(id=game_data.player_id)
+    #traer el mazo de robo
+
+    if not game:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Game not found"
+        )
+    
+    if not game.draw_deck:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Draw deck not found"
+        )
+
+    #verify game status
+
+    if len(game.draw_deck) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The draw deck is empty"
+        )
+        
+
+    if not player:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Player not found"
+        )
+    
+
+    is_player_in_game = select(
+        p for p in game.players if (p.id == player.id)).exists()
+    
+
+    if not is_player_in_game:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The player is not in the game"
+        )
+    
+    if game.turn != player.position:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="It's not the turn of the player"
+        )
+    
+    
+    
+

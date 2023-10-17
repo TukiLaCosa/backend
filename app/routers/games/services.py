@@ -4,6 +4,7 @@ from .schemas import *
 from fastapi import HTTPException, status
 from .utils import find_game_by_name, list_of_unstarted_games
 from ..cards import services as cards_services
+from app.routers.games import utils
 
 
 def get_unstarted_games() -> List[GameResponse]:
@@ -207,3 +208,26 @@ def discard_card(game_name: str, game_data: DiscardInformationIn):
         player.hand.remove(card)
     if game and card:
         game.discard_deck.add(card)
+
+
+
+
+
+@db_session
+def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOut:
+    game = Game.get(name=game_name)
+    player = Player.get(id=game_data.player_id)
+    draw_deck = list(game.draw_deck)
+    card = draw_deck.pop(0)
+    
+    player.hand.add(card)
+    game.draw_deck.remove(card)
+    
+    if len(game.draw_deck) == 0:
+        utils.re_build_draw_deck(game)
+
+    return DrawInformationOut(player_id=player.id,
+                              card=CardResponse.model_validate(card),
+                              top_card_face=list(game.draw_deck)[0].type
+    )
+    

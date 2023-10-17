@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List, Optional
 from enum import Enum
 from ..players.schemas import PlayerResponse
-from ..cards.schemas import CardType
+from ..cards.schemas import CardType, CardResponse
 
 
 class GameStatus(str, Enum):
@@ -102,3 +102,16 @@ class DiscardInformationIn(BaseModel):
 
     player_id: int
     card_id: int
+
+
+class DrawInformationIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+
+class DrawInformationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    card: CardResponse
+    top_card_face: CardType
