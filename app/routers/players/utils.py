@@ -23,3 +23,9 @@ def verify_card_in_hand(player: Player, card: Card):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Card not in player hand"
         )
+
+
+@db_session
+def get_player_name_by_id(player_id: int) -> str:
+    player = find_player_by_id(player_id)
+    return player.name
