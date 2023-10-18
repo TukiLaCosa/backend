@@ -6,9 +6,10 @@ client = TestClient(app)
 
 
 class FakePlayer:
-    def __init__(self, id, username):
+    def __init__(self, id, username, hand):
         self.id = id
         self.username = username
+        self.hand = hand
 
 
 class FakeGame:
@@ -38,9 +39,9 @@ class FakeGame:
         pass
 
 
-ignacio = FakePlayer(1, "Ignacio")
-anelio = FakePlayer(2, "Anelio")
-ezequiel = FakePlayer(3, "Ezequiel")
+ignacio = FakePlayer(1, "Ignacio", [])
+anelio = FakePlayer(2, "Anelio", [])
+ezequiel = FakePlayer(3, "Ezequiel", [])
 
 
 games = [

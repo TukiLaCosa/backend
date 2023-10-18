@@ -5,8 +5,15 @@ from enum import Enum
 
 class CardType(str, Enum):
     PANIC = 'PANIC'
-    GET_AWAY = 'GET_AWAY'
+    STAY_AWAY = 'STAY_AWAY'
     THE_THING = 'THE_THING'
+
+class CardSubtype(str, Enum):
+    CONTACION = 'CONTAGION'
+    ACTION = 'ACTION'
+    DEFENSE = 'DEFENSE'
+    OBSTACLE = 'OBSTACLE'
+    PANIC = 'PANIC'
 
 
 class BaseCard(BaseModel):
@@ -15,6 +22,7 @@ class BaseCard(BaseModel):
     number: int = Field(
         ge=4, le=12)
     type: CardType
+    subtype: CardSubtype
     name: str = Field(
         min_length=3, max_length=50)
     description: str = Field(
@@ -37,6 +45,9 @@ class CardUpdateIn(BaseModel):
     type: Optional[CardType] = Field(
         None, description="Optional card type."
     )
+    subtype: Optional[CardSubtype] = Field(
+        None, description="Optional card subtype."
+    )
     name: Optional[str] = Field(
         None, min_length=3, max_length=50, description="Optional name of the card."
     )
@@ -51,5 +62,5 @@ class CardUpdateOut(BaseCard):
 
 class CardResponse(BaseCard):
     id: int = Field(
-        ge=1, le=110
+        ge=1, le=108
     )

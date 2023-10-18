@@ -14,6 +14,7 @@ def get_cards() -> list[CardResponse]:
         id=card.id,
         number=card.number,
         type=card.type,
+        subtype=card.subtype,
         name=card.name,
         description=card.description
     ) for card in cards]
@@ -25,6 +26,7 @@ def create_card(card_data: CardCreationIn) -> Card:
     new_card = Card(
         number=card_data.number,
         type=card_data.type,
+        subtype=card_data.subtype,
         name=card_data.name,
         description=card_data.description
     )
@@ -34,6 +36,11 @@ def create_card(card_data: CardCreationIn) -> Card:
 
 @db_session
 def find_card_by_id(id: int) -> Card:
+    if id < 1 or id > 109:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid card id, must be between 1 and 109."
+        )
+
     card = Card.get(id=id)
 
     if not card:
@@ -43,7 +50,7 @@ def find_card_by_id(id: int) -> Card:
         )
     if id != card.id:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid card id"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Something went wrong with the card id"
         )
 
     return card
@@ -55,11 +62,13 @@ def update_card(card_id: int, request_data: CardUpdateIn) -> CardUpdateOut:
 
     card.number = request_data.number
     card.type = request_data.type
+    card.subtype = request_data.subtype
     card.name = request_data.name
     card.description = request_data.description
     return CardUpdateOut(
         number=card.number,
         type=card.type,
+        subtype=card.subtype,
         name=card.name,
         description=card.description
     )
@@ -73,9 +82,11 @@ def delete_card(card_id: int):
 
 
 @db_session
-def build_deck(players: int) -> List[Card]:
-    deck = list(Card.select(lambda c: c.number <= players and
-                            c.name != 'La Cosa'))
+def build_deal_deck(players: int) -> list[Card]:
+    deal_deck = list(Card.select(lambda c: c.number <= players and
+                                 c.name != 'La Cosa' and
+                                 c.name != '¡Infectado!' and
+                                 c.type != 'PANIC'))
     the_thing = Card.get(name='La Cosa')
 
     if the_thing is None:
@@ -84,18 +95,27 @@ def build_deck(players: int) -> List[Card]:
             detail='The card "The Thing" not found.'
         )
 
-    random.shuffle(deck)
+    random.shuffle(deal_deck)
 
     # Insert the The Thing card making sure that
     # it will go to a player's hand on the first deal.
     random_index = random.randint(0, players - 1)
-    deck.insert(random_index, the_thing)
+    deal_deck.insert(random_index, the_thing)
 
-    return deck
+    return deal_deck
 
 
 @db_session
-def deal_cards_to_players(game: Game, deck: List[Card]):
+def build_draw_deck(deal_deck: list[Card], players: int) -> list[Card]:
+    draw_deck = list(Card.select(lambda c: c.number <= players and
+                                 (c.name == '¡Infectado!' or c.type == 'PANIC')))
+    draw_deck.extend(deal_deck)
+    random.shuffle(draw_deck)
+    return draw_deck
+
+
+@db_session
+def deal_cards_to_players(game: Game, deck: list[Card]):
     for _ in range(4):
         for player in game.players:
             card = deck.pop(0)

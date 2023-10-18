@@ -1,9 +1,8 @@
-from fastapi import APIRouter, status, HTTPException, WebSocket
-from typing import List
+from fastapi import APIRouter, status
+from app.database.models import Player
 from . import services
 from . import utils
 from .schemas import *
-from ..players.schemas import PlayerResponse
 from ..websockets.utils import player_connections
 
 
@@ -40,6 +39,8 @@ async def create_game(game_data: GameCreationIn):
 async def start(name: str, host_player_id: int) -> GameStartOut:
     utils.verify_game_can_start(name, host_player_id)
     game = services.start_game(name)
+
+    await utils.send_initial_cards(name)
 
     json_msg = {
         "event": utils.Events.GAME_STARTED,
@@ -88,3 +89,50 @@ async def join_player(game_name: str, game_data: GameInformationIn):
     await player_connections.broadcast(json_msg)
 
     return game
+
+
+@router.delete("/cancel/{game_name}", status_code=status.HTTP_200_OK)
+async def cancel_game(game_name: str, player_id: int):
+    utils.verify_game_can_be_canceled(game_name, player_id)
+
+    json_msg = {
+        "event": utils.Events.GAME_CANCELED,
+        "game_name": game_name
+    }
+    await player_connections.send_event_to_other_players_in_game(game_name=game_name,
+                                                                 message=json_msg,
+                                                                 excluded_id=player_id)
+
+    services.cancel_game(game_name)
+
+    json_msg["event"] = utils.Events.GAME_DELETED
+    await player_connections.broadcast(message=json_msg)
+
+    return {"message": "Game canceled"}
+
+
+@router.patch("/leave/{game_name}", response_model=GameInformationOut, status_code=status.HTTP_200_OK)
+async def leave_game(game_name: str, player_id: int):
+    utils.verify_game_can_be_abandon(game_name, player_id)
+    json_msg = {
+        "event": utils.Events.PLAYER_LEFT,
+        "game_name": game_name
+    }
+    await player_connections.send_event_to_other_players_in_game(game_name=game_name,
+                                                                 message=json_msg,
+                                                                 excluded_id=player_id)
+
+    gameInformation = services.leave_game(game_name, player_id)
+
+    json_msg["event"] = utils.Events.GAME_UPDATED
+
+    await player_connections.broadcast(message=json_msg)
+
+    return gameInformation
+
+
+@router.patch("/{game_name}/discard", status_code=status.HTTP_200_OK)
+async def discard_card(game_name: str, game_data: DiscardInformationIn):
+    utils.verify_discard_can_be_done(game_name, game_data)
+    services.discard_card(game_name, game_data)
+    return {"message": "Card discarded"}

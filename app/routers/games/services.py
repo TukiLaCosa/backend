@@ -1,5 +1,5 @@
 from pony.orm import *
-from app.database.models import Game, Player
+from app.database.models import Game, Player, Card
 from .schemas import *
 from ..players.schemas import PlayerRol
 from fastapi import HTTPException, status
@@ -100,6 +100,9 @@ def delete_game(game_name: str):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
 
+    for player in game.players:
+        player.hand.clear()
+
     game.delete()
 
 
@@ -149,8 +152,11 @@ def start_game(name: str) -> Game:
     game: Game = find_game_by_name(name)
     players_joined = count(game.players)
 
-    draw_deck = cards_services.build_deck(players_joined)
-    cards_services.deal_cards_to_players(game, draw_deck)
+    deal_deck = cards_services.build_deal_deck(players_joined)
+    cards_services.deal_cards_to_players(game, deal_deck)
+
+    draw_deck = cards_services.build_draw_deck(
+        deal_deck=deal_deck, players=players_joined)
     game.draw_deck.add(draw_deck)
 
     # setting the position and rol of the players
@@ -172,6 +178,43 @@ def start_game(name: str) -> Game:
 
 
 @db_session
+def cancel_game(game_name: str):
+    game = Game.get(name=game_name)
+    game.delete()
+
+
+@db_session
+def leave_game(game_name: str, player_id: int) -> GameInformationOut:
+    game = Game.get(name=game_name)
+    player = Player.get(id=player_id)
+    game.players.remove(player)
+    players_joined = game.players.select()[:]
+    num_players_joined = len(players_joined)
+    return GameInformationOut(name=game.name,
+                              min_players=game.min_players,
+                              max_players=game.max_players,
+                              is_private=game.password is not None,
+                              status=game.status,
+                              host_player_name=game.host.name,
+                              host_player_id=game.host.id,
+                              num_of_players=num_players_joined,
+                              list_of_players=[PlayerResponse.model_validate(
+                                  p) for p in players_joined]
+                              )
+
+
+@db_session
+def discard_card(game_name: str, game_data: DiscardInformationIn):
+    game = Game.get(name=game_name)
+    player = Player.get(id=game_data.player_id)
+    card = Card.get(id=game_data.card_id)
+    if card in player.hand:
+        player.hand.remove(card)
+    if game and card:
+        game.discard_deck.add(card)
+
+
+@db_session
 def finish_game(name: str) -> Game:
     game: Game = find_game_by_name(name)
 
@@ -182,4 +225,5 @@ def finish_game(name: str) -> Game:
 
         return game
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
