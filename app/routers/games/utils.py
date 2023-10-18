@@ -18,6 +18,8 @@ class Events(str, Enum):
     PLAYER_LEFT = 'player_left'
     PLAYER_INIT_HAND = 'player_init_hand'
     PLAYED_CARD = 'played_card'
+    PLAYER_ELIMINATED = 'player_eliminated'
+    WHISKEY_CARD_PLAYED = 'whiskey_card_played'
 
 
 @db_session
