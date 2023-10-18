@@ -142,11 +142,11 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
 
 @router.post("/{game_name}/play-action-card", status_code=status.HTTP_200_OK)
 async def play_action_card(game_name: str, play_info: PlayInformation):
-    services.play_action_card(game_name, play_info)
+    result = services.play_action_card(game_name, play_info)
     json_msg = {
         "event": utils.Events.PLAYED_CARD,
         "player_name": get_player_name_by_id(play_info.player_id),
         "card_name": get_card_name_by_id(play_info.card_id)
     }
     await player_connections.send_event_to_other_players_in_game(game_name, json_msg, play_info.player_id)
-    return {"message": "Action card played"}
+    return result

@@ -9,6 +9,8 @@ from ..cards.utils import find_card_by_id, verify_action_card
 from ..players.utils import find_player_by_id, verify_card_in_hand
 from ..cards.schemas import CardActionName
 from ..players.schemas import PlayerRol
+import json
+import random
 
 
 def get_unstarted_games() -> List[GameResponse]:
@@ -216,29 +218,53 @@ def discard_card(game_name: str, game_data: DiscardInformationIn):
 
 @db_session
 def play_action_card(game_name: str, play_info: PlayInformation):
-    verify_player_in_game(play_info.player_id, game_name)
-    verify_player_in_game(play_info.objective_player_id, game_name)
-
+    result = {"message": "Action card played"}
     game = find_game_by_name(game_name)
-
+    verify_player_in_game(play_info.player_id, game_name)
     player = find_player_by_id(play_info.player_id)
-    objective_player = find_player_by_id(play_info.objective_player_id)
-
     card = find_card_by_id(play_info.card_id)
     verify_action_card(card)
-
     verify_card_in_hand(player, card)
 
     # Lanzallamas
     if card.name == CardActionName.FLAMETHROWER:
+        verify_player_in_game(play_info.objective_player_id, game_name)
         verify_adjacent_players(play_info.player_id,
                                 play_info.objective_player_id,
                                 len(game.players)-1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
         objective_player.rol = PlayerRol.ELIMINATED
+        game.players.remove(objective_player)
+        for player in game.players:
+            if player.position > objective_player.position:
+                player.position -= 1
+
+        game.discard_deck.add(card)
+        player.hand.remove(card)
 
     # Analisis
     if card.name == CardActionName.ANALYSIS:
-        pass
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                len(game.players)-1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+
+        result = []
+        for card in objective_player.hand:
+            card_info = {
+                'id': card.id,
+                'number': card.number,
+                'type': card.type,
+                'subtype': card.subtype,
+                'name': card.name,
+                'description': card.description
+            }
+            result.append(card_info)
+        result = json.dumps(result)
+
+        game.discard_deck.add(card)
+        player.hand.remove(card)
 
     # Hacha
     if card.name == CardActionName.AXE:
@@ -246,7 +272,26 @@ def play_action_card(game_name: str, play_info: PlayInformation):
 
     # Sospecha
     if card.name == CardActionName.SUSPICIOUS:
-        pass
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                len(game.players)-1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+
+        objective_player_hand_list = list(objective_player.hand)
+        random_card = random.choice(objective_player_hand_list)
+        card_info = {
+            'id': random_card.id,
+            'number': random_card.number,
+            'type': random_card.type,
+            'subtype': random_card.subtype,
+            'name': random_card.name,
+            'description': random_card.description
+        }
+        result = json.dumps(card_info)
+
+        game.discard_deck.add(card)
+        player.hand.remove(card)
 
     # Whisky
     if card.name == CardActionName.WHISKEY:
@@ -258,19 +303,49 @@ def play_action_card(game_name: str, play_info: PlayInformation):
 
     # Vigila tus espaldas
     if card.name == CardActionName.WATCH_YOUR_BACK:
-        pass
+        if game.round_direction == RoundDirection.CLOCKWISE:
+            game.round_direction = RoundDirection.COUNTERCLOCKWISE
+        else:
+            game.round_direction = RoundDirection.CLOCKWISE
+
+        game.discard_deck.add(card)
+        player.hand.remove(card)
 
     # Cambio de lugar
     if card.name == CardActionName.CHANGE_PLACES:
-        pass
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                len(game.players)-1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+        tempPosition = player.position
+        player.position = objective_player.position
+        objective_player.position = tempPosition
+
+        game.discard_deck.add(card)
+        player.hand.remove(card)
 
     # Mas vale que corras
     if card.name == CardActionName.BETTER_RUN:
-        pass
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+        tempPosition = player.position
+        player.position = objective_player.position
+        objective_player.position = tempPosition
 
-    # Seduccion
+        game.discard_deck.add(card)
+        player.hand.remove(card)
+
+    # Seduccion (Ojo porque esta carta modifica la mano del jugador objetivo)
     if card.name == CardActionName.SEDUCTION:
-        pass
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+        objective_player_hand_list = list(objective_player.hand)
+        eligible_cards = [
+            card for card in objective_player_hand_list if card.type != CardType.THE_THING]
+        random_card = random.choice(eligible_cards)
+        player.hand.add(random_card)
+        objective_player.hand.remove(random_card)
+        objective_player.hand.add(card)
 
-    game.discard_deck.add(card)
-    player.hand.remove(card)
+    return result

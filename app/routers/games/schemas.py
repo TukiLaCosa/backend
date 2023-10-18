@@ -109,4 +109,6 @@ class PlayInformation(BaseModel):
 
     card_id: int
     player_id: int
-    objective_player_id: int
+    objective_player_id: Optional[int] = Field(
+        None, description="Optional objective player."
+    )
