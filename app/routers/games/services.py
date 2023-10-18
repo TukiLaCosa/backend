@@ -235,19 +235,18 @@ def play_action_card(game_name: str, play_info: PlayInformation):
         objective_player = find_player_by_id(play_info.objective_player_id)
         objective_player.rol = PlayerRol.ELIMINATED
 
-        '''Aca tengo que chequear si el jugador eliminado
-        es La Cosa, si lo es, debo terminar el juego avisando
-        de los ganadores.'''
+        if objective_player.rol == PlayerRol.THE_THING:
+            game.status = GameStatus.ENDED
+        else:
+            # Las cartas del jugador eliminado van al mazo de descarte
+            for card in objective_player.hand:
+                game.discard_deck.add(card)
 
-        # Las cartas del jugador eliminado van al mazo de descarte
-        for card in objective_player.hand:
-            game.discard_deck.add(card)
-
-        # Saco al jugador de la partida y reacomodo posiciones
-        game.players.remove(objective_player)
-        for player in game.players:
-            if player.position > objective_player.position:
-                player.position -= 1
+            # Saco al jugador de la partida y reacomodo posiciones
+            game.players.remove(objective_player)
+            for player in game.players:
+                if player.position > objective_player.position:
+                    player.position -= 1
 
         game.discard_deck.add(card)
         player.hand.remove(card)
