@@ -344,7 +344,9 @@ def play_action_card(game_name: str, play_info: PlayInformation):
         eligible_cards = [
             card for card in objective_player_hand_list if card.type != CardType.THE_THING]
         random_card = random.choice(eligible_cards)
+        
         player.hand.add(random_card)
+        player.hand.remove(card)
         objective_player.hand.remove(random_card)
         objective_player.hand.add(card)
 
