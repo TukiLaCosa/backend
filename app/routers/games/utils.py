@@ -98,6 +98,28 @@ def verify_game_can_be_abandon(game_name: str, player_id: int):
 
 
 @db_session
+def verify_game_can_be_finished(game: Game):
+    if not the_thing_is_eliminated(game):
+        raise Exception('The Thing is still alive')
+
+    if not no_human_remains(game):
+        raise Exception('There are living Humans')
+
+
+@db_session
+def the_thing_is_eliminated(game: Game) -> bool:
+    the_thing = game.players.select(
+        lambda p: p.rol == PlayerRol.THE_THING).count()
+    return the_thing == 0
+
+
+@db_session
+def no_human_remains(game: Game) -> bool:
+    humans = game.players.select(lambda p: p.rol == PlayerRol.HUMAN).count()
+    return humans == 0
+
+
+@db_session
 def list_of_unstarted_games() -> List[GameResponse]:
     games = Game.select(lambda game: game.status !=
                         GameStatus.STARTED and game.status != GameStatus.ENDED)
