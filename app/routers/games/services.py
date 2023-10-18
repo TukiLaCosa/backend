@@ -255,7 +255,7 @@ def play_action_card(game_name: str, play_info: PlayInformation):
                                 play_info.objective_player_id,
                                 players_not_eliminated - 1)
         objective_player = find_player_by_id(play_info.objective_player_id)
-        process_flamethrower_card(game, player, objective_player)
+        process_flamethrower_card(game, player, card, objective_player)
 
     # Analisis
     if card.name == CardActionName.ANALYSIS:

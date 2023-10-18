@@ -9,31 +9,22 @@ import random
 
 
 @db_session
-async def process_flamethrower_card(game: Game, player: Player,
-                                    card: Card, objective_player: Player):
+def process_flamethrower_card(game: Game, player: Player,
+                              card: Card, objective_player: Player):
     objective_player.rol = PlayerRol.ELIMINATED
 
     # Las cartas del jugador eliminado van al mazo de descarte
     # salvo sea que sea la carta 'La Cosa'
-    for card in objective_player.hand:
-        if card.type != CardType.THE_THING:
-            game.discard_deck.add(card)
-            objective_player.hand.remove(card)
+    for c in objective_player.hand:
+        if c.type != CardType.THE_THING:
+            game.discard_deck.add(c)
+            objective_player.hand.remove(c)
 
     # Reacomodo las posiciones
-    for player in game.players:
-        if player.position > objective_player.position:
-            player.position -= 1
-    objective_player.position = -1
-
-    json_msg = {
-        "event": Events.PLAYER_ELIMINATED,
-        "player_id": objective_player.id,
-        "player_name": objective_player.name
-    }
     for p in game.players:
-        player_connections.send_event_to(p.id, json_msg)
-
+        if p.position > objective_player.position:
+            p.position -= 1
+    objective_player.position = -1
     game.discard_deck.add(card)
     player.hand.remove(card)
 
@@ -41,13 +32,13 @@ async def process_flamethrower_card(game: Game, player: Player,
 @db_session
 def process_analysis_card(game: Game, player: Player,
                           card: Card, objective_player: Player):
-    result = [CardResponse(id=card.id,
-                           number=card.number,
-                           type=card.type,
-                           subtype=card.subtype,
-                           name=card.name,
-                           description=card.description
-                           ) for card in objective_player.hand]
+    result = [CardResponse(id=c.id,
+                           number=c.number,
+                           type=c.type,
+                           subtype=c.subtype,
+                           name=c.name,
+                           description=c.description
+                           ) for c in objective_player.hand]
     game.discard_deck.add(card)
     player.hand.remove(card)
     return result
@@ -72,15 +63,8 @@ def process_suspicious_card(game: Game, player: Player,
 
 
 @db_session
-async def process_whiskey_card(game: Game, player: Player, card: Card):
-    json_msg = {
-        "event": Events.WHISKEY_CARD_PLAYED,
-        "player_id": player.id,
-        "player_name": player.name
-    }
-    player_connections.send_event_to_other_players_in_game(
-        game.name, json_msg, player.id)
-
+def process_whiskey_card(game: Game, player: Player, card: Card):
+    # Falta propagar el evento por WS
     game.discard_deck.add(card)
     player.hand.remove(card)
 
@@ -97,8 +81,7 @@ def process_watch_your_back_card(game: Game, player: Player, card: Card):
 
 
 @db_session
-def process_change_places_card(game: Game, player: Player,
-                               card: Card, objective_player: Player):
+def process_change_places_card(game: Game, player: Player, card: Card, objective_player: Player):
     # Intercambio de posiciones entre los jugadores
     tempPosition = player.position
     player.position = objective_player.position
@@ -126,7 +109,7 @@ def process_seduction_card(game: Game, player: Player,
                            card_to_exchange: Card):
     objective_player_hand_list = list(objective_player.hand)
     eligible_cards = [
-        card for card in objective_player_hand_list if card.type != CardType.THE_THING]
+        c for c in objective_player_hand_list if c.type != CardType.THE_THING]
     random_card = random.choice(eligible_cards)
 
     player.hand.add(random_card)
