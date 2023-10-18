@@ -7,9 +7,8 @@ from .utils import verify_player_in_game, verify_adjacent_players
 from ..cards import services as cards_services
 from ..cards.utils import find_card_by_id, verify_action_card
 from ..players.utils import find_player_by_id, verify_card_in_hand
-from ..cards.schemas import CardActionName
+from ..cards.schemas import CardActionName, CardResponse
 from ..players.schemas import PlayerRol
-import json
 import random
 
 
@@ -260,18 +259,13 @@ def play_action_card(game_name: str, play_info: PlayInformation):
         objective_player = find_player_by_id(play_info.objective_player_id)
 
         # Armo listado de cartas del jugador objetivo para enviar en el body response
-        result = []
-        for card in objective_player.hand:
-            card_info = {
-                'id': card.id,
-                'number': card.number,
-                'type': card.type,
-                'subtype': card.subtype,
-                'name': card.name,
-                'description': card.description
-            }
-            result.append(card_info)
-        result = json.dumps(result)
+        result = [CardResponse(id=card.id,
+                               number=card.number,
+                               type=card.type,
+                               subtype=card.subtype,
+                               name=card.name,
+                               description=card.description
+                               ) for card in objective_player.hand]
 
         game.discard_deck.add(card)
         player.hand.remove(card)
@@ -288,18 +282,17 @@ def play_action_card(game_name: str, play_info: PlayInformation):
                                 len(game.players)-1)
         objective_player = find_player_by_id(play_info.objective_player_id)
 
-        # Elijo una carta al azar del jugador objetivo y armo JSON para pasar por body response
+        # Elijo una carta al azar del jugador objetivo y armo el body response
         objective_player_hand_list = list(objective_player.hand)
         random_card = random.choice(objective_player_hand_list)
-        card_info = {
-            'id': random_card.id,
-            'number': random_card.number,
-            'type': random_card.type,
-            'subtype': random_card.subtype,
-            'name': random_card.name,
-            'description': random_card.description
-        }
-        result = json.dumps(card_info)
+        result = CardResponse(
+            id=random_card.id,
+            number=random_card.number,
+            type=random_card.type,
+            subtype=random_card.subtype,
+            name=random_card.name,
+            description=random_card.description
+        )
 
         game.discard_deck.add(card)
         player.hand.remove(card)
@@ -360,7 +353,7 @@ def play_action_card(game_name: str, play_info: PlayInformation):
         eligible_cards = [
             card for card in objective_player_hand_list if card.type != CardType.THE_THING]
         random_card = random.choice(eligible_cards)
-        
+
         player.hand.add(random_card)
         player.hand.remove(card)
         objective_player.hand.remove(random_card)
