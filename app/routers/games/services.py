@@ -156,7 +156,7 @@ def start_game(name: str) -> Game:
     # setting the position and rol of the players
     for idx, player in enumerate(game.players):
         player.position = idx
-        if cards_services.card_is_in_player_hand('La Cosa', player.hand):
+        if cards_services.card_is_in_player_hand('La Cosa', player):
             player.rol = PlayerRol.THE_THING
         else:
             player.rol = PlayerRol.HUMAN
@@ -174,7 +174,12 @@ def start_game(name: str) -> Game:
 @db_session
 def finish_game(name: str) -> Game:
     game: Game = find_game_by_name(name)
-    verify_game_can_finish(game)
-    game.status = GameStatus.ENDED
 
-    return game
+    try:
+        verify_game_can_be_finished(game)
+        game.status = GameStatus.ENDED
+        # enviar por ws los resultados
+
+        return game
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

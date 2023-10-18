@@ -103,6 +103,6 @@ def deal_cards_to_players(game: Game, deck: List[Card]):
 
 
 @db_session
-def card_is_in_player_hand(card_name: str, hand_player: list[Card]) -> bool:
-    card_names = map(lambda card: card.name, hand_player)
-    return card_name in card_names
+def card_is_in_player_hand(card_name: str, player: Player) -> bool:
+    card = player.hand.select(lambda c: c.name == card_name).count()
+    return card > 0

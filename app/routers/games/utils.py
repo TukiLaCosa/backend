@@ -51,15 +51,25 @@ def verify_game_can_start(name: str, host_player_id: int):
 
 
 @db_session
-def verify_game_can_finish(game: Game):
-    players_eliminated = game.players.select(
-        lambda player: player.rol == PlayerRol.ELIMINATED)
+def verify_game_can_be_finished(game: Game):
+    if not the_thing_is_eliminated(game):
+        raise Exception('The Thing is still alive')
 
-    if count(players_eliminated) < count(game.players) - 1:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"There must be exactly one player not eliminated."
-        )
+    if not no_human_remains(game):
+        raise Exception('There are living Humans')
+
+
+@db_session
+def the_thing_is_eliminated(game: Game) -> bool:
+    the_thing = game.players.select(
+        lambda p: p.rol == PlayerRol.THE_THING).count()
+    return the_thing == 0
+
+
+@db_session
+def no_human_remains(game: Game) -> bool:
+    humans = game.players.select(lambda p: p.rol == PlayerRol.HUMAN).count()
+    return humans == 0
 
 
 @db_session
