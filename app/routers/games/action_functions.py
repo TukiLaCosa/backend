@@ -25,6 +25,9 @@ def process_flamethrower_card(game: Game, player: Player,
         if p.position > objective_player.position:
             p.position -= 1
     objective_player.position = -1
+
+    # Falta implementar Evento por WS
+    
     game.discard_deck.add(card)
     player.hand.remove(card)
 
@@ -64,7 +67,7 @@ def process_suspicious_card(game: Game, player: Player,
 
 @db_session
 def process_whiskey_card(game: Game, player: Player, card: Card):
-    # Falta propagar el evento por WS
+    # Falta implementar evento por WS
     game.discard_deck.add(card)
     player.hand.remove(card)
 
