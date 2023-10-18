@@ -234,6 +234,16 @@ def play_action_card(game_name: str, play_info: PlayInformation):
                                 len(game.players)-1)
         objective_player = find_player_by_id(play_info.objective_player_id)
         objective_player.rol = PlayerRol.ELIMINATED
+
+        '''Aca tengo que chequear si el jugador eliminado
+        es La Cosa, si lo es, debo terminar el juego avisando
+        de los ganadores.'''
+
+        # Las cartas del jugador eliminado van al mazo de descarte
+        for card in objective_player.hand:
+            game.discard_deck.add(card)
+
+        # Saco al jugador de la partida y reacomodo posiciones
         game.players.remove(objective_player)
         for player in game.players:
             if player.position > objective_player.position:
@@ -250,6 +260,7 @@ def play_action_card(game_name: str, play_info: PlayInformation):
                                 len(game.players)-1)
         objective_player = find_player_by_id(play_info.objective_player_id)
 
+        # Armo listado de cartas del jugador objetivo para enviar en el body response
         result = []
         for card in objective_player.hand:
             card_info = {
@@ -278,6 +289,7 @@ def play_action_card(game_name: str, play_info: PlayInformation):
                                 len(game.players)-1)
         objective_player = find_player_by_id(play_info.objective_player_id)
 
+        # Elijo una carta al azar del jugador objetivo y armo JSON para pasar por body response
         objective_player_hand_list = list(objective_player.hand)
         random_card = random.choice(objective_player_hand_list)
         card_info = {
@@ -303,6 +315,7 @@ def play_action_card(game_name: str, play_info: PlayInformation):
 
     # Vigila tus espaldas
     if card.name == CardActionName.WATCH_YOUR_BACK:
+        # Cambio direccion de la ronda
         if game.round_direction == RoundDirection.CLOCKWISE:
             game.round_direction = RoundDirection.COUNTERCLOCKWISE
         else:
@@ -318,6 +331,8 @@ def play_action_card(game_name: str, play_info: PlayInformation):
                                 play_info.objective_player_id,
                                 len(game.players)-1)
         objective_player = find_player_by_id(play_info.objective_player_id)
+
+        # Intercambio de posiciones entre los jugadores
         tempPosition = player.position
         player.position = objective_player.position
         objective_player.position = tempPosition
@@ -329,6 +344,8 @@ def play_action_card(game_name: str, play_info: PlayInformation):
     if card.name == CardActionName.BETTER_RUN:
         verify_player_in_game(play_info.objective_player_id, game_name)
         objective_player = find_player_by_id(play_info.objective_player_id)
+
+        # Intercambio de posiciones entre los jugadores
         tempPosition = player.position
         player.position = objective_player.position
         objective_player.position = tempPosition
