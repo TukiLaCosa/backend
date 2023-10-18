@@ -228,24 +228,25 @@ def play_action_card(game_name: str, play_info: PlayInformation):
     # Lanzallamas
     if card.name == CardActionName.FLAMETHROWER:
         verify_player_in_game(play_info.objective_player_id, game_name)
+        players_not_eliminated = select(
+            p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
         verify_adjacent_players(play_info.player_id,
                                 play_info.objective_player_id,
-                                len(game.players)-1)
+                                players_not_eliminated - 1)
         objective_player = find_player_by_id(play_info.objective_player_id)
         objective_player.rol = PlayerRol.ELIMINATED
 
-        if objective_player.rol == PlayerRol.THE_THING:
-            game.status = GameStatus.ENDED
-        else:
-            # Las cartas del jugador eliminado van al mazo de descarte
-            for card in objective_player.hand:
+        # Las cartas del jugador eliminado van al mazo de descarte salvo sea carta la Cosa
+        for card in objective_player.hand:
+            if card.type != CardType.THE_THING:
                 game.discard_deck.add(card)
 
-            # Saco al jugador de la partida y reacomodo posiciones
-            game.players.remove(objective_player)
-            for player in game.players:
-                if player.position > objective_player.position:
-                    player.position -= 1
+        # Reacomodo las posiciones
+        for player in game.players:
+            if player.position > objective_player.position:
+                player.position -= 1
+
+        objective_player.position = -1
 
         game.discard_deck.add(card)
         player.hand.remove(card)
@@ -253,9 +254,11 @@ def play_action_card(game_name: str, play_info: PlayInformation):
     # Analisis
     if card.name == CardActionName.ANALYSIS:
         verify_player_in_game(play_info.objective_player_id, game_name)
+        players_not_eliminated = select(
+            p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
         verify_adjacent_players(play_info.player_id,
                                 play_info.objective_player_id,
-                                len(game.players)-1)
+                                players_not_eliminated - 1)
         objective_player = find_player_by_id(play_info.objective_player_id)
 
         # Armo listado de cartas del jugador objetivo para enviar en el body response
@@ -277,9 +280,11 @@ def play_action_card(game_name: str, play_info: PlayInformation):
     # Sospecha
     if card.name == CardActionName.SUSPICIOUS:
         verify_player_in_game(play_info.objective_player_id, game_name)
+        players_not_eliminated = select(
+            p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
         verify_adjacent_players(play_info.player_id,
                                 play_info.objective_player_id,
-                                len(game.players)-1)
+                                players_not_eliminated - 1)
         objective_player = find_player_by_id(play_info.objective_player_id)
 
         # Elijo una carta al azar del jugador objetivo y armo el body response
@@ -319,9 +324,11 @@ def play_action_card(game_name: str, play_info: PlayInformation):
     # Cambio de lugar
     if card.name == CardActionName.CHANGE_PLACES:
         verify_player_in_game(play_info.objective_player_id, game_name)
+        players_not_eliminated = select(
+            p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
         verify_adjacent_players(play_info.player_id,
                                 play_info.objective_player_id,
-                                len(game.players)-1)
+                                players_not_eliminated - 1)
         objective_player = find_player_by_id(play_info.objective_player_id)
 
         # Intercambio de posiciones entre los jugadores
