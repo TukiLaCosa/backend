@@ -5,6 +5,11 @@ from ..players.schemas import PlayerRol
 from fastapi import HTTPException, status
 from .utils import *
 from ..cards import services as cards_services
+from ..cards.utils import find_card_by_id, verify_action_card
+from ..players.utils import find_player_by_id, verify_card_in_hand
+from ..cards.schemas import CardActionName, CardResponse
+from ..players.schemas import PlayerRol
+import random
 
 
 def get_unstarted_games() -> List[GameResponse]:
@@ -227,3 +232,157 @@ def finish_game(name: str) -> Game:
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@db_session
+def play_action_card(game_name: str, play_info: PlayInformation):
+    result = {"message": "Action card played"}
+    game = find_game_by_name(game_name)
+    verify_player_in_game(play_info.player_id, game_name)
+    player = find_player_by_id(play_info.player_id)
+    card = find_card_by_id(play_info.card_id)
+    verify_action_card(card)
+    verify_card_in_hand(player, card)
+
+    # Lanzallamas
+    if card.name == CardActionName.FLAMETHROWER:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        players_not_eliminated = select(
+            p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                players_not_eliminated - 1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+        objective_player.rol = PlayerRol.ELIMINATED
+
+        # Las cartas del jugador eliminado van al mazo de descarte salvo sea carta la Cosa
+        for card in objective_player.hand:
+            if card.type != CardType.THE_THING:
+                game.discard_deck.add(card)
+
+        # Reacomodo las posiciones
+        for player in game.players:
+            if player.position > objective_player.position:
+                player.position -= 1
+
+        objective_player.position = -1
+
+        game.discard_deck.add(card)
+        player.hand.remove(card)
+
+    # Analisis
+    if card.name == CardActionName.ANALYSIS:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        players_not_eliminated = select(
+            p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                players_not_eliminated - 1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+
+        # Armo listado de cartas del jugador objetivo para enviar en el body response
+        result = [CardResponse(id=card.id,
+                               number=card.number,
+                               type=card.type,
+                               subtype=card.subtype,
+                               name=card.name,
+                               description=card.description
+                               ) for card in objective_player.hand]
+
+        game.discard_deck.add(card)
+        player.hand.remove(card)
+
+    # Hacha
+    if card.name == CardActionName.AXE:
+        pass
+
+    # Sospecha
+    if card.name == CardActionName.SUSPICIOUS:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        players_not_eliminated = select(
+            p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                players_not_eliminated - 1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+
+        # Elijo una carta al azar del jugador objetivo y armo el body response
+        objective_player_hand_list = list(objective_player.hand)
+        random_card = random.choice(objective_player_hand_list)
+        result = CardResponse(
+            id=random_card.id,
+            number=random_card.number,
+            type=random_card.type,
+            subtype=random_card.subtype,
+            name=random_card.name,
+            description=random_card.description
+        )
+
+        game.discard_deck.add(card)
+        player.hand.remove(card)
+
+    # Whisky
+    if card.name == CardActionName.WHISKEY:
+        pass
+
+    # Determinacion
+    if card.name == CardActionName.RESOLUTE:
+        pass
+
+    # Vigila tus espaldas
+    if card.name == CardActionName.WATCH_YOUR_BACK:
+        # Cambio direccion de la ronda
+        if game.round_direction == RoundDirection.CLOCKWISE:
+            game.round_direction = RoundDirection.COUNTERCLOCKWISE
+        else:
+            game.round_direction = RoundDirection.CLOCKWISE
+
+        game.discard_deck.add(card)
+        player.hand.remove(card)
+
+    # Cambio de lugar
+    if card.name == CardActionName.CHANGE_PLACES:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        players_not_eliminated = select(
+            p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                players_not_eliminated - 1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+
+        # Intercambio de posiciones entre los jugadores
+        tempPosition = player.position
+        player.position = objective_player.position
+        objective_player.position = tempPosition
+
+        game.discard_deck.add(card)
+        player.hand.remove(card)
+
+    # Mas vale que corras
+    if card.name == CardActionName.BETTER_RUN:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+
+        # Intercambio de posiciones entre los jugadores
+        tempPosition = player.position
+        player.position = objective_player.position
+        objective_player.position = tempPosition
+
+        game.discard_deck.add(card)
+        player.hand.remove(card)
+
+    # Seduccion (Ojo porque esta carta modifica la mano del jugador objetivo)
+    if card.name == CardActionName.SEDUCTION:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+        objective_player_hand_list = list(objective_player.hand)
+        eligible_cards = [
+            card for card in objective_player_hand_list if card.type != CardType.THE_THING]
+        random_card = random.choice(eligible_cards)
+
+        player.hand.add(random_card)
+        player.hand.remove(card)
+        objective_player.hand.remove(random_card)
+        objective_player.hand.add(card)
+
+    return result
