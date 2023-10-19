@@ -6,6 +6,26 @@ from ..websockets.utils import player_connections
 from .utils import Events
 from .schemas import RoundDirection
 import random
+import asyncio
+
+
+async def send_players_eliminated_event(game: Game, eliminated_id: int, eliminated_name: str):
+    json_msg = {
+        "event": Events.PLAYER_ELIMINATED,
+        "player_id": eliminated_id,
+        "player_name": eliminated_name
+    }
+    for p in game.players:
+        await player_connections.send_event_to(p.id, json_msg)
+
+
+async def send_players_whiskey_event(game: Game, player_id: int, player_name: str):
+    json_msg = {
+        "event": Events.WHISKEY_CARD_PLAYED,
+        "player_id": player_id,
+        "player_name": player_name
+    }
+    await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
 
 
 @db_session
@@ -26,10 +46,12 @@ def process_flamethrower_card(game: Game, player: Player,
             p.position -= 1
     objective_player.position = -1
 
-    # Falta implementar Evento por WS
-    
     game.discard_deck.add(card)
     player.hand.remove(card)
+
+    asyncio.ensure_future(send_players_eliminated_event(game=game,
+                                                        eliminated_id=objective_player.id,
+                                                        eliminated_name=objective_player.name))
 
 
 @db_session
@@ -67,9 +89,10 @@ def process_suspicious_card(game: Game, player: Player,
 
 @db_session
 def process_whiskey_card(game: Game, player: Player, card: Card):
-    # Falta implementar evento por WS
     game.discard_deck.add(card)
     player.hand.remove(card)
+    asyncio.ensure_future(send_players_whiskey_event(
+        game, player.id, player.name))
 
 
 @db_session
