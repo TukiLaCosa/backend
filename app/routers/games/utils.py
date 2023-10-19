@@ -325,7 +325,7 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
             detail="The player is not in the game"
         )
 
-    if player.hand > 4:
+    if len(player.hand) > 4:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The player already has 5 cards"

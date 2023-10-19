@@ -157,7 +157,6 @@ async def draw_card(game_name: str, game_data: DrawInformationIn):
     utils.verify_draw_can_be_done(game_name, game_data)
     draw_card_information = services.draw_card(game_name, game_data)
 
-    # mandar por ws que se robo la carta y el dorso de la misma.
     json_msg = {
         "event": utils.Events.PLAYER_DRAW_CARD,
         "game_name": game_name,
