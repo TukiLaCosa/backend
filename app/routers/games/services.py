@@ -164,12 +164,12 @@ def start_game(name: str) -> Game:
 
     draw_deck = cards_services.build_draw_deck(
         deal_deck=deal_deck, players=players_joined)
-    
+
     # Pongo los id de las cartas en draw_deck_order y luego hago el shuffle (mezclar)
-    for c in draw_deck:
-        game.draw_deck_order.append(c.id)
+    for card in draw_deck:
+        game.draw_deck_order.append(card.id)
     random.shuffle(game.draw_deck_order)
-    
+
     game.draw_deck.add(draw_deck)
 
     # setting the position and rol of the players
@@ -183,7 +183,8 @@ def start_game(name: str) -> Game:
     game.status = GameStatus.STARTED
     game.turn = 0
 
-    top_card_face = select(card for card in game.draw_deck if card.id == game.draw_deck_order[0]).first().type
+    top_card_face = select(
+        card for card in game.draw_deck if card.id == game.draw_deck_order[0]).first().type
 
     return GameStartOut(
         list_of_players=game.players,
@@ -338,4 +339,33 @@ def play_action_card(game_name: str, play_info: PlayInformation):
 def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOut:
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(game_data.player_id)
-    pass
+
+    if len(game.draw_deck_order) == 1:
+        new_deck_list = list(game.draw_deck) + list(game.discard_deck)
+        game.draw_deck.clear()
+        game.discard_deck.clear()
+        game.draw_deck_order = []
+        game.draw_deck.add(new_deck_list)
+        # A continuacion genero el orden aleatorio de como van a descartarse las cartas
+        for card in game.draw_deck:
+            game.draw_deck_order.append(card.id)
+        random.shuffle(game.draw_deck_order)
+
+    top_card_id = game.draw_deck_order.pop(0)
+    card = select(card for card in game.draw_deck if card.id ==
+                  top_card_id).first()
+
+    player.hand.add(card)
+    game.draw_deck.remove(card)
+
+    top_card_face = select(
+        card for card in game.draw_deck if card.id == game.draw_deck_order[0]).first().type
+
+    return DrawInformationOut(player_id=player.id,
+                              card=CardResponse(number=card.number,
+                                                type=card.type,
+                                                subtype=card.subtype,
+                                                name=card.name,
+                                                description=card.description,
+                                                id=card.id),
+                              top_card_face=top_card_face)

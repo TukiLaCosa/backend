@@ -268,20 +268,6 @@ def verify_adjacent_players(player_id: int, other_player_id: int, max_position: 
 
 
 @db_session
-def re_build_draw_deck(game: Game) -> list[Card]:
-    if len(game.draw_deck) != 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='The draw deck is not empty.'
-        )
-    game.draw_deck = game.discard_deck
-    game.discard_deck = []
-
-    random.shuffle(list(game.draw_deck))
-    return game.draw_deck
-
-
-@db_session
 def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
     game = Game.get(name=game_name)
     player = Player.get(id=game_data.player_id)
