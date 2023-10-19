@@ -12,7 +12,7 @@ def create_seed_data():
 
     game = Game(name="TestGame",
                 min_players=4,
-                max_players=6,
+                max_players=12,
                 password='secure',
                 host=players[0],
                 )
