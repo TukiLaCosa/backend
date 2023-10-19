@@ -112,3 +112,6 @@ class PlayInformation(BaseModel):
     objective_player_id: Optional[int] = Field(
         None, description="Optional objective player."
     )
+    card_to_exchange: Optional[int] = Field(
+        None, description="Optional card to exchange."
+    )
