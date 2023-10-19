@@ -164,6 +164,12 @@ def start_game(name: str) -> Game:
 
     draw_deck = cards_services.build_draw_deck(
         deal_deck=deal_deck, players=players_joined)
+    
+    # Pongo los id de las cartas en draw_deck_order y luego hago el shuffle (mezclar)
+    for c in draw_deck:
+        game.draw_deck_order.append(c.id)
+    random.shuffle(game.draw_deck_order)
+    
     game.draw_deck.add(draw_deck)
 
     # setting the position and rol of the players
@@ -177,10 +183,12 @@ def start_game(name: str) -> Game:
     game.status = GameStatus.STARTED
     game.turn = 0
 
+    top_card_face = select(card for card in game.draw_deck if card.id == game.draw_deck_order[0]).first().type
+
     return GameStartOut(
         list_of_players=game.players,
         status=game.status,
-        top_card_face=list(game.draw_deck)[0].type
+        top_card_face=top_card_face
     )
 
 
@@ -328,18 +336,6 @@ def play_action_card(game_name: str, play_info: PlayInformation):
 
 @db_session
 def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOut:
-    game = Game.get(name=game_name)
-    player = Player.get(id=game_data.player_id)
-    draw_deck = list(game.draw_deck)
-    card = draw_deck.pop(0)
-
-    player.hand.add(card)
-    game.draw_deck.remove(card)
-
-    if len(game.draw_deck) == 0:
-        utils.re_build_draw_deck(game)
-
-    return DrawInformationOut(player_id=player.id,
-                              card=CardResponse.model_validate(card),
-                              top_card_face=list(game.draw_deck)[0].type
-                              )
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(game_data.player_id)
+    pass
