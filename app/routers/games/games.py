@@ -139,7 +139,7 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
 
 
 
-@router.patch("/{game_name}/draw-card", status_code=status.HTTP_200_OK, response_model=DrawInformationOut)
+@router.patch("/{game_name}/draw-card", status_code=status.HTTP_200_OK, response_model=CardResponse)
 async def draw_card(game_name: str, game_data: DrawInformationIn):
     utils.verify_draw_can_be_done(game_name, game_data)
     draw_card_information = services.draw_card(game_name, game_data)
@@ -151,10 +151,9 @@ async def draw_card(game_name: str, game_data: DrawInformationIn):
         "player_id": game_data.player_id,
         "next_card": draw_card_information.top_card_face
     }
-
-    await player_connections.send_event_to_other_players_in_game(game_name=game_name,
-                                                                 message=json_msg,
-                                                                 excluded_id=game_data.player_id)
     
-    return draw_card_information
+    await player_connections.send_event_to_all_players_in_game(game_name=game_name,
+                                                                 message=json_msg)
+    
+    return draw_card_information.card
     

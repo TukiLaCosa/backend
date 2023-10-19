@@ -193,7 +193,7 @@ def verify_discard_can_be_done(game_name: str, game_data: DiscardInformationIn):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="It's not the turn of the player"
         )
-    if player.role == PlayerRol.INFECTED and card.name == '¡Infectado!':
+    if player.rol == PlayerRol.INFECTED and card.name == '¡Infectado!':
         infected_count = select(count(c)
                                 for c in player.hand if c.name == '¡Infectado!')
         if infected_count <= 1:
@@ -214,7 +214,7 @@ def re_build_draw_deck(game: Game) -> list[Card]:
     game.draw_deck = game.discard_deck
     game.discard_deck = []
     
-    random.shuffle(game.draw_deck)
+    random.shuffle(list(game.draw_deck))
     return game.draw_deck
 
 
@@ -222,7 +222,6 @@ def re_build_draw_deck(game: Game) -> list[Card]:
 def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
     game = Game.get(name=game_name)
     player = Player.get(id=game_data.player_id)
-    #traer el mazo de robo
 
     if not game:
         raise HTTPException(
@@ -236,7 +235,12 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
             detail="Draw deck not found"
         )
 
-    #verify game status
+    
+    if game.status != GameStatus.STARTED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The game status is not started"
+        )
 
     if len(game.draw_deck) == 0:
         raise HTTPException(
@@ -262,10 +266,10 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
             detail="The player is not in the game"
         )
     
-    if game.turn != player.position:
+    if player.hand > 4:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="It's not the turn of the player"
+            detail="The player already has 5 cards"
         )
     
     
