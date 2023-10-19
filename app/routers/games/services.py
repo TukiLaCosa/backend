@@ -11,6 +11,7 @@ from ..cards.schemas import CardActionName, CardResponse
 from ..players.schemas import PlayerRol
 from .action_functions import *
 import random
+from app.routers.games import utils
 
 
 def get_unstarted_games() -> List[GameResponse]:
@@ -323,3 +324,22 @@ def play_action_card(game_name: str, play_info: PlayInformation):
             game, player, card, objective_player, card_to_exchange)
 
     return result
+
+
+@db_session
+def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOut:
+    game = Game.get(name=game_name)
+    player = Player.get(id=game_data.player_id)
+    draw_deck = list(game.draw_deck)
+    card = draw_deck.pop(0)
+
+    player.hand.add(card)
+    game.draw_deck.remove(card)
+
+    if len(game.draw_deck) == 0:
+        utils.re_build_draw_deck(game)
+
+    return DrawInformationOut(player_id=player.id,
+                              card=CardResponse.model_validate(card),
+                              top_card_face=list(game.draw_deck)[0].type
+                              )

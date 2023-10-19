@@ -1,3 +1,4 @@
+import random
 from typing import List
 from fastapi import WebSocket, HTTPException, status
 from app.database.models import Game, Player, Card
@@ -20,6 +21,7 @@ class Events(str, Enum):
     PLAYED_CARD = 'played_card'
     PLAYER_ELIMINATED = 'player_eliminated'
     WHISKEY_CARD_PLAYED = 'whiskey_card_played'
+    PLAYER_DRAW_CARD = 'player_draw_card'
 
 
 @db_session
@@ -218,7 +220,7 @@ def verify_discard_can_be_done(game_name: str, game_data: DiscardInformationIn):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="It's not the turn of the player"
         )
-    if player.role == PlayerRol.INFECTED and card.name == '¡Infectado!':
+    if player.rol == PlayerRol.INFECTED and card.name == '¡Infectado!':
         infected_count = select(count(c)
                                 for c in player.hand if c.name == '¡Infectado!')
         if infected_count <= 1:
@@ -262,4 +264,69 @@ def verify_adjacent_players(player_id: int, other_player_id: int, max_position: 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Players are not adjacent"
+        )
+
+
+@db_session
+def re_build_draw_deck(game: Game) -> list[Card]:
+    if len(game.draw_deck) != 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The draw deck is not empty.'
+        )
+    game.draw_deck = game.discard_deck
+    game.discard_deck = []
+
+    random.shuffle(list(game.draw_deck))
+    return game.draw_deck
+
+
+@db_session
+def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
+    game = Game.get(name=game_name)
+    player = Player.get(id=game_data.player_id)
+
+    if not game:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Game not found"
+        )
+
+    if not game.draw_deck:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Draw deck not found"
+        )
+
+    if game.status != GameStatus.STARTED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The game status is not started"
+        )
+
+    if len(game.draw_deck) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The draw deck is empty"
+        )
+
+    if not player:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Player not found"
+        )
+
+    is_player_in_game = select(
+        p for p in game.players if (p.id == player.id)).exists()
+
+    if not is_player_in_game:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The player is not in the game"
+        )
+
+    if len(player.hand) > 4:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The player already has 5 cards"
         )
