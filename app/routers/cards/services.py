@@ -120,3 +120,9 @@ def deal_cards_to_players(game: Game, deck: list[Card]):
         for player in game.players:
             card = deck.pop(0)
             player.hand.add(card)
+
+
+@db_session
+def card_is_in_player_hand(card_name: str, player: Player) -> bool:
+    card = player.hand.select(lambda c: c.name == card_name).count()
+    return card > 0

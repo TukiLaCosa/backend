@@ -104,10 +104,24 @@ class DiscardInformationIn(BaseModel):
     card_id: int
 
 
+class PlayInformation(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    card_id: int
+    player_id: int
+    objective_player_id: Optional[int] = Field(
+        None, description="Optional objective player."
+    )
+    card_to_exchange: Optional[int] = Field(
+        None, description="Optional card to exchange."
+    )
+
+
 class DrawInformationIn(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     player_id: int
+
 
 class DrawInformationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)

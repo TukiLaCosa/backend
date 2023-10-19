@@ -6,6 +6,7 @@ from pony.orm import *
 from .schemas import *
 from ..websockets.utils import player_connections, get_players_id
 from ..players.schemas import PlayerRol
+from ..players.utils import find_player_by_id
 
 
 class Events(str, Enum):
@@ -17,6 +18,9 @@ class Events(str, Enum):
     PLAYER_JOINED = 'player_joined'
     PLAYER_LEFT = 'player_left'
     PLAYER_INIT_HAND = 'player_init_hand'
+    PLAYED_CARD = 'played_card'
+    PLAYER_ELIMINATED = 'player_eliminated'
+    WHISKEY_CARD_PLAYED = 'whiskey_card_played'
     PLAYER_DRAW_CARD = 'player_draw_card'
 
 
@@ -26,7 +30,8 @@ def find_game_by_name(game_name: str):
 
     if not game:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Game not found"
         )
 
     return game
@@ -97,6 +102,28 @@ def verify_game_can_be_abandon(game_name: str, player_id: int):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Host of the game can only cancel the game"
         )
+
+
+@db_session
+def verify_game_can_be_finished(game: Game):
+    if not the_thing_is_eliminated(game):
+        raise Exception('The Thing is still alive')
+
+    if not no_human_remains(game):
+        raise Exception('There are living Humans')
+
+
+@db_session
+def the_thing_is_eliminated(game: Game) -> bool:
+    the_thing = game.players.select(
+        lambda p: p.rol == PlayerRol.THE_THING).count()
+    return the_thing == 0
+
+
+@db_session
+def no_human_remains(game: Game) -> bool:
+    humans = game.players.select(lambda p: p.rol == PlayerRol.HUMAN).count()
+    return humans == 0
 
 
 @db_session
@@ -203,6 +230,42 @@ def verify_discard_can_be_done(game_name: str, game_data: DiscardInformationIn):
             )
 
 
+@db_session
+def verify_player_in_game(player_id: int, game_name: str):
+    player = Player.get(id=player_id)
+    game = Game.get(name=game_name)
+    if player and game:
+        if player in game.players:
+            pass
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The player is not in the game"
+            )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Player or game not found"
+        )
+
+
+@db_session
+def verify_adjacent_players(player_id: int, other_player_id: int, max_position: int):
+    player = find_player_by_id(player_id)
+    other_player = find_player_by_id(other_player_id)
+
+    are_adjacent = (
+        abs(player.position - other_player.position) == 1 or
+        (player.position == 0 and other_player.position == max_position) or
+        (other_player.position == 0 and player.position == max_position)
+    )
+
+    if not are_adjacent:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Players are not adjacent"
+        )
+
 
 @db_session
 def re_build_draw_deck(game: Game) -> list[Card]:
@@ -213,7 +276,7 @@ def re_build_draw_deck(game: Game) -> list[Card]:
         )
     game.draw_deck = game.discard_deck
     game.discard_deck = []
-    
+
     random.shuffle(list(game.draw_deck))
     return game.draw_deck
 
@@ -228,14 +291,13 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Game not found"
         )
-    
+
     if not game.draw_deck:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Draw deck not found"
         )
 
-    
     if game.status != GameStatus.STARTED:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -247,31 +309,24 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The draw deck is empty"
         )
-        
 
     if not player:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Player not found"
         )
-    
 
     is_player_in_game = select(
         p for p in game.players if (p.id == player.id)).exists()
-    
 
     if not is_player_in_game:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The player is not in the game"
         )
-    
+
     if player.hand > 4:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The player already has 5 cards"
         )
-    
-    
-    
-

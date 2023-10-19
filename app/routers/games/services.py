@@ -1,9 +1,16 @@
 from pony.orm import *
 from app.database.models import Game, Player, Card
 from .schemas import *
+from ..players.schemas import PlayerRol
 from fastapi import HTTPException, status
-from .utils import find_game_by_name, list_of_unstarted_games
+from .utils import *
 from ..cards import services as cards_services
+from ..cards.utils import find_card_by_id, verify_action_card
+from ..players.utils import find_player_by_id, verify_card_in_hand
+from ..cards.schemas import CardActionName, CardResponse
+from ..players.schemas import PlayerRol
+from .action_functions import *
+import random
 from app.routers.games import utils
 
 
@@ -159,9 +166,13 @@ def start_game(name: str) -> Game:
         deal_deck=deal_deck, players=players_joined)
     game.draw_deck.add(draw_deck)
 
-    # setting the position of the players
+    # setting the position and rol of the players
     for idx, player in enumerate(game.players):
         player.position = idx
+        if cards_services.card_is_in_player_hand('La Cosa', player):
+            player.rol = PlayerRol.THE_THING
+        else:
+            player.rol = PlayerRol.HUMAN
 
     game.status = GameStatus.STARTED
     game.turn = 0
@@ -210,7 +221,109 @@ def discard_card(game_name: str, game_data: DiscardInformationIn):
         game.discard_deck.add(card)
 
 
+@db_session
+def finish_game(name: str) -> Game:
+    game: Game = find_game_by_name(name)
 
+    try:
+        verify_game_can_be_finished(game)
+        game.status = GameStatus.ENDED
+        # enviar por ws los resultados
+
+        return game
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@db_session
+def play_action_card(game_name: str, play_info: PlayInformation):
+    result = {"message": "Action card played"}
+    game = find_game_by_name(game_name)
+    verify_player_in_game(play_info.player_id, game_name)
+    player = find_player_by_id(play_info.player_id)
+    card = find_card_by_id(play_info.card_id)
+    verify_action_card(card)
+    verify_card_in_hand(player, card)
+
+    players_not_eliminated = select(
+        p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
+
+    # Lanzallamas
+    if card.name == CardActionName.FLAMETHROWER:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                players_not_eliminated - 1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+        process_flamethrower_card(game, player, card, objective_player)
+
+    # Analisis
+    if card.name == CardActionName.ANALYSIS:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                players_not_eliminated - 1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+
+        # Armo listado de cartas del jugador objetivo para enviar en el body response
+        result = process_analysis_card(game, player, card, objective_player)
+
+    # Hacha
+    if card.name == CardActionName.AXE:
+        pass
+
+    # Sospecha
+    if card.name == CardActionName.SUSPICIOUS:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                players_not_eliminated - 1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+        result = process_suspicious_card(game, player, card, objective_player)
+
+    # Whisky
+    if card.name == CardActionName.WHISKEY:
+        process_whiskey_card(game, player, card)
+
+    # Determinacion
+    if card.name == CardActionName.RESOLUTE:
+        pass
+
+    # Vigila tus espaldas
+    if card.name == CardActionName.WATCH_YOUR_BACK:
+        process_watch_your_back_card(game, player, card)
+
+    # Cambio de lugar
+    if card.name == CardActionName.CHANGE_PLACES:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                players_not_eliminated - 1)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+        process_change_places_card(game, player, card, objective_player)
+
+    # Mas vale que corras
+    if card.name == CardActionName.BETTER_RUN:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+        process_better_run_card(game, player, card, objective_player)
+
+    # Seduccion (Ojo porque esta carta modifica la mano del jugador objetivo)
+    if card.name == CardActionName.SEDUCTION:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        objective_player = find_player_by_id(play_info.objective_player_id)
+        card_to_exchange = find_card_by_id(play_info.card_to_exchange)
+        if card_to_exchange.type == CardType.THE_THING:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The card to exchange cannot be The Thing"
+            )
+        verify_card_in_hand(player, card_to_exchange)
+        process_seduction_card(
+            game, player, card, objective_player, card_to_exchange)
+
+    return result
 
 
 @db_session
@@ -219,15 +332,14 @@ def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOu
     player = Player.get(id=game_data.player_id)
     draw_deck = list(game.draw_deck)
     card = draw_deck.pop(0)
-    
+
     player.hand.add(card)
     game.draw_deck.remove(card)
-    
+
     if len(game.draw_deck) == 0:
         utils.re_build_draw_deck(game)
 
     return DrawInformationOut(player_id=player.id,
                               card=CardResponse.model_validate(card),
                               top_card_face=list(game.draw_deck)[0].type
-    )
-    
+                              )

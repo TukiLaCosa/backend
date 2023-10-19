@@ -151,6 +151,8 @@ def test_create_card_bad_type():
     cleanup_database()
 
 #   Test card names
+
+
 def test_create_card_missing_name():
     cleanup_database()
     response = client.post(
