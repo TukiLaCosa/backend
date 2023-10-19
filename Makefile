@@ -32,6 +32,7 @@ help:
 	@echo "Usage: make [target]"
 	@echo "Targets:"
 	@echo "  run                - Run the UVicorn server"
+	@echo "  create-seed-data   - Seed to plant 6 players and 1 Game in the Database"
 	@echo "  delete-db          - Delete the database file"
 	@echo "  coverage-report    - Generate coverage reports"
 	@echo "  coverage-clean     - Remove coverage reports"

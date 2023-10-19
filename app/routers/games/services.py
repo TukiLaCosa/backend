@@ -220,14 +220,23 @@ def leave_game(game_name: str, player_id: int) -> GameInformationOut:
 
 
 @db_session
-def discard_card(game_name: str, game_data: DiscardInformationIn):
-    game = Game.get(name=game_name)
-    player = Player.get(id=game_data.player_id)
+def discard_card(game_name: str, game_data: DiscardInformationIn) -> Game:
+    game: Game = Game.get(name=game_name)
+    player: Player = Player.get(id=game_data.player_id)
     card = Card.get(id=game_data.card_id)
     if card in player.hand:
         player.hand.remove(card)
     if game and card:
         game.discard_deck.add(card)
+
+    players_playing = len(
+        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        game.turn = (game.turn - 1) % players_playing
+    else:
+        game.turn = (game.turn + 1) % players_playing
+
+    return game
 
 
 @db_session
@@ -246,7 +255,7 @@ def finish_game(name: str) -> Game:
 
 
 @db_session
-def play_action_card(game_name: str, play_info: PlayInformation):
+def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
     result = {"message": "Action card played"}
     game = find_game_by_name(game_name)
     verify_player_in_game(play_info.player_id, game_name)
@@ -331,6 +340,13 @@ def play_action_card(game_name: str, play_info: PlayInformation):
         verify_card_in_hand(player, card_to_exchange)
         process_seduction_card(
             game, player, card, objective_player, card_to_exchange)
+
+    players_playing = len(
+        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        game.turn = (game.turn - 1) % players_playing
+    else:
+        game.turn = (game.turn + 1) % players_playing
 
     return result
 
