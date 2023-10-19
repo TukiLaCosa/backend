@@ -46,6 +46,9 @@ help:
 run: install
 	poetry run $(UVICORN_CMD)
 
+create-seed-data: install
+	poetry run python -c "from app.database.utils import create_seed_data; create_seed_data()"
+
 # Define the 'delete-db' target to delete the database file
 delete-db:
 	@if [ -f $(DB_FILE) ]; then \
