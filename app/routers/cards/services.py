@@ -57,6 +57,19 @@ def find_card_by_id(id: int) -> Card:
 
 
 @db_session
+def find_card_by_name(name: str) -> Card:
+    card = Card.get(name=name)
+
+    if card is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Card not found."
+        )
+
+    return card
+
+
+@db_session
 def update_card(card_id: int, request_data: CardUpdateIn) -> CardUpdateOut:
     card = find_card_by_id(card_id)
 

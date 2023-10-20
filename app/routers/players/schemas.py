@@ -1,6 +1,7 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 from typing import List, Optional
 from enum import Enum
+from ..cards.schemas import CardResponse
 
 
 class PlayerRol(str, Enum):
@@ -31,3 +32,14 @@ class PlayerUpdateIn(BaseModel):
 class PlayerResponse(BasePlayer):
     id: int
     position: int
+
+
+class PlayerInfo(PlayerResponse):
+    rol: PlayerRol
+    hand: List[CardResponse]
+
+    @computed_field
+    @property
+    def was_the_thing(self) -> bool:
+        card_names = map(lambda card: card.name, self.hand)
+        return 'La Cosa' in card_names
