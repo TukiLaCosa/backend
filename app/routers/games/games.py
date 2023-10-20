@@ -199,3 +199,42 @@ async def draw_card(game_name: str, game_data: DrawInformationIn):
                                                                message=json_msg)
 
     return draw_card_information.card
+
+
+@router.patch("/{game_name}/intention-to-interchange-card", status_code=status.HTTP_200_OK)
+async def intention_to_interchange_card(game_name: str, interchange_info: IntentionExchangeInformationIn):
+    utils.verify_if_interchange_can_be_done(game_name, interchange_info)
+    objective_player_id = utils.get_id_of_next_player_in_turn(game_name)
+    json_msg = {
+        "event": "exchange_intention",
+        "player_id": interchange_info.player_id,
+        "player_name": get_player_name_by_id(interchange_info.player_id),
+        "card_to_exchange": interchange_info.card_id
+    }
+    await player_connections.send_event_to(objective_player_id, json_msg)
+    return {"message": "Card interchange intention terminated."}
+
+
+@router.patch("/{game_name}/card-interchange-response", status_code=status.HTTP_200_OK)
+async def card_interchange_response(game_name: str, game_data: InterchangeInformationIn):
+    services.card_interchange_response(game_name, game_data)
+    json_msg = {
+        "event": "exchange_done"
+    }
+    await player_connections.send_event_to(game_data.player_id, json_msg)
+    await player_connections.send_event_to(game_data.objective_player_id, json_msg)
+    
+
+    with db_session:
+        game = find_game_by_name(game_name)
+        player_id_turn = select(
+            p for p in game.players if p.position == game.turn).first().id
+    json_msg = {
+        "event": utils.Events.NEW_TURN,
+        "next_player_name": get_player_name_by_id(player_id_turn),
+        "next_player_id": player_id_turn,
+        "round_direction": game.round_direction
+    }
+    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+    
+    return {"message": "Card interchange terminated."}

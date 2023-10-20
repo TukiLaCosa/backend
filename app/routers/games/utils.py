@@ -317,3 +317,30 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Is not the player turn"
         )
+
+
+@db_session
+def verify_if_interchange_can_be_done(game_name: str, interchange_info: IntentionExchangeInformationIn):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(interchange_info.player_id)
+
+    if game.turn != player.position:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Is not the player turn"
+        )
+
+
+@db_session
+def get_id_of_next_player_in_turn(game_name):
+    game: Game = find_game_by_name(game_name)
+    players_playing = len(
+        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        next_turn = (game.turn - 1) % players_playing
+    else:
+        next_turn = (game.turn + 1) % players_playing
+
+    next_player_id = select(
+        p.id for p in game.players if p.position == next_turn).first()
+    return next_player_id

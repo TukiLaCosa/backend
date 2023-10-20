@@ -407,3 +407,25 @@ def get_game_result(name: str) -> GameResult:
         winners=[PlayerInfo.model_validate(p) for p in winners],
         losers=[PlayerInfo.model_validate(p) for p in losers]
     )
+
+@db_session
+def card_interchange_response(game_name: str, game_data: InterchangeInformationIn):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(game_data.objective_player_id)
+    player_card: Card = Card[game_data.objective_card_id]
+
+    next_player: Player = find_player_by_id(game_data.player_id)
+    next_player_card: Card = Card[game_data.card_id]
+
+    player.hand.remove(player_card)
+    next_player.hand.remove(next_player_card)
+
+    player.hand.add(next_player_card)
+    next_player.hand.add(player_card)
+
+    players_playing = len(
+        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        game.turn = (game.turn - 1) % players_playing
+    else:
+        game.turn = (game.turn + 1) % players_playing
