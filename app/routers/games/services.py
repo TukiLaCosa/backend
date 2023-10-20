@@ -1,4 +1,5 @@
 from pony.orm import *
+from typing import List
 from app.database.models import Game, Player, Card
 from .schemas import *
 from ..players.schemas import PlayerRol
@@ -98,14 +99,13 @@ def update_game(game_name: str, request_data: GameUpdateIn) -> GameUpdateOut:
 
 @db_session
 def delete_game(game_name: str):
-    game = Game.get(name=game_name)
+    game: Game = find_game_by_name(game_name)
 
-    if not game:
+    if game.status != GameStatus.ENDED:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
-    if game_name != game.name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid game name")
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"The game is not ended."
+        )
 
     for player in game.players:
         player.hand.clear()
@@ -246,7 +246,13 @@ def finish_game(name: str) -> Game:
     try:
         verify_game_can_be_finished(game)
         game.status = GameStatus.ENDED
-        # enviar por ws los resultados
+
+        json_msg = {
+            "event": utils.Events.GAME_ENDED,
+        }
+
+        asyncio.run(player_connections.send_event_to_all_players_in_game(
+            game.name, json_msg))
 
         return game
     except Exception as e:
