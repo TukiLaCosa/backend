@@ -389,15 +389,33 @@ def get_game_result(name: str) -> GameResult:
             detail=f"The game is not ended."
         )
 
+    reason = ""
     winners = []
     losers = []
 
     if the_thing_is_eliminated(game):
+        reason = "La Cosa fue eliminada de la partida."
         winners = game.players.select(lambda p: p.rol == PlayerRol.HUMAN)[:]
         losers = game.players.select(
             lambda p: p.rol in [PlayerRol.INFECTED, PlayerRol.ELIMINATED])[:]
 
+    elif no_human_remains(game):
+        reason = "No queda ningún Humano en la partida."
+        winners = game.players.select(
+            lambda p: p.rol in [PlayerRol.THE_THING, PlayerRol.INFECTED])[:]
+        losers = game.players.select(
+            lambda p: p.rol == PlayerRol.ELIMINATED)[:]
+
+    elif the_thing_infected_everyone(game):
+        reason = '''La Cosa ha logrado infectar a todos los demás jugadores
+                    sin que haya sido eliminado ningún Humano de la partida.'''
+        winners = game.players.select(
+            lambda p: p.rol == PlayerRol.THE_THING)[:]
+        losers = game.players.select(
+            lambda p: p.rol != PlayerRol.THE_THING)[:]
+
     return GameResult(
+        reason=reason,
         winners=[PlayerInfo.model_validate(p) for p in winners],
         losers=[PlayerInfo.model_validate(p) for p in losers]
     )

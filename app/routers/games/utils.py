@@ -116,15 +116,32 @@ def verify_game_can_be_finished(game: Game):
 
 @db_session
 def the_thing_is_eliminated(game: Game) -> bool:
-    the_thing = game.players.select(
-        lambda p: p.rol == PlayerRol.THE_THING).count()
-    return the_thing == 0
+    the_thing_exists = game.players.select(
+        lambda p: p.rol == PlayerRol.THE_THING).exists()
+
+    return not the_thing_exists
 
 
 @db_session
 def no_human_remains(game: Game) -> bool:
-    humans = game.players.select(lambda p: p.rol == PlayerRol.HUMAN).count()
-    return humans == 0
+    the_thing_exists = game.players.select(
+        lambda p: p.rol == PlayerRol.THE_THING).exists()
+
+    number_of_humans = game.players.select(
+        lambda p: p.rol == PlayerRol.HUMAN).count()
+
+    return the_thing_exists and number_of_humans == 0
+
+
+@db_session
+def the_thing_infected_everyone(game: Game) -> bool:
+    the_thing_exists = game.players.select(
+        lambda p: p.rol == PlayerRol.THE_THING).exists()
+
+    number_of_infecteds = game.players.select(
+        lambda p: p.rol == PlayerRol.INFECTED).count()
+
+    return the_thing_exists and number_of_infecteds == count(game.players) - 1
 
 
 @db_session
