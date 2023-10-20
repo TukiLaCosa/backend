@@ -108,12 +108,10 @@ def verify_game_can_be_abandon(game_name: str, player_id: int):
 
 @db_session
 def verify_game_can_be_finished(game: Game):
-    if not the_thing_is_eliminated(game):
-        raise Exception('The Thing is still alive')
-
-    if not no_human_remains(game):
-        raise Exception('There are living Humans')
-
+    if the_thing_is_eliminated(game) or no_human_remains(game):
+        pass
+    else:
+        raise Exception('The Thing and humans are still alive')
 
 @db_session
 def the_thing_is_eliminated(game: Game) -> bool:

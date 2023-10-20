@@ -239,25 +239,19 @@ def discard_card(game_name: str, game_data: DiscardInformationIn) -> Game:
     return game
 
 
-@db_session
-def finish_game(name: str) -> Game:
-    game: Game = find_game_by_name(name)
-
-    try:
+async def finish_game(name: str) -> Game:
+    with db_session:
+        game: Game = find_game_by_name(name)
         verify_game_can_be_finished(game)
         game.status = GameStatus.ENDED
 
-        json_msg = {
-            "event": utils.Events.GAME_ENDED,
-        }
+    json_msg = {
+        "event": utils.Events.GAME_ENDED,
+    }
 
-        asyncio.run(player_connections.send_event_to_all_players_in_game(
-            game.name, json_msg))
-
-        return game
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    player_connections.send_event_to_all_players_in_game(game.name, json_msg)
+    return game
+    
 
 
 @db_session

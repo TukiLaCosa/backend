@@ -8,6 +8,7 @@ from ..websockets.utils import player_connections
 from .utils import find_game_by_name, is_the_game_finished
 from ..players.utils import get_player_name_by_id
 from ..cards.utils import get_card_name_by_id
+from .services import finish_game
 
 
 router = APIRouter(
@@ -160,8 +161,9 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
 @router.post("/{game_name}/play-action-card", status_code=status.HTTP_200_OK)
 async def play_action_card(game_name: str, play_info: PlayInformation):
     result = services.play_action_card(game_name, play_info)
+    
     if is_the_game_finished(game_name):
-        services.finish_game(game_name)
+        finish_game()
     else:
         json_msg = {
             "event": utils.Events.PLAYED_CARD,
