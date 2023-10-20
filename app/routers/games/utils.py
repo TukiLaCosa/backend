@@ -15,6 +15,7 @@ class Events(str, Enum):
     GAME_DELETED = 'game_deleted'
     GAME_STARTED = 'game_started'
     GAME_CANCELED = 'game_canceled'
+    GAME_ENDED = 'game_ended'
     PLAYER_JOINED = 'player_joined'
     PLAYER_LEFT = 'player_left'
     PLAYER_INIT_HAND = 'player_init_hand'
