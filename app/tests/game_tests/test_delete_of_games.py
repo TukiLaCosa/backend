@@ -35,7 +35,7 @@ class FakeGame:
         self.status = status
         self.round_direction = round_direction
 
-    def delete():
+    def delete(a):
         pass
 
 
@@ -52,7 +52,7 @@ games = [
              max_players=6,
              password=None,
              turn=-1,
-             status="UNSTARTED",
+             status="ENDED",
              round_direction="CLOCKWISE"
              )
 ]
@@ -68,8 +68,18 @@ def test_delete_game_success(mocker):
         "message": "Game deleted"}, "El mensaje de la respuesta no es 'Game deleted' (Juego eliminado)."
 
 
-def test_delete_game_with_invalid_name(mocker):
-    mocker.patch.object(Game, "get", return_value=games[0])
+def test_delete_game_with_unstarted_status(mocker):
+    game = FakeGame(name="game1",
+             players=[ignacio, anelio, ezequiel],
+             host=ignacio,
+             min_players=4,
+             max_players=6,
+             password=None,
+             turn=-1,
+             status="UNSTARTED",
+             round_direction="CLOCKWISE"
+             )
+    mocker.patch.object(Game, "get", return_value=game)
     response = client.delete("/games/game2")
     assert response.status_code == 400, "El código de estado de la respuesta no es 400 (Bad Request)."
 

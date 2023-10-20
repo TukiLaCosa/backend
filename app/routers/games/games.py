@@ -5,7 +5,7 @@ from . import services
 from . import utils
 from .schemas import *
 from ..websockets.utils import player_connections
-from .utils import find_game_by_name
+from .utils import find_game_by_name, is_the_game_finished
 from ..players.utils import get_player_name_by_id
 from ..cards.utils import get_card_name_by_id
 
@@ -160,24 +160,27 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
 @router.post("/{game_name}/play-action-card", status_code=status.HTTP_200_OK)
 async def play_action_card(game_name: str, play_info: PlayInformation):
     result = services.play_action_card(game_name, play_info)
-    json_msg = {
-        "event": utils.Events.PLAYED_CARD,
-        "player_name": get_player_name_by_id(play_info.player_id),
-        "card_name": get_card_name_by_id(play_info.card_id)
-    }
-    await player_connections.send_event_to_other_players_in_game(game_name, json_msg, play_info.player_id)
+    if is_the_game_finished(game_name):
+        services.finish_game(game_name)
+    else:
+        json_msg = {
+            "event": utils.Events.PLAYED_CARD,
+            "player_name": get_player_name_by_id(play_info.player_id),
+            "card_name": get_card_name_by_id(play_info.card_id)
+        }
+        await player_connections.send_event_to_other_players_in_game(game_name, json_msg, play_info.player_id)
 
-    with db_session:
-        game = find_game_by_name(game_name)
-        player_id_turn = select(
-            p for p in game.players if p.position == game.turn).first().id
-    json_msg = {
-        "event": utils.Events.NEW_TURN,
-        "next_player_name": get_player_name_by_id(player_id_turn),
-        "next_player_id": player_id_turn,
-        "round_direction": game.round_direction
-    }
-    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+        with db_session:
+            game = find_game_by_name(game_name)
+            player_id_turn = select(
+                p for p in game.players if p.position == game.turn).first().id
+        json_msg = {
+            "event": utils.Events.NEW_TURN,
+            "next_player_name": get_player_name_by_id(player_id_turn),
+            "next_player_id": player_id_turn,
+            "round_direction": game.round_direction
+        }
+        await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
     return result
 

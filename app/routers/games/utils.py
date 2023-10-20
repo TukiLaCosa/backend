@@ -317,3 +317,11 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Is not the player turn"
         )
+
+@db_session
+def is_the_game_finished(game_name: str) -> bool:
+    is_finish = False
+    game: Game = find_game_by_name(game_name)
+    if no_human_remains(game) or the_thing_is_eliminated(game):
+        is_finish = True
+    return is_finish
