@@ -377,3 +377,27 @@ def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOu
                                                 description=card.description,
                                                 id=card.id),
                               top_card_face=top_card_face)
+
+
+@db_session
+def get_game_result(name: str) -> GameResult:
+    game: Game = find_game_by_name(name)
+
+    if game.status != GameStatus.ENDED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"The game is not ended."
+        )
+
+    winners = []
+    losers = []
+
+    if the_thing_is_eliminated(game):
+        winners = game.players.select(lambda p: p.rol == PlayerRol.HUMAN)[:]
+        losers = game.players.select(
+            lambda p: p.rol in [PlayerRol.INFECTED, PlayerRol.ELIMINATED])[:]
+
+    return GameResult(
+        winners=[PlayerInfo.model_validate(p) for p in winners],
+        losers=[PlayerInfo.model_validate(p) for p in losers]
+    )

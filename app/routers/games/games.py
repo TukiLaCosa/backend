@@ -26,6 +26,11 @@ def get_game_information(game_name: str):
     return services.get_game_information(game_name)
 
 
+@router.get("/{game_name}/result")
+def get_game_result(game_name: str) -> GameResult:
+    return services.get_game_result(game_name)
+
+
 @router.post("/", response_model=GameCreationOut, status_code=status.HTTP_201_CREATED)
 async def create_game(game_data: GameCreationIn):
     new_game = services.create_game(game_data)

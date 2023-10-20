@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List, Optional
 from enum import Enum
-from ..players.schemas import PlayerResponse
+from ..players.schemas import PlayerResponse, PlayerInfo
 from ..cards.schemas import CardType, CardResponse
 
 
@@ -129,3 +129,10 @@ class DrawInformationOut(BaseModel):
     player_id: int
     card: CardResponse
     top_card_face: CardType
+
+
+class GameResult(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    winners: List[PlayerInfo]
+    losers: List[PlayerInfo]
