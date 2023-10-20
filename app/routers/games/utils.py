@@ -269,26 +269,34 @@ def verify_adjacent_players(player_id: int, other_player_id: int, max_position: 
 
 
 @db_session
+def merge_decks_of_card(game_name: str):
+    game: Game = find_game_by_name(game_name)
+    top_card_id = game.draw_deck_order.pop(0)
+    new_deck_list = list(game.draw_deck) + list(game.discard_deck)
+    game.draw_deck.clear()
+    game.discard_deck.clear()
+    game.draw_deck_order = []
+    game.draw_deck.add(new_deck_list)
+
+    # A continuacion genero el orden aleatorio de como van a robarse las cartas
+    for card in game.draw_deck:
+        if card.id != top_card_id:
+            game.draw_deck_order.append(card.id)
+    random.shuffle(game.draw_deck_order)
+    # Inserto primera la carta que quedaba en draw_deck
+    game.draw_deck_order.insert(0, top_card_id)
+
+
+@db_session
 def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
-    game = Game.get(name=game_name)
-    player = Player.get(id=game_data.player_id)
-
-    if not game:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Game not found"
-        )
-
-    if not game.draw_deck:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Draw deck not found"
-        )
+    game = find_game_by_name(game_name)
+    player = find_player_by_id(game_data.player_id)
+    verify_player_in_game(player_id=game_data.player_id, game_name=game_name)
 
     if game.status != GameStatus.STARTED:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The game status is not started"
+            detail="The game status isn't STARTED"
         )
 
     if len(game.draw_deck) == 0:
@@ -297,23 +305,14 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
             detail="The draw deck is empty"
         )
 
-    if not player:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Player not found"
-        )
-
-    is_player_in_game = select(
-        p for p in game.players if (p.id == player.id)).exists()
-
-    if not is_player_in_game:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The player is not in the game"
-        )
-
     if len(player.hand) > 4:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The player already has 5 cards"
+        )
+
+    if game.turn != player.position:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Is not the player turn"
         )

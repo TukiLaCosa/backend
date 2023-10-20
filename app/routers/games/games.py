@@ -144,6 +144,7 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
             p for p in game.players if p.position == game.turn).first().id
     json_msg = {
         "event": utils.Events.NEW_TURN,
+        "next_player_name": get_player_name_by_id(player_id_turn),
         "next_player_id": player_id_turn,
         "round_direction": game.round_direction
     }
@@ -167,6 +168,7 @@ async def play_action_card(game_name: str, play_info: PlayInformation):
             p for p in game.players if p.position == game.turn).first().id
     json_msg = {
         "event": utils.Events.NEW_TURN,
+        "next_player_name": get_player_name_by_id(player_id_turn),
         "next_player_id": player_id_turn,
         "round_direction": game.round_direction
     }
@@ -183,6 +185,7 @@ async def draw_card(game_name: str, game_data: DrawInformationIn):
     json_msg = {
         "event": utils.Events.PLAYER_DRAW_CARD,
         "game_name": game_name,
+        "player_name": get_player_name_by_id(game_data.player_id),
         "player_id": game_data.player_id,
         "next_card": draw_card_information.top_card_face
     }

@@ -357,15 +357,7 @@ def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOu
     player: Player = find_player_by_id(game_data.player_id)
 
     if len(game.draw_deck_order) == 1:
-        new_deck_list = list(game.draw_deck) + list(game.discard_deck)
-        game.draw_deck.clear()
-        game.discard_deck.clear()
-        game.draw_deck_order = []
-        game.draw_deck.add(new_deck_list)
-        # A continuacion genero el orden aleatorio de como van a descartarse las cartas
-        for card in game.draw_deck:
-            game.draw_deck_order.append(card.id)
-        random.shuffle(game.draw_deck_order)
+        merge_decks_of_card(game_name)
 
     top_card_id = game.draw_deck_order.pop(0)
     card = select(card for card in game.draw_deck if card.id ==
