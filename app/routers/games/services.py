@@ -164,6 +164,12 @@ def start_game(name: str) -> Game:
 
     draw_deck = cards_services.build_draw_deck(
         deal_deck=deal_deck, players=players_joined)
+
+    # Pongo los id de las cartas en draw_deck_order y luego hago el shuffle (mezclar)
+    for card in draw_deck:
+        game.draw_deck_order.append(card.id)
+    random.shuffle(game.draw_deck_order)
+
     game.draw_deck.add(draw_deck)
 
     # setting the position and rol of the players
@@ -177,10 +183,13 @@ def start_game(name: str) -> Game:
     game.status = GameStatus.STARTED
     game.turn = 0
 
+    top_card_face = select(
+        card for card in game.draw_deck if card.id == game.draw_deck_order[0]).first().type
+
     return GameStartOut(
         list_of_players=game.players,
         status=game.status,
-        top_card_face=list(game.draw_deck)[0].type
+        top_card_face=top_card_face
     )
 
 
@@ -211,14 +220,23 @@ def leave_game(game_name: str, player_id: int) -> GameInformationOut:
 
 
 @db_session
-def discard_card(game_name: str, game_data: DiscardInformationIn):
-    game = Game.get(name=game_name)
-    player = Player.get(id=game_data.player_id)
+def discard_card(game_name: str, game_data: DiscardInformationIn) -> Game:
+    game: Game = Game.get(name=game_name)
+    player: Player = Player.get(id=game_data.player_id)
     card = Card.get(id=game_data.card_id)
     if card in player.hand:
         player.hand.remove(card)
     if game and card:
         game.discard_deck.add(card)
+
+    players_playing = len(
+        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        game.turn = (game.turn - 1) % players_playing
+    else:
+        game.turn = (game.turn + 1) % players_playing
+
+    return game
 
 
 @db_session
@@ -237,7 +255,7 @@ def finish_game(name: str) -> Game:
 
 
 @db_session
-def play_action_card(game_name: str, play_info: PlayInformation):
+def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
     result = {"message": "Action card played"}
     game = find_game_by_name(game_name)
     verify_player_in_game(play_info.player_id, game_name)
@@ -323,23 +341,39 @@ def play_action_card(game_name: str, play_info: PlayInformation):
         process_seduction_card(
             game, player, card, objective_player, card_to_exchange)
 
+    players_playing = len(
+        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        game.turn = (game.turn - 1) % players_playing
+    else:
+        game.turn = (game.turn + 1) % players_playing
+
     return result
 
 
 @db_session
 def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOut:
-    game = Game.get(name=game_name)
-    player = Player.get(id=game_data.player_id)
-    draw_deck = list(game.draw_deck)
-    card = draw_deck.pop(0)
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(game_data.player_id)
+
+    if len(game.draw_deck_order) == 1:
+        merge_decks_of_card(game_name)
+
+    top_card_id = game.draw_deck_order.pop(0)
+    card = select(card for card in game.draw_deck if card.id ==
+                  top_card_id).first()
 
     player.hand.add(card)
     game.draw_deck.remove(card)
 
-    if len(game.draw_deck) == 0:
-        utils.re_build_draw_deck(game)
+    top_card_face = select(
+        card for card in game.draw_deck if card.id == game.draw_deck_order[0]).first().type
 
     return DrawInformationOut(player_id=player.id,
-                              card=CardResponse.model_validate(card),
-                              top_card_face=list(game.draw_deck)[0].type
-                              )
+                              card=CardResponse(number=card.number,
+                                                type=card.type,
+                                                subtype=card.subtype,
+                                                name=card.name,
+                                                description=card.description,
+                                                id=card.id),
+                              top_card_face=top_card_face)

@@ -42,6 +42,8 @@ In the Makefile, you have the following targets:
 
 `make run` starts the Uvicorn server with the application. If it's not defined in the .env file, de default port is 8000.
 
+`make create-seed-data` Populates the database with 6 players and 1 game.
+
 `make delete-db` deletes the application's database file if it exists. It will request confirmation before deletion.
 
 `make test-all` runs the application's tests using pytest and tracks code coverage.

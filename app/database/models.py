@@ -1,4 +1,4 @@
-from pony.orm import PrimaryKey, Required, Set, Optional
+from pony.orm import PrimaryKey, Required, Set, Optional, Json
 from app.database import db
 from app.routers.games.schemas import GameStatus, RoundDirection
 
@@ -24,6 +24,7 @@ class Game(db.Entity):
     status = Required(str, default=GameStatus.UNSTARTED)
     discard_deck = Set('Card', reverse='games_discard_deck')
     draw_deck = Set('Card', reverse='games_draw_deck')
+    draw_deck_order = Required(Json, default=[])
     round_direction = Required(str, default=RoundDirection.CLOCKWISE)
 
 

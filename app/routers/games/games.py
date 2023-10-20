@@ -1,9 +1,11 @@
 from fastapi import APIRouter, status
+from pony.orm import db_session, select
 from app.database.models import Player
 from . import services
 from . import utils
 from .schemas import *
 from ..websockets.utils import player_connections
+from .utils import find_game_by_name
 from ..players.utils import get_player_name_by_id
 from ..cards.utils import get_card_name_by_id
 
@@ -136,7 +138,17 @@ async def leave_game(game_name: str, player_id: int):
 @router.patch("/{game_name}/discard", status_code=status.HTTP_200_OK)
 async def discard_card(game_name: str, game_data: DiscardInformationIn):
     utils.verify_discard_can_be_done(game_name, game_data)
-    services.discard_card(game_name, game_data)
+    game = services.discard_card(game_name, game_data)
+    with db_session:
+        player_id_turn = select(
+            p for p in game.players if p.position == game.turn).first().id
+    json_msg = {
+        "event": utils.Events.NEW_TURN,
+        "next_player_name": get_player_name_by_id(player_id_turn),
+        "next_player_id": player_id_turn,
+        "round_direction": game.round_direction
+    }
+    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
     return {"message": "Card discarded"}
 
 
@@ -149,6 +161,19 @@ async def play_action_card(game_name: str, play_info: PlayInformation):
         "card_name": get_card_name_by_id(play_info.card_id)
     }
     await player_connections.send_event_to_other_players_in_game(game_name, json_msg, play_info.player_id)
+
+    with db_session:
+        game = find_game_by_name(game_name)
+        player_id_turn = select(
+            p for p in game.players if p.position == game.turn).first().id
+    json_msg = {
+        "event": utils.Events.NEW_TURN,
+        "next_player_name": get_player_name_by_id(player_id_turn),
+        "next_player_id": player_id_turn,
+        "round_direction": game.round_direction
+    }
+    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+
     return result
 
 
@@ -160,6 +185,7 @@ async def draw_card(game_name: str, game_data: DrawInformationIn):
     json_msg = {
         "event": utils.Events.PLAYER_DRAW_CARD,
         "game_name": game_name,
+        "player_name": get_player_name_by_id(game_data.player_id),
         "player_id": game_data.player_id,
         "next_card": draw_card_information.top_card_face
     }
