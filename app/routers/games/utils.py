@@ -330,7 +330,7 @@ def verify_if_interchange_can_be_done(game_name: str, interchange_info: Intentio
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Is not the player turn"
         )
-    if interchange_info.card_id == 1:
+    if card.type == CardType.THE_THING:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='The Thing cannot be interchange'
@@ -360,10 +360,15 @@ def verify_if_interchange_response_can_be_done(game_name: str, game_data: Interc
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Card of the player in turn not found'
         )
-    if player_card.id == 1 or objective_player_card.id == 1:
+    if player_card.type == CardType.THE_THING or objective_player_card.type == CardType.THE_THING:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='The Thing cannot be interchange'
+        )
+    if player_card.type != CardType.STAY_AWAY:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The card of the next player in turn must be a STAY_AWAY card'
         )
     if player_card not in player.hand:
         raise HTTPException(
