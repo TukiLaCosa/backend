@@ -147,6 +147,15 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
     with db_session:
         player_id_turn = select(
             p for p in game.players if p.position == game.turn).first().id
+    
+    json_msg = {
+        "event": "discard_card",
+        "player_name": get_player_name_by_id(game_data.player_id),
+        "card_id": game_data.card_id,
+        "card_name": get_card_name_by_id(game_data.card_id)
+    }
+    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+    
     json_msg = {
         "event": utils.Events.NEW_TURN,
         "next_player_name": get_player_name_by_id(player_id_turn),
@@ -154,6 +163,7 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
         "round_direction": game.round_direction
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+    
     return {"message": "Card discarded"}
 
 
