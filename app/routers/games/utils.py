@@ -108,7 +108,7 @@ def verify_game_can_be_abandon(game_name: str, player_id: int):
 
 @db_session
 def verify_game_can_be_finished(game: Game):
-    if no_human_remains(game) or the_thing_is_eliminated(game):
+    if not (no_human_remains(game) or the_thing_is_eliminated(game)):
         raise Exception('There are living Humans and The Thing')
 
 
@@ -331,3 +331,13 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Is not the player turn"
         )
+
+
+@db_session
+def is_the_game_finished(game_name: str) -> bool:
+    game: Game = find_game_by_name(game_name)
+    try:
+        verify_game_can_be_finished(game)
+        return True
+    except:
+        return False

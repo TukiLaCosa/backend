@@ -257,6 +257,7 @@ async def finish_game(name: str) -> Game:
     await player_connections.send_event_to_all_players_in_game(game.name, json_msg)
     return game
 
+
 @db_session
 def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
     result = {"message": "Action card played"}
