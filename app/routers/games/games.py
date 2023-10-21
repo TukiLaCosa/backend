@@ -217,6 +217,7 @@ async def intention_to_interchange_card(game_name: str, interchange_info: Intent
 
 @router.patch("/{game_name}/card-interchange-response", status_code=status.HTTP_200_OK)
 async def card_interchange_response(game_name: str, game_data: InterchangeInformationIn):
+    utils.verify_if_interchange_response_can_be_done(game_name, game_data)
     services.card_interchange_response(game_name, game_data)
     json_msg = {
         "event": "exchange_done"

@@ -323,11 +323,67 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
 def verify_if_interchange_can_be_done(game_name: str, interchange_info: IntentionExchangeInformationIn):
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(interchange_info.player_id)
+    card: Card = Card[interchange_info.card_id]
 
     if game.turn != player.position:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Is not the player turn"
+        )
+    if interchange_info.card_id == 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The Thing cannot be interchange'
+        )
+    if card not in player.hand:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The card selected for the interchange is not in the player hand'
+        )
+    
+
+@db_session
+def verify_if_interchange_response_can_be_done(game_name: str, game_data: InterchangeInformationIn):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(game_data.player_id)
+    player_card: Card = Card[game_data.card_id]
+    objective_player: Player = find_player_by_id(game_data.objective_player_id)
+    objective_player_card: Card = Card[game_data.objective_card_id]
+
+    if not player_card:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Card of next player in turn not found'
+        )
+    if not objective_player_card:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Card of the player in turn not found'
+        )
+    if player_card.id == 1 or objective_player_card.id == 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The Thing cannot be interchange'
+        )
+    if player_card not in player.hand:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The card selected for the interchange is not in the next player hand'
+        )
+    if objective_player_card not in objective_player.hand:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The card selected for the interchange is not in the player hand'
+        )
+    if not player in game.players:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The next player in turn is not in the game'
+        )
+    if not objective_player in game.players:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The player in turn is not in the game'
         )
 
 
