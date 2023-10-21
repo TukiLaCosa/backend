@@ -134,6 +134,7 @@ class DrawInformationOut(BaseModel):
 class GameResult(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    reason: str
     winners: List[PlayerInfo]
     losers: List[PlayerInfo]
 

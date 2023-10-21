@@ -109,24 +109,38 @@ def verify_game_can_be_abandon(game_name: str, player_id: int):
 
 @db_session
 def verify_game_can_be_finished(game: Game):
-    if not the_thing_is_eliminated(game):
-        raise Exception('The Thing is still alive')
-
-    if not no_human_remains(game):
-        raise Exception('There are living Humans')
+    if not (no_human_remains(game) or the_thing_is_eliminated(game)):
+        raise Exception('There are living Humans and The Thing')
 
 
 @db_session
 def the_thing_is_eliminated(game: Game) -> bool:
-    the_thing = game.players.select(
-        lambda p: p.rol == PlayerRol.THE_THING).count()
-    return the_thing == 0
+    the_thing_exists = game.players.select(
+        lambda p: p.rol == PlayerRol.THE_THING).exists()
+
+    return not the_thing_exists
 
 
 @db_session
 def no_human_remains(game: Game) -> bool:
-    humans = game.players.select(lambda p: p.rol == PlayerRol.HUMAN).count()
-    return humans == 0
+    the_thing_exists = game.players.select(
+        lambda p: p.rol == PlayerRol.THE_THING).exists()
+
+    number_of_humans = game.players.select(
+        lambda p: p.rol == PlayerRol.HUMAN).count()
+
+    return the_thing_exists and number_of_humans == 0
+
+
+@db_session
+def the_thing_infected_everyone(game: Game) -> bool:
+    the_thing_exists = game.players.select(
+        lambda p: p.rol == PlayerRol.THE_THING).exists()
+
+    number_of_infecteds = game.players.select(
+        lambda p: p.rol == PlayerRol.INFECTED).count()
+
+    return the_thing_exists and number_of_infecteds == count(game.players) - 1
 
 
 @db_session
@@ -416,3 +430,12 @@ def get_id_of_next_player_in_turn(game_name):
     next_player_id = select(
         p.id for p in game.players if p.position == next_turn).first()
     return next_player_id
+
+def is_the_game_finished(game_name: str) -> bool:
+    game: Game = find_game_by_name(game_name)
+    try:
+        verify_game_can_be_finished(game)
+        return True
+    except:
+        return False
+
