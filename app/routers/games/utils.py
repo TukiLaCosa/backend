@@ -7,6 +7,7 @@ from .schemas import *
 from ..websockets.utils import player_connections, get_players_id
 from ..players.schemas import PlayerRol
 from ..players.utils import find_player_by_id
+from ..cards.schemas import CardType, CardSubtype
 
 
 class Events(str, Enum):
@@ -340,6 +341,11 @@ def verify_if_interchange_can_be_done(game_name: str, interchange_info: Intentio
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='The card selected for the interchange is not in the player hand'
         )
+    if card.subtype == CardSubtype.CONTAGION and player.rol != PlayerRol.THE_THING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The player cannot pass the card Infected because is not The Thing'
+        )
     
 
 @db_session
@@ -389,6 +395,11 @@ def verify_if_interchange_response_can_be_done(game_name: str, game_data: Interc
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='The player in turn is not in the game'
+        )
+    if player_card.subtype == CardSubtype.CONTAGION and player.rol != PlayerRol.THE_THING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Player next in turn cannot pass an infected card because is not The Thing'
         )
 
 
