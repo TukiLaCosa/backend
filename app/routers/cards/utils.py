@@ -1,7 +1,7 @@
 from pony.orm import db_session
 from fastapi import HTTPException, status
 from app.database.models import Card
-from ..cards.schemas import CardSubtype
+from ..cards.schemas import CardType, CardSubtype
 
 
 @db_session
@@ -22,6 +22,12 @@ def verify_action_card(card: Card):
             detail="Card is not an ACTION card"
         )
 
+def verify_panic_card(card: Card):
+    if card.typej != CardType.PANIC:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Card is not a PANIC card"
+        )
 
 @db_session
 def get_card_name_by_id(card_id: int) -> str:

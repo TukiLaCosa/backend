@@ -6,9 +6,9 @@ from ..players.schemas import PlayerRol
 from fastapi import HTTPException, status
 from .utils import *
 from ..cards import services as cards_services
-from ..cards.utils import find_card_by_id, verify_action_card
+from ..cards.utils import find_card_by_id, verify_action_card, verify_panic_card
 from ..players.utils import find_player_by_id, verify_card_in_hand
-from ..cards.schemas import CardActionName, CardResponse
+from ..cards.schemas import CardActionName, CardResponse, CardPanicName
 from ..players.schemas import PlayerRol
 from .action_functions import *
 import random
@@ -259,7 +259,7 @@ async def finish_game(name: str) -> Game:
 
 
 @db_session
-def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
+def play_action_card(game_name: str, play_info: PlayInformation):
     result = {"message": "Action card played"}
     game = find_game_by_name(game_name)
     verify_player_in_game(play_info.player_id, game_name)
@@ -423,3 +423,65 @@ def get_game_result(name: str) -> GameResult:
         winners=[PlayerInfo.model_validate(p) for p in winners],
         losers=[PlayerInfo.model_validate(p) for p in losers]
     )
+
+@db_session
+def play_panic_card(game_name: str, play_info: PlayInformation):
+    result = {"message": "Panic card played"}
+    game = find_game_by_name(game_name)
+    verify_player_in_game(play_info.player_id, game_name)
+    player = find_player_by_id(play_info.player_id)
+    card = find_card_by_id(play_info.card_id)
+    verify_panic_card(card)
+    verify_card_in_hand(player, card)
+
+    # Que quede entre nosotros
+    if card.name == CardPanicName.JUST_BETWEEN_US:
+        pass
+
+    # Revelaciones
+    if card.name == CardPanicName.REVELATIONS:
+        pass
+
+    # Cuerdas podridas
+    if card.name == CardPanicName.ROTTEN_ROPES:
+        pass
+
+    # Uno, dos...
+    if card.name == CardPanicName.ONE_TWO:
+        pass
+
+    # Tres, cuatro
+    if card.name == CardPanicName.THREE_FOUR:
+        pass
+
+    # ¿Es aquí la fiesta?
+    if card.name == CardPanicName.SO_THIS_IS_THE_PARTY:
+        pass
+
+    # Ups
+    if card.name == CardPanicName.OOOPS:
+        pass
+
+    # Olvidadizo
+    if card.name == CardPanicName.FORGETFUL:
+        pass
+
+    # Vuelta y vuelta
+    if card.name == CardPanicName.ROUND_AND_ROUND:
+        pass
+
+    # ¿No podemos ser amigos?
+    if card.name == CardPanicName.CANT_WE_BE_FRIENDS:
+        pass
+
+    # Cita a ciegas
+    if card.name == CardPanicName.BLIND_DATE:
+        pass
+
+    # ¡Sal de aquí!
+    if card.name == CardPanicName.GETOUT:
+        pass
+
+
+    return result
+
