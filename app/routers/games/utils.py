@@ -7,6 +7,7 @@ from .schemas import *
 from ..websockets.utils import player_connections, get_players_id
 from ..players.schemas import PlayerRol
 from ..players.utils import find_player_by_id
+from ..cards.schemas import CardType, CardSubtype
 
 
 class Events(str, Enum):
@@ -334,6 +335,102 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
 
 
 @db_session
+def verify_if_interchange_can_be_done(game_name: str, interchange_info: IntentionExchangeInformationIn):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(interchange_info.player_id)
+    card: Card = Card[interchange_info.card_id]
+
+    if game.turn != player.position:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Is not the player turn"
+        )
+    if card.type == CardType.THE_THING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The Thing cannot be interchange'
+        )
+    if card not in player.hand:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The card selected for the interchange is not in the player hand'
+        )
+    if card.subtype == CardSubtype.CONTAGION and player.rol != PlayerRol.THE_THING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The player cannot pass the card Infected because is not The Thing'
+        )
+    
+
+@db_session
+def verify_if_interchange_response_can_be_done(game_name: str, game_data: InterchangeInformationIn):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(game_data.player_id)
+    player_card: Card = Card[game_data.card_id]
+    objective_player: Player = find_player_by_id(game_data.objective_player_id)
+    objective_player_card: Card = Card[game_data.objective_card_id]
+
+    if not player_card:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Card of next player in turn not found'
+        )
+    if not objective_player_card:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Card of the player in turn not found'
+        )
+    if player_card.type == CardType.THE_THING or objective_player_card.type == CardType.THE_THING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The Thing cannot be interchange'
+        )
+    if player_card.type != CardType.STAY_AWAY:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The card of the next player in turn must be a STAY_AWAY card'
+        )
+    if player_card not in player.hand:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The card selected for the interchange is not in the next player hand'
+        )
+    if objective_player_card not in objective_player.hand:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The card selected for the interchange is not in the player hand'
+        )
+    if not player in game.players:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The next player in turn is not in the game'
+        )
+    if not objective_player in game.players:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The player in turn is not in the game'
+        )
+    if player_card.subtype == CardSubtype.CONTAGION and player.rol != PlayerRol.THE_THING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Player next in turn cannot pass an infected card because is not The Thing'
+        )
+
+
+@db_session
+def get_id_of_next_player_in_turn(game_name):
+    game: Game = find_game_by_name(game_name)
+    players_playing = len(
+        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        next_turn = (game.turn - 1) % players_playing
+    else:
+        next_turn = (game.turn + 1) % players_playing
+
+    next_player_id = select(
+        p.id for p in game.players if p.position == next_turn).first()
+    return next_player_id
+
 def is_the_game_finished(game_name: str) -> bool:
     game: Game = find_game_by_name(game_name)
     try:
@@ -341,3 +438,4 @@ def is_the_game_finished(game_name: str) -> bool:
         return True
     except:
         return False
+
