@@ -387,11 +387,11 @@ def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOu
 def get_game_result(name: str) -> GameResult:
     game: Game = find_game_by_name(name)
 
-    # if game.status != GameStatus.ENDED:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_400_BAD_REQUEST,
-    #         detail=f"The game is not ended."
-    #     )
+    if game.status != GameStatus.ENDED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"The game is not ended."
+        )
 
     reason = ""
     winners = []
