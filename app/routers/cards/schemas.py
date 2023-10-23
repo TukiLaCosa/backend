@@ -41,7 +41,7 @@ class CardPanicName(str, Enum):
     ROUND_AND_ROUND = 'Vuelta y vuelta'
     CANT_WE_BE_FRIENDS = '¿No podemos ser amigos?'
     BLIND_DATE = 'Cita a ciegas'
-    GETOUT = '¡Sal de aquí!'
+    GETOUT_OF_HERE = '¡Sal de aquí!'
 
 
 class BaseCard(BaseModel):

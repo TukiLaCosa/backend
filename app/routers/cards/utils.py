@@ -23,7 +23,7 @@ def verify_action_card(card: Card):
         )
 
 def verify_panic_card(card: Card):
-    if card.typej != CardType.PANIC:
+    if card.type != CardType.PANIC:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Card is not a PANIC card"

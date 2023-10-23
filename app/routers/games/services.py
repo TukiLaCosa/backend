@@ -7,10 +7,11 @@ from fastapi import HTTPException, status
 from .utils import *
 from ..cards import services as cards_services
 from ..cards.utils import find_card_by_id, verify_action_card, verify_panic_card
-from ..players.utils import find_player_by_id, verify_card_in_hand
+from ..players.utils import find_player_by_id, verify_card_in_hand, verify_player_not_in_quarentine
 from ..cards.schemas import CardActionName, CardResponse, CardPanicName
 from ..players.schemas import PlayerRol
 from .action_functions import *
+from .panic_functions import *
 import random
 from app.routers.games import utils
 
@@ -424,6 +425,7 @@ def get_game_result(name: str) -> GameResult:
         losers=[PlayerInfo.model_validate(p) for p in losers]
     )
 
+
 @db_session
 def play_panic_card(game_name: str, play_info: PlayInformation):
     result = {"message": "Panic card played"}
@@ -434,9 +436,18 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
     verify_panic_card(card)
     verify_card_in_hand(player, card)
 
+    players_not_eliminated = select(
+        p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
+
     # Que quede entre nosotros
     if card.name == CardPanicName.JUST_BETWEEN_US:
-        pass
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        objective_player: Player = find_player_by_id(
+            play_info.objective_player_id)
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                players_not_eliminated - 1)
+        process_between_us_card(game, player, card)
 
     # Revelaciones
     if card.name == CardPanicName.REVELATIONS:
@@ -479,9 +490,11 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
         pass
 
     # ¡Sal de aquí!
-    if card.name == CardPanicName.GETOUT:
-        pass
-
+    if card.name == CardPanicName.GETOUT_OF_HERE:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        objective_player: Player = find_player_by_id(
+            play_info.objective_player_id)
+        verify_player_not_in_quarentine(objective_player)
+        process_getout_of_here_card(game, player, card, objective_player)
 
     return result
-
