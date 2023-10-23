@@ -388,3 +388,14 @@ def is_the_game_finished(game_name: str) -> bool:
         return True
     except:
         return False
+
+
+@db_session
+def update_game_turn(game_name: str):
+    game: Game = find_game_by_name(game_name)
+    players_playing = len(
+        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        game.turn = (game.turn - 1) % players_playing
+    else:
+        game.turn = (game.turn + 1) % players_playing

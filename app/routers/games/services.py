@@ -346,12 +346,7 @@ def play_action_card(game_name: str, play_info: PlayInformation):
         process_seduction_card(
             game, player, card, objective_player, card_to_exchange)
 
-    players_playing = len(
-        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
-    if game.round_direction == RoundDirection.CLOCKWISE:
-        game.turn = (game.turn - 1) % players_playing
-    else:
-        game.turn = (game.turn + 1) % players_playing
+    update_game_turn(game_name)
 
     return result
 
@@ -496,6 +491,8 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
             play_info.objective_player_id)
         verify_player_not_in_quarentine(objective_player)
         process_getout_of_here_card(game, player, card, objective_player)
+
+    utils.update_game_turn(game_name)
 
     return result
 
