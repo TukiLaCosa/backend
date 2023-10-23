@@ -7,6 +7,7 @@ from .schemas import *
 from ..websockets.utils import player_connections, get_players_id
 from ..players.schemas import PlayerRol
 from ..players.utils import find_player_by_id
+from ..cards.utils import find_card_by_id
 
 
 class Events(str, Enum):
@@ -25,6 +26,8 @@ class Events(str, Enum):
     PLAYER_DRAW_CARD = 'player_draw_card'
     NEW_TURN = 'new_turn'
     BETWEEN_US_CARD_PLAYED = 'between_us_card_played'
+    ROUND_AND_ROUND_START = 'round_and_round_start'
+    ROUND_AND_ROUND_END = 'round_and_round_end'
 
 
 @db_session
@@ -331,6 +334,49 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Is not the player turn"
+        )
+
+
+@db_session
+def verify_player_is_next_in_turn(game_name: str, player_id: int, other_player_id: int):
+    game = find_game_by_name(game_name)
+    player = find_player_by_id(player_id)
+    other_player = find_player_by_id(other_player_id)
+
+    players_not_eliminated = select(
+        p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
+
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        next_turn = (player.position - 1) % players_not_eliminated
+    else:
+        next_turn = (player.position + 1) % players_not_eliminated
+
+    if next_turn != other_player.position:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The player selected is not the next in turn"
+        )
+
+
+@db_session
+def verify_pass_card_can_be_done(game_name: str, play_info: PlayInformation):
+    player: Player = find_player_by_id(play_info.player_id)
+    card: Card = find_card_by_id(play_info.card_id)
+    verify_player_in_game(play_info.player_id, game_name)
+    verify_player_in_game(play_info.objective_player_id, game_name)
+    verify_player_is_next_in_turn(
+        play_info.player_id, play_info.objective_player_id)
+    if card.type == CardType.THE_THING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The Thing cannot be passed"
+        )
+    is_card_in_player = select(
+        c for c in player.hand if (c.id == card.id)).exists()
+    if not is_card_in_player:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The card is not in the hand of the player"
         )
 
 

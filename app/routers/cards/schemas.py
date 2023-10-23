@@ -29,6 +29,7 @@ class CardActionName(str, Enum):
     BETTER_RUN = '¡Más vale que corras!'
     SEDUCTION = 'Seducción'
 
+
 class CardPanicName(str, Enum):
     JUST_BETWEEN_US = 'Que quede entre nosotros...'
     REVELATIONS = 'Revelaciones'

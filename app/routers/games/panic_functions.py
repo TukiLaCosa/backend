@@ -18,6 +18,13 @@ async def send_player_between_us_event(to_player_id: int, player_id: int, player
     await player_connections.send_event_to(to_player_id, json_msg)
 
 
+async def send_round_and_round_start_event(game_name: str):
+    json_msg = {
+        "event": Events.ROUND_AND_ROUND_START
+    }
+    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+
+
 @db_session
 def process_between_us_card(game: Game, player: Player, card: Card, objective_player: Player):
     game.discard_deck.add(card)
@@ -25,6 +32,14 @@ def process_between_us_card(game: Game, player: Player, card: Card, objective_pl
 
     asyncio.ensure_future(send_player_between_us_event(
         objective_player.id, player.id, player.name))
+
+
+@db_session
+def process_round_and_round_card(game: Game, player: Player, card: Card):
+    game.discard_deck.add(card)
+    player.hand.remove(card)
+
+    asyncio.ensure_future(send_round_and_round_start_event(game.name))
 
 
 @db_session

@@ -479,7 +479,7 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
 
     # Vuelta y vuelta
     if card.name == CardPanicName.ROUND_AND_ROUND:
-        pass
+        process_round_and_round_card(game, player, card)
 
     # ¿No podemos ser amigos?
     if card.name == CardPanicName.CANT_WE_BE_FRIENDS:
@@ -498,3 +498,13 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
         process_getout_of_here_card(game, player, card, objective_player)
 
     return result
+
+
+@db_session
+def pass_card(play_info: PlayInformation):
+    player: Player = find_player_by_id(play_info.player_id)
+    objective_player: Player = find_player_by_id(play_info.objective_player_id)
+    card: Card = find_card_by_id(play_info.card_id)
+
+    objective_player.hand.add(card)
+    player.hand.remove(card)

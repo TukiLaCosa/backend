@@ -30,6 +30,7 @@ def get_player_name_by_id(player_id: int) -> str:
     player = find_player_by_id(player_id)
     return player.name
 
+
 @db_session
 def verify_player_not_in_quarentine(player: Player):
     if player.isQuatentined:
