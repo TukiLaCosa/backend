@@ -231,7 +231,7 @@ def discard_card(game_name: str, game_data: DiscardInformationIn) -> Game:
 
     players_playing = len(
         list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
-    if game.round_direction == RoundDirection.CLOCKWISE:
+    if game.round_direction != RoundDirection.CLOCKWISE:
         game.turn = (game.turn - 1) % players_playing
     else:
         game.turn = (game.turn + 1) % players_playing
@@ -352,7 +352,7 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
 
     players_playing = len(
         list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
-    if game.round_direction == RoundDirection.CLOCKWISE:
+    if game.round_direction != RoundDirection.CLOCKWISE:
         game.turn = (game.turn - 1) % players_playing
     else:
         game.turn = (game.turn + 1) % players_playing
@@ -446,7 +446,7 @@ def card_interchange_response(game_name: str, game_data: InterchangeInformationI
 
     players_playing = len(
         list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
-    if game.round_direction == RoundDirection.CLOCKWISE:
+    if game.round_direction != RoundDirection.CLOCKWISE:
         game.turn = (game.turn - 1) % players_playing
     else:
         game.turn = (game.turn + 1) % players_playing
