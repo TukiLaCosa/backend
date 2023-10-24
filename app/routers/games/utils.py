@@ -422,7 +422,7 @@ def get_id_of_next_player_in_turn(game_name):
     game: Game = find_game_by_name(game_name)
     players_playing = len(
         list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
-    if game.round_direction == RoundDirection.CLOCKWISE:
+    if game.round_direction != RoundDirection.CLOCKWISE:
         next_turn = (game.turn - 1) % players_playing
     else:
         next_turn = (game.turn + 1) % players_playing
