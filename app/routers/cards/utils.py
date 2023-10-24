@@ -35,3 +35,9 @@ def verify_panic_card(card: Card):
 def get_card_name_by_id(card_id: int) -> str:
     card = find_card_by_id(card_id)
     return card.name
+
+
+@db_session
+def get_card_type_by_id(card_id: int) -> str:
+    card: Card = find_card_by_id(card_id)
+    return card.type

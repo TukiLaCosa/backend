@@ -10,7 +10,7 @@ class CardType(str, Enum):
 
 
 class CardSubtype(str, Enum):
-    CONTACION = 'CONTAGION'
+    CONTAGION = 'CONTAGION'
     ACTION = 'ACTION'
     DEFENSE = 'DEFENSE'
     OBSTACLE = 'OBSTACLE'
