@@ -249,8 +249,8 @@ def verify_discard_can_be_done(game_name: str, game_data: DiscardInformationIn):
 
 @db_session
 def verify_player_in_game(player_id: int, game_name: str):
-    player = Player.get(id=player_id)
-    game = Game.get(name=game_name)
+    player: Player = find_player_by_id(player_id)
+    game: Game = find_game_by_name(game_name)
     if player and game:
         if player in game.players:
             pass
@@ -422,10 +422,10 @@ def get_id_of_next_player_in_turn(game_name):
     game: Game = find_game_by_name(game_name)
     players_playing = len(
         list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
-    if game.round_direction != RoundDirection.CLOCKWISE:
-        next_turn = (game.turn - 1) % players_playing
-    else:
+    if game.round_direction == RoundDirection.CLOCKWISE:
         next_turn = (game.turn + 1) % players_playing
+    else:
+        next_turn = (game.turn - 1) % players_playing
 
     next_player_id = select(
         p.id for p in game.players if p.position == next_turn).first()
@@ -438,4 +438,15 @@ def is_the_game_finished(game_name: str) -> bool:
         return True
     except:
         return False
+    
+
+@db_session
+def update_game_turn(game_name: str):
+    game: Game = find_game_by_name(game_name)
+    players_playing = len(
+        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        game.turn = (game.turn + 1) % players_playing
+    else:
+        game.turn = (game.turn - 1) % players_playing
 

@@ -229,12 +229,7 @@ def discard_card(game_name: str, game_data: DiscardInformationIn) -> Game:
     if game and card:
         game.discard_deck.add(card)
 
-    players_playing = len(
-        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
-    if game.round_direction != RoundDirection.CLOCKWISE:
-        game.turn = (game.turn - 1) % players_playing
-    else:
-        game.turn = (game.turn + 1) % players_playing
+    update_game_turn(game_name)
 
     return game
 
@@ -261,10 +256,10 @@ async def finish_game(name: str) -> Game:
 @db_session
 def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
     result = {"message": "Action card played"}
-    game = find_game_by_name(game_name)
+    game: Game = find_game_by_name(game_name)
     verify_player_in_game(play_info.player_id, game_name)
-    player = find_player_by_id(play_info.player_id)
-    card = find_card_by_id(play_info.card_id)
+    player: Player = find_player_by_id(play_info.player_id)
+    card: Card = find_card_by_id(play_info.card_id)
     verify_action_card(card)
     verify_card_in_hand(player, card)
 
@@ -277,11 +272,10 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
         verify_adjacent_players(play_info.player_id,
                                 play_info.objective_player_id,
                                 players_not_eliminated - 1)
-        objective_player = find_player_by_id(play_info.objective_player_id)
+        objective_player: Player = find_player_by_id(play_info.objective_player_id)
 
-        # fix provisorio
-        if player.position > objective_player.position:
-            game.turn = objective_player.position
+        if game.turn != 0 and objective_player.position < player.position:
+            game.turn = game.turn - 1
 
         process_flamethrower_card(game, player, card, objective_player)
 
@@ -291,8 +285,8 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
         verify_adjacent_players(play_info.player_id,
                                 play_info.objective_player_id,
                                 players_not_eliminated - 1)
-        objective_player = find_player_by_id(play_info.objective_player_id)
-
+        objective_player: Player = find_player_by_id(play_info.objective_player_id)
+        
         # Armo listado de cartas del jugador objetivo para enviar en el body response
         result = process_analysis_card(game, player, card, objective_player)
 
@@ -306,7 +300,7 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
         verify_adjacent_players(play_info.player_id,
                                 play_info.objective_player_id,
                                 players_not_eliminated - 1)
-        objective_player = find_player_by_id(play_info.objective_player_id)
+        objective_player: Player = find_player_by_id(play_info.objective_player_id)
         result = process_suspicious_card(game, player, card, objective_player)
 
     # Whisky
@@ -327,20 +321,20 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
         verify_adjacent_players(play_info.player_id,
                                 play_info.objective_player_id,
                                 players_not_eliminated - 1)
-        objective_player = find_player_by_id(play_info.objective_player_id)
+        objective_player: Player = find_player_by_id(play_info.objective_player_id)
         process_change_places_card(game, player, card, objective_player)
 
     # Mas vale que corras
     if card.name == CardActionName.BETTER_RUN:
         verify_player_in_game(play_info.objective_player_id, game_name)
-        objective_player = find_player_by_id(play_info.objective_player_id)
+        objective_player: Player = find_player_by_id(play_info.objective_player_id)
         process_better_run_card(game, player, card, objective_player)
 
     # Seduccion (Ojo porque esta carta modifica la mano del jugador objetivo)
     if card.name == CardActionName.SEDUCTION:
         verify_player_in_game(play_info.objective_player_id, game_name)
-        objective_player = find_player_by_id(play_info.objective_player_id)
-        card_to_exchange = find_card_by_id(play_info.card_to_exchange)
+        objective_player: Player = find_player_by_id(play_info.objective_player_id)
+        card_to_exchange: Card = find_card_by_id(play_info.card_to_exchange)
         if card_to_exchange.type == CardType.THE_THING:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -350,12 +344,7 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
         process_seduction_card(
             game, player, card, objective_player, card_to_exchange)
 
-    players_playing = len(
-        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
-    if game.round_direction != RoundDirection.CLOCKWISE:
-        game.turn = (game.turn - 1) % players_playing
-    else:
-        game.turn = (game.turn + 1) % players_playing
+    update_game_turn(game_name)
 
     return result
 
@@ -444,9 +433,4 @@ def card_interchange_response(game_name: str, game_data: InterchangeInformationI
     player.hand.add(next_player_card)
     next_player.hand.add(player_card)
 
-    players_playing = len(
-        list(select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)))
-    if game.round_direction != RoundDirection.CLOCKWISE:
-        game.turn = (game.turn - 1) % players_playing
-    else:
-        game.turn = (game.turn + 1) % players_playing
+    update_game_turn(game_name)
