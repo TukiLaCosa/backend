@@ -24,6 +24,9 @@ async def send_players_eliminated_event(game: Game, eliminated_id: int, eliminat
     }
     for p in game.players:
         await player_connections.send_event_to(p.id, json_msg)
+
+    # Espera 4 segundos antes de enviar el siguiente evento
+    await asyncio.sleep(4)
     
     with db_session:
         player_id_turn = select(
