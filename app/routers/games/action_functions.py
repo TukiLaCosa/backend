@@ -4,7 +4,7 @@ from ..players.schemas import PlayerRol
 from ..cards.schemas import CardType, CardResponse
 from ..websockets.utils import player_connections
 from .utils import Events
-from .schemas import RoundDirection
+from .schemas import RoundDirection, GameStatus
 from ..players.utils import get_player_name_by_id
 import random
 import asyncio
