@@ -7,7 +7,7 @@ from .schemas import *
 from ..websockets.utils import player_connections, get_players_id
 from ..players.schemas import PlayerRol
 from ..players.utils import find_player_by_id
-from ..cards.schemas import CardType, CardSubtype
+from ..cards.schemas import CardType, CardSubtype, CardActionName
 
 
 class Events(str, Enum):
@@ -450,3 +450,11 @@ def update_game_turn(game_name: str):
     else:
         game.turn = (game.turn - 1) % players_playing
 
+
+@db_session
+def is_flamethrower(card_id: int):
+    card: Card = Card.get(card_id)
+    if(card.name == CardActionName.FLAMETHROWER):
+        return True
+    else:
+        return False
