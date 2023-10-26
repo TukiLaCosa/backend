@@ -29,6 +29,11 @@ class Events(str, Enum):
     BETWEEN_US_CARD_PLAYED = 'between_us_card_played'
     ROUND_AND_ROUND_START = 'round_and_round_start'
     ROUND_AND_ROUND_END = 'round_and_round_end'
+    REVELATIONS_CARD_PLAYED = 'revelations_card_played'
+    REVELATIONS_SHOW = 'revelations_show'
+    REVELATIONS_DONE = 'revelations_done'
+    EXCHANGE_INTENTION = 'exchange_intention'
+    EXCHANGE_DONE = 'exchange_done'
 
 
 @db_session

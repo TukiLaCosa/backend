@@ -275,7 +275,7 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
     utils.verify_if_interchange_response_can_be_done(game_name, game_data)
     services.card_interchange_response(game_name, game_data)
     json_msg = {
-        "event": "exchange_done"
+        "event": utils.Events.EXCHANGE_DONE
     }
     await player_connections.send_event_to(game_data.player_id, json_msg)
     await player_connections.send_event_to(game_data.objective_player_id, json_msg)
@@ -293,3 +293,16 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
     return {"message": "Card interchange terminated."}
+
+
+@router.post("/{game_name}/show_revelations_cards/{player_id}", status_code=status.HTTP_200_OK)
+async def show_revelations_cards(game_name: str, player_id: int, game_data: ShowRevelationsCardsIn):
+    utils.verify_player_in_game(player_id, game_name)
+    utils.verify_player_in_game(game_data.original_player_id, game_name)
+    services.show_cards(game_name, player_id, game_data)
+    if player_id == game_data.original_player_id:
+        json_msg = {
+            "event": utils.Events.REVELATIONS_DONE
+        }
+        await player_connections.send_event_to(player_id, json_msg)
+    return {"message": "Show card terminated."}

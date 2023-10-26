@@ -153,3 +153,10 @@ class InterchangeInformationIn(BaseModel):
     card_id: int  # Card ID del jugador que recibe la intencion
     objective_player_id: int  # ID jugador que inicia la intencion
     objective_card_id: int  # Card ID del jugador que inicia la intencion
+
+
+class ShowRevelationsCardsIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    original_player_id: int  # ID del jugador que jugo la carta Revelaciones
+    show_my_cards: bool

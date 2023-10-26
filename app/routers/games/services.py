@@ -275,7 +275,7 @@ def play_action_card(game_name: str, play_info: PlayInformation):
                                 players_not_eliminated - 1)
         objective_player: Player = find_player_by_id(
             play_info.objective_player_id)
-        
+
         if game.turn != 0 and objective_player.position < player.position:
             game.turn = game.turn - 1
 
@@ -451,7 +451,7 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
 
     # Revelaciones
     if card.name == CardPanicName.REVELATIONS:
-        pass
+        process_revelations_card(game, player, card)
 
     # Cuerdas podridas
     if card.name == CardPanicName.ROTTEN_ROPES:
@@ -528,3 +528,19 @@ def card_interchange_response(game_name: str, game_data: InterchangeInformationI
     next_player.hand.add(player_card)
 
     update_game_turn(game_name)
+
+
+async def show_revelations_cards(game_name: str, player_id: int, game_data: ShowRevelationsCardsIn):
+    if game_data.show_my_cards:
+        json_msg = {
+            "event": utils.Events.REVELATIONS_SHOW,
+            "player_id": player_id
+        }
+        await player_connections.send_event_to_other_players_in_game(game_name, json_msg, player_id)
+    if player_id != game_data.original_player_id:
+        next_player_id = get_id_of_next_player_in_turn(game_name)
+        json_msg = {
+            "event": Events.REVELATIONS_CARD_PLAYED,
+            "original_player_id": game_data.original_player_id
+        }
+        await player_connections.send_event_to(next_player_id, json_msg)

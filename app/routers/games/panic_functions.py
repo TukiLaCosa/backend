@@ -3,7 +3,7 @@ from app.database.models import Game, Card, Player
 from ..players.schemas import PlayerRol
 from ..cards.schemas import CardType, CardResponse
 from ..websockets.utils import player_connections
-from .utils import Events
+from .utils import Events, get_id_of_next_player_in_turn
 from .schemas import RoundDirection
 import random
 import asyncio
@@ -23,6 +23,23 @@ async def send_round_and_round_start_event(game_name: str):
         "event": Events.ROUND_AND_ROUND_START
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+
+
+async def send_revelations_card_played_event(game_name: str, original_player_id: int, next_player_id: int):
+    json_msg = {
+        "event": Events.REVELATIONS_CARD_PLAYED,
+        "original_player_id": original_player_id
+    }
+    await player_connections.send_event_to(next_player_id, json_msg)
+
+
+@db_session
+def process_revelations_card(game: Game, player: Player, card: Card):
+    game.discard_deck.add(card)
+    player.hand.remove(card)
+    next_player_id = get_id_of_next_player_in_turn(game.name)
+    asyncio.ensure_future(send_revelations_card_played_event(
+        game.name, player.id, next_player_id))
 
 
 @db_session
