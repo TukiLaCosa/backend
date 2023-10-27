@@ -1,7 +1,7 @@
 from pony.orm import db_session
 from fastapi import HTTPException, status
 from app.database.models import Card
-from ..cards.schemas import CardSubtype
+from ..cards.schemas import CardSubtype, CardActionName
 
 
 @db_session
@@ -33,3 +33,8 @@ def get_card_name_by_id(card_id: int) -> str:
 def get_card_type_by_id(card_id: int) -> str:
     card: Card = find_card_by_id(card_id)
     return card.type
+
+@db_session
+def is_flamethrower(card_id: int) -> bool:
+    card: Card = find_card_by_id(card_id)
+    return (card.name == CardActionName.FLAMETHROWER)

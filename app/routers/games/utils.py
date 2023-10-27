@@ -449,4 +449,3 @@ def update_game_turn(game_name: str):
         game.turn = (game.turn + 1) % players_playing
     else:
         game.turn = (game.turn - 1) % players_playing
-
