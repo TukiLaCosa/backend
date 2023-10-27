@@ -42,6 +42,7 @@ def get_card_type_by_id(card_id: int) -> str:
     card: Card = find_card_by_id(card_id)
     return card.type
 
+
 @db_session
 def is_flamethrower(card_id: int) -> bool:
     card: Card = find_card_by_id(card_id)

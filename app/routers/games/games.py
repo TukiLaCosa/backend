@@ -181,19 +181,6 @@ async def play_action_card(game_name: str, play_info: PlayInformation):
         }
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
-        if not is_flamethrower(play_info.card_id):
-            with db_session:
-                game = find_game_by_name(game_name)
-                player_id_turn = select(
-                    p for p in game.players if p.position == game.turn).first().id
-            json_msg = {
-                "event": utils.Events.NEW_TURN,
-                "next_player_name": get_player_name_by_id(player_id_turn),
-                "next_player_id": player_id_turn,
-                "round_direction": game.round_direction
-            }
-            await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
-
     return result
 
 
@@ -210,17 +197,6 @@ async def play_action_card(game_name: str, play_info: PlayInformation):
         }
         await player_connections.send_event_to_other_players_in_game(game_name, json_msg, play_info.player_id)
 
-        with db_session:
-            game = find_game_by_name(game_name)
-            player_id_turn = select(
-                p for p in game.players if p.position == game.turn).first().id
-        json_msg = {
-            "event": utils.Events.NEW_TURN,
-            "next_player_name": get_player_name_by_id(player_id_turn),
-            "next_player_id": player_id_turn,
-            "round_direction": game.round_direction
-        }
-        await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
     return result
 
 
