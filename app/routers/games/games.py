@@ -156,14 +156,6 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
-    json_msg = {
-        "event": utils.Events.NEW_TURN,
-        "next_player_name": get_player_name_by_id(player_id_turn),
-        "next_player_id": player_id_turn,
-        "round_direction": game.round_direction
-    }
-    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
-
     return {"message": "Card discarded"}
 
 
