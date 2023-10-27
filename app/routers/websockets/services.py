@@ -1,5 +1,12 @@
 from fastapi import WebSocket, WebSocketDisconnect
-from .utils import player_connections, get_players_id, flamethrower_cheat
+from .utils import *
+
+
+async def send_event_cheat_used(player_id: int):
+    json_msg = {
+        "event": "cheat_used"
+    }
+    await player_connections.send_event_to(player_id, json_msg)
 
 
 async def handle_message(data, player_id):
@@ -12,12 +19,12 @@ async def handle_message(data, player_id):
         if i != player_id:
             await player_connections.send_message(player_id=i, message_from=message_from, message=message)
 
-    if message == 'lz':
+    if message == 'lz' or message == 'lanzallamas':
         flamethrower_cheat(game_name, player_id)
-        json_msg = {
-            "event": "cheat_flamethrower"
-        }
-        await player_connections.send_event_to(player_id, json_msg)
+        await send_event_cheat_used(player_id)
+    if message == 'ws' or message == 'whisky' or message == 'whiskey':
+        whiskey_cheat(game_name, player_id)
+        await send_event_cheat_used(player_id)
 
 
 async def websocket_games(player_id: int, websocket: WebSocket):
