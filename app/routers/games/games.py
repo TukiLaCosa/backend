@@ -148,14 +148,14 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
     with db_session:
         player_id_turn = select(
             p for p in game.players if p.position == game.turn).first().id
-    
+
     json_msg = {
         "event": "discard_card",
         "player_name": get_player_name_by_id(game_data.player_id),
         "card_type": get_card_type_by_id(game_data.card_id)
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
-    
+
     json_msg = {
         "event": utils.Events.NEW_TURN,
         "next_player_name": get_player_name_by_id(player_id_turn),
@@ -163,7 +163,7 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
         "round_direction": game.round_direction
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
-    
+
     return {"message": "Card discarded"}
 
 
@@ -179,7 +179,7 @@ async def play_action_card(game_name: str, play_info: PlayInformation):
             "player_name": get_player_name_by_id(play_info.player_id),
             "card_id": play_info.card_id
         }
-        await player_connections.send_event_to_all_players_in_game(game_name,json_msg)
+        await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
         if not is_flamethrower(play_info.card_id):
             with db_session:
@@ -239,7 +239,6 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
     }
     await player_connections.send_event_to(game_data.player_id, json_msg)
     await player_connections.send_event_to(game_data.objective_player_id, json_msg)
-    
 
     with db_session:
         game = find_game_by_name(game_name)
@@ -252,5 +251,5 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
         "round_direction": game.round_direction
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
-    
+
     return {"message": "Card interchange terminated."}
