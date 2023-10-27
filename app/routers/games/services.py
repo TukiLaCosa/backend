@@ -486,7 +486,7 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
 
     # Cita a ciegas
     if card.name == CardPanicName.BLIND_DATE:
-        pass
+        process_blind_date_card(game, player, card)
 
     # ¡Sal de aquí!
     if card.name == CardPanicName.GETOUT_OF_HERE:
@@ -543,3 +543,24 @@ async def show_revelations_cards(game_name: str, player_id: int, game_data: Show
             "original_player_id": game_data.original_player_id
         }
         await player_connections.send_event_to(next_player_id, json_msg)
+
+
+@db_session
+def blind_date_interchange(game_name: str, game_data: IntentionExchangeInformationIn):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(game_data.player_id)
+    player_card: Card = find_card_by_id(game_data.card_id)
+
+    card_to_exchange = select(
+        c for c in game.draw_deck if 2 <= c.id and c.id <= 88).first()
+    if card_to_exchange:
+        game.draw_deck.remove(card_to_exchange)
+        game.draw_deck_order.remove(card_to_exchange.id)
+    else:
+        card_to_exchange = select(
+            c for c in game.discard_deck if 2 <= c.id and c.id <= 88).first()
+        if card_to_exchange:
+            game.discard_deck.remove(card_to_exchange)
+    if card_to_exchange and player_card:
+        player.hand.remove(player_card)
+        player.hand.add(card_to_exchange)

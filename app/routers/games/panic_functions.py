@@ -33,6 +33,13 @@ async def send_revelations_card_played_event(game_name: str, original_player_id:
     await player_connections.send_event_to(next_player_id, json_msg)
 
 
+async def send_blind_date_selection_event(player_id: int):
+    json_msg = {
+        "event": Events.BLIND_DATE_SELECTION,
+    }
+    await player_connections.send_event_to(player_id, json_msg)
+
+
 @db_session
 def process_revelations_card(game: Game, player: Player, card: Card):
     game.discard_deck.add(card)
@@ -68,3 +75,11 @@ def process_getout_of_here_card(game: Game, player: Player, card: Card, objectiv
 
     game.discard_deck.add(card)
     player.hand.remove(card)
+
+
+@db_session
+def process_blind_date_card(game: Game, player: Player, card: Card):
+    game.discard_deck.add(card)
+    player.hand.remove(card)
+
+    asyncio.ensure_future(send_blind_date_selection_event(player.id))

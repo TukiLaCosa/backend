@@ -272,7 +272,7 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
     return {"message": "Card interchange terminated."}
 
 
-@router.post("/{game_name}/show_revelations_cards/{player_id}", status_code=status.HTTP_200_OK)
+@router.post("/{game_name}/show-revelations-cards/{player_id}", status_code=status.HTTP_200_OK)
 async def show_revelations_cards(game_name: str, player_id: int, game_data: ShowRevelationsCardsIn):
     utils.verify_player_in_game(player_id, game_name)
     utils.verify_player_in_game(game_data.original_player_id, game_name)
@@ -283,3 +283,14 @@ async def show_revelations_cards(game_name: str, player_id: int, game_data: Show
         }
         await player_connections.send_event_to(player_id, json_msg)
     return {"message": "Show card terminated."}
+
+
+@router.patch("/{game_name}/blind-date-interchange", status_code=status.HTTP_200_OK)
+async def blind_date_interchange(game_name: str, game_data: IntentionExchangeInformationIn):
+    utils.verify_player_in_game(game_data.player_id, game_name)
+    services.blind_date_interchange(game_name, game_data)
+    json_msg = {
+        "event": utils.Events.BLIND_DATE_DONE
+    }
+    await player_connections.send_event_to(game_data.player_id, json_msg)
+    return {"message": "Blind date interchange terminated."}
