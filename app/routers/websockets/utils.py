@@ -20,57 +20,28 @@ def get_players_id(game_name: str) -> List[Player]:
 
 
 @db_session
-def flamethrower_cheat(game_name: str, player_id: int):
+def apply_cheat(game_name: str, player_id: int, card_range):
+    games_utils.verify_player_in_game(player_id, game_name)
     game: Game = games_utils.find_game_by_name(game_name)
     player: Player = find_player_by_id(player_id)
-    games_utils.verify_player_in_game(player_id, game_name)
 
     player_hand = list(player.hand)
     elegible_cards = [c for c in player_hand if c.type != CardType.THE_THING]
     if elegible_cards:
         random_card = random.choice(elegible_cards)
-        flamethrower_card = select(
-            c for c in game.draw_deck if 22 <= c.id and c.id <= 26).first()
-        if flamethrower_card:
-            game.draw_deck.remove(flamethrower_card)
-            game.draw_deck_order.remove(flamethrower_card.id)
 
-        else:
-            flamethrower_card = select(
-                c for c in game.discard_deck if 22 <= c.id and c.id <= 26).first()
-            if flamethrower_card:
-                game.discard_deck.remove(flamethrower_card)
+        cheat_card = select(
+            c for c in game.draw_deck if c.id in card_range).first()
 
-        if flamethrower_card and random_card:
+        if not cheat_card:
+            cheat_card = select(
+                c for c in game.discard_deck if c.id in card_range).first()
+
+        if cheat_card:
+            game.draw_deck.remove(cheat_card)
+            game.draw_deck_order.remove(cheat_card.id)
             player.hand.remove(random_card)
-            player.hand.add(flamethrower_card)
-
-
-@db_session
-def whiskey_cheat(game_name: str, player_id: int):
-    game: Game = games_utils.find_game_by_name(game_name)
-    player: Player = find_player_by_id(player_id)
-    games_utils.verify_player_in_game(player_id, game_name)
-
-    player_hand = list(player.hand)
-    elegible_cards = [c for c in player_hand if c.type != CardType.THE_THING]
-    if elegible_cards:
-        random_card = random.choice(elegible_cards)
-        whiskey_card = select(
-            c for c in game.draw_deck if 40 <= c.id and c.id <= 42).first()
-        if whiskey_card:
-            game.draw_deck.remove(whiskey_card)
-            game.draw_deck_order.remove(whiskey_card.id)
-
-        else:
-            whiskey_card = select(
-                c for c in game.discard_deck if 40 <= c.id and c.id <= 42).first()
-            if whiskey_card:
-                game.discard_deck.remove(whiskey_card)
-
-        if whiskey_card and random_card:
-            player.hand.remove(random_card)
-            player.hand.add(whiskey_card)
+            player.hand.add(cheat_card)
 
 
 class ConnectionManager:
