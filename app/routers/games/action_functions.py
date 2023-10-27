@@ -4,7 +4,7 @@ from ..players.schemas import PlayerRol
 from ..cards.schemas import CardType, CardResponse
 from ..websockets.utils import player_connections
 from .utils import Events
-from .schemas import RoundDirection
+from .schemas import RoundDirection, GameStatus
 from ..players.utils import get_player_name_by_id
 import random
 import asyncio
@@ -27,7 +27,7 @@ async def send_players_eliminated_event(game: Game, eliminated_id: int, eliminat
 
     # Espera 4 segundos antes de enviar el siguiente evento
     await asyncio.sleep(4)
-    
+
     with db_session:
         player_id_turn = select(
             p for p in game.players if p.position == game.turn).first().id

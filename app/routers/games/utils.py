@@ -360,7 +360,7 @@ def verify_if_interchange_can_be_done(game_name: str, interchange_info: Intentio
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='The player cannot pass the card Infected because is not The Thing'
         )
-    
+
 
 @db_session
 def verify_if_interchange_response_can_be_done(game_name: str, game_data: InterchangeInformationIn):
@@ -431,6 +431,7 @@ def get_id_of_next_player_in_turn(game_name):
         p.id for p in game.players if p.position == next_turn).first()
     return next_player_id
 
+
 def is_the_game_finished(game_name: str) -> bool:
     game: Game = find_game_by_name(game_name)
     try:
@@ -438,7 +439,7 @@ def is_the_game_finished(game_name: str) -> bool:
         return True
     except:
         return False
-    
+
 
 @db_session
 def update_game_turn(game_name: str):
