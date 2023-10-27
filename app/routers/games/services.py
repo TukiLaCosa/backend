@@ -466,7 +466,7 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
 
     # Ups
     if card.name == CardPanicName.OOOPS:
-        pass
+        process_ooops_card(game, player, card)
 
     # Olvidadizo
     if card.name == CardPanicName.FORGETFUL:

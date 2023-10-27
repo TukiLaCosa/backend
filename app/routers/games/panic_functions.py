@@ -9,6 +9,15 @@ import random
 import asyncio
 
 
+async def send_ooops_card_played_event(game_name: str, player_name: str, player_id: int):
+    json_msg = {
+        "event": Events.OOOPS_CARD_PLAYED,
+        "player_name": player_name,
+        "player_id": player_id
+    }
+    await player_connections.send_event_to_other_players_in_game(game_name, json_msg, player_id)
+
+
 async def send_player_between_us_event(to_player_id: int, player_id: int, player_name: str):
     json_msg = {
         "event": Events.BETWEEN_US_CARD_PLAYED,
@@ -50,6 +59,14 @@ def process_revelations_card(game: Game, player: Player, card: Card):
 
 
 @db_session
+def process_ooops_card(game: Game, player: Player, card: Card):
+    game.discard_deck.add(card)
+    player.hand.remove(card)
+    asyncio.ensure_future(send_ooops_card_played_event(
+        game.name, player.name, player.id))
+
+
+@db_session
 def process_between_us_card(game: Game, player: Player, card: Card, objective_player: Player):
     game.discard_deck.add(card)
     player.hand.remove(card)
@@ -68,7 +85,6 @@ def process_round_and_round_card(game: Game, player: Player, card: Card):
 
 @db_session
 def process_getout_of_here_card(game: Game, player: Player, card: Card, objective_player: Player):
-    # Intercambio de posiciones entre los jugadores
     tempPosition = player.position
     player.position = objective_player.position
     objective_player.position = tempPosition
