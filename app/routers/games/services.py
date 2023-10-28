@@ -471,7 +471,7 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
 
     # Olvidadizo
     if card.name == CardPanicName.FORGETFUL:
-        pass
+        process_forgetful_card(game, player, card)
 
     # Vuelta y vuelta
     if card.name == CardPanicName.ROUND_AND_ROUND:
@@ -559,3 +559,34 @@ def blind_date_interchange(game_name: str, game_data: IntentionExchangeInformati
     if card_to_exchange and player_card:
         player.hand.remove(player_card)
         player.hand.add(card_to_exchange)
+
+
+@db_session
+def card_forgetful_exchange(game_name: str, game_data: ForgetfulExchangeIn):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(game_data.player_id)
+    player_cards: list[Card] = []
+
+    for cardId in game_data.cards_for_exchange:
+        card = find_card_by_id(cardId)
+        player_cards.append(card)
+
+    for card in player_cards:
+        player.hand.remove(card)
+        game.discard_deck.add(card)
+
+    random_draw_deck_cards = select(
+        c for c in game.draw_deck if 2 <= c.id and c.id <= 88).random(3)
+    random_discard_deck_cards = select(
+        c for c in game.discard_deck if 2 <= c.id and c.id <= 88).random(3)
+
+    while (len(random_draw_deck_cards) < 3):
+        random_draw_deck_cards.append(random_discard_deck_cards.pop())
+
+    for card in random_draw_deck_cards:
+        player.hand.add(card)
+        if card in game.draw_deck:
+            game.draw_deck.remove(card)
+            game.draw_deck_order.remove(card.id)
+        elif card in game.discard_deck:
+            game.discard_deck.remove(card)

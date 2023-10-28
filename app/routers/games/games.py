@@ -285,3 +285,15 @@ async def blind_date_interchange(game_name: str, game_data: IntentionExchangeInf
     }
     await player_connections.send_event_to(game_data.player_id, json_msg)
     return {"message": "Blind date interchange terminated."}
+
+
+@router.patch("/{game_name}/forgetful-exchange", status_code=status.HTTP_200_OK)
+async def card_forgetful_exchange(game_name: str, game_data: ForgetfulExchangeIn):
+    utils.verify_player_in_game(game_data.player_id, game_name)
+    services.card_forgetful_exchange(game_name, game_data)
+    json_msg = {
+        "event": utils.Events.FORGETFUL_DONE
+    }
+    await player_connections.send_event_to(game_data.player_id, json_msg)
+
+    return {"message": "Forgetful exchange terminated"}

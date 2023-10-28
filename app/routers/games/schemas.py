@@ -160,3 +160,10 @@ class ShowRevelationsCardsIn(BaseModel):
 
     original_player_id: int  # ID del jugador que jugo la carta Revelaciones
     show_my_cards: bool
+
+
+class ForgetfulExchangeIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    cards_for_exchange: List[int]

@@ -37,6 +37,8 @@ class Events(str, Enum):
     BLIND_DATE_SELECTION = 'blind_date_selection'
     BLIND_DATE_DONE = 'blind_date_done'
     OOOPS_CARD_PLAYED = 'ooops_card_played'
+    FORGETFUL_CARD_PLAYED = 'forgetful_card_played'
+    FORGETFUL_DONE = 'forgetful_done'
 
 
 @db_session
