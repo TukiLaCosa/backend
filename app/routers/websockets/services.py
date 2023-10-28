@@ -12,10 +12,13 @@ async def send_event_cheat_used(player_id: int):
 
 async def send_list_of_cheats(player_id: int):
     cheat_messages: list[str] = [
-    'Soy Loki, Dios de las mentiras, estos son algunos cheats que puedes usar...',
-    '[lz | lanzallamas | flamethrower]: Obtienes una carta lanzallamas',
-    '[ws | whiskey | whisky]: Obtienes una carta whiskey',
-    '[ups | ooops]: Obtienes una carta ups!']
+        'Soy Loki, Dios de las mentiras, estos son algunos cheats que puedes usar...',
+        '[lz | lanzallamas | flamethrower]: Obtienes una carta lanzallamas',
+        '[ws | whiskey | whisky]: Obtienes una carta whiskey',
+        '[ups | ooops]: Obtienes una carta ups!',
+        '[det | determinación | resolute]: Obtienes una carta determinación'
+    ]
+
     for message in cheat_messages:
         await player_connections.send_message(player_id, 'Loki', message)
         await asyncio.sleep(0.25)
@@ -41,9 +44,13 @@ async def handle_message(data, player_id):
     elif message == 'ws' or message == 'whisky' or message == 'whiskey':
         apply_cheat(game_name, player_id, range(40, 43))
         await send_event_cheat_used(player_id)
-    
-    elif message == 'ooops':
+
+    elif message == 'ups' or message == 'ooops':
         apply_cheat(game_name, player_id, range(108, 109))
+        await send_event_cheat_used(player_id)
+
+    elif message == 'det' or message == 'determinación' or message == 'resolute':
+        apply_cheat(game_name, player_id, range(43, 48))
         await send_event_cheat_used(player_id)
 
 
