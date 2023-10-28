@@ -25,6 +25,7 @@ class Events(str, Enum):
     WHISKEY_CARD_PLAYED = 'whiskey_card_played'
     PLAYER_DRAW_CARD = 'player_draw_card'
     NEW_TURN = 'new_turn'
+    SEDUCTION_DONE = 'seduction_done'
 
 
 @db_session
