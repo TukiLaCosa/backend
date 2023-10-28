@@ -36,10 +36,13 @@ def apply_cheat(game_name: str, player_id: int, card_range):
         if not cheat_card:
             cheat_card = select(
                 c for c in game.discard_deck if c.id in card_range).first()
+            if cheat_card:
+                game.discard_deck.remove(cheat_card)
 
         if cheat_card:
-            game.draw_deck.remove(cheat_card)
-            game.draw_deck_order.remove(cheat_card.id)
+            if cheat_card in game.draw_deck:
+                game.draw_deck.remove(cheat_card)
+                game.draw_deck_order.remove(cheat_card.id)
             player.hand.remove(random_card)
             player.hand.add(cheat_card)
 
