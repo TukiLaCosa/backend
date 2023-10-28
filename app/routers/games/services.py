@@ -455,7 +455,7 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
 
     # Uno, dos...
     if card.name == CardPanicName.ONE_TWO:
-        pass
+        process_one_two_card(game, player, card)
 
     # Tres, cuatro
     if card.name == CardPanicName.THREE_FOUR:
@@ -590,3 +590,13 @@ def card_forgetful_exchange(game_name: str, game_data: ForgetfulExchangeIn):
             game.draw_deck_order.remove(card.id)
         elif card in game.discard_deck:
             game.discard_deck.remove(card)
+
+
+@db_session
+def card_one_two_effect(game_data: OneTwoEffectIn):
+    player: Player = find_player_by_id(game_data.player_id)
+    objective_player: Player = find_player_by_id(game_data.objective_player_id)
+
+    tempPosition = player.position
+    player.position = objective_player.position
+    objective_player.position = tempPosition

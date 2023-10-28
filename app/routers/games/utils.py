@@ -39,6 +39,8 @@ class Events(str, Enum):
     OOOPS_CARD_PLAYED = 'ooops_card_played'
     FORGETFUL_CARD_PLAYED = 'forgetful_card_played'
     FORGETFUL_DONE = 'forgetful_done'
+    ONE_TWO_CARD_PLAYED = 'one_two_card_played'
+    ONE_TWO_DONE = "one_two_done"
 
 
 @db_session

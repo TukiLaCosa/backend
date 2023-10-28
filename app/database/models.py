@@ -9,7 +9,7 @@ class Player(db.Entity):
     game_hosting = Optional('Game', reverse='host', cascade_delete=True)
     name = Required(str)
     rol = Optional(str, nullable=True)
-    isQuatentined = Optional(bool, default=False)
+    isQuarentined = Optional(bool, default=False)
     position = Required(int, default="-1")
     hand = Set('Card')
 

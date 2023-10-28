@@ -16,7 +16,9 @@ async def send_list_of_cheats(player_id: int):
         '[lz | lanzallamas | flamethrower]: Obtienes una carta lanzallamas',
         '[ws | whiskey | whisky]: Obtienes una carta whiskey',
         '[ups | ooops]: Obtienes una carta ups!',
-        '[olv | olvidadizo | forgetful]: Obtienes una carta olvidadizo']
+        '[olv | olvidadizo | forgetful]: Obtienes una carta olvidadizo',
+        '[uno dos | one two]: obtienes una carta uno, dos...'
+    ]
     for message in cheat_messages:
         await player_connections.send_message(player_id, 'Loki', message)
         await asyncio.sleep(0.25)
@@ -49,6 +51,10 @@ async def handle_message(data, player_id):
 
     elif message == 'olv' or message == 'olvidadizo' or message == 'forgetful':
         apply_cheat(game_name, player_id, range(93, 94))
+        await send_event_cheat_used(player_id)
+    
+    elif message == 'uno dos' or message == 'one two':
+        apply_cheat(game_name, player_id, range(94, 96))
         await send_event_cheat_used(player_id)
 
 

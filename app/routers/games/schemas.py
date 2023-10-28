@@ -167,3 +167,10 @@ class ForgetfulExchangeIn(BaseModel):
 
     player_id: int
     cards_for_exchange: List[int]
+
+
+class OneTwoEffectIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    objective_player_id: int
