@@ -56,6 +56,13 @@ async def send_resolute_card_played_event(game: Game, player_id: int, option_car
     }
     await player_connections.send_event_to(player_id, json_msg)
 
+async def send_seduction_done_event(player_id: int, objective_player_id: int):
+    json_msg = {
+        "event": Events.SEDUCTION_DONE
+    }
+    await player_connections.send_event_to(player_id, json_msg)
+    await player_connections.send_event_to(objective_player_id, json_msg)
+
 
 @db_session
 def process_flamethrower_card(game: Game, player: Player,
@@ -193,3 +200,5 @@ def process_seduction_card(game: Game, player: Player,
 
     game.discard_deck.add(card)
     player.hand.remove(card)
+
+    send_seduction_done_event(player.id, objective_player.id)
