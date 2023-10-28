@@ -49,7 +49,7 @@ async def send_players_whiskey_event(game: Game, player_id: int, player_name: st
     await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
 
 
-async def send_resolute_start_event(game: Game, player_id: int, option_cards: list[int]):
+async def send_resolute_card_played_event(game: Game, player_id: int, option_cards: list[int]):
     json_msg = {
         "event": Events.RESOLUTE_CARD_PLAYED,
         "option_cards": option_cards
@@ -139,7 +139,7 @@ def process_resolute_card(game: Game, player: Player, card: Card):
 
     option_cards_id = [card.id for card in random_draw_deck_cards]
 
-    asyncio.ensure_future(send_resolute_start_event(
+    asyncio.ensure_future(send_resolute_card_played_event(
         game, player.id, option_cards_id))
 
 
