@@ -35,6 +35,14 @@ async def send_players_whiskey_event(game: Game, player_id: int, player_name: st
     await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
 
 
+async def send_seduction_done_event(player_id: int, objective_player_id: int):
+    json_msg = {
+        "event": Events.SEDUCTION_DONE
+    }
+    await player_connections.send_event_to(player_id, json_msg)
+    await player_connections.send_event_to(objective_player_id, json_msg)
+
+
 @db_session
 def process_flamethrower_card(game: Game, player: Player,
                               card: Card, objective_player: Player):
@@ -152,3 +160,5 @@ def process_seduction_card(game: Game, player: Player,
 
     game.discard_deck.add(card)
     player.hand.remove(card)
+
+    send_seduction_done_event(player.id, objective_player.id)

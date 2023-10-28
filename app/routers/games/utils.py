@@ -41,6 +41,7 @@ class Events(str, Enum):
     FORGETFUL_DONE = 'forgetful_done'
     ONE_TWO_CARD_PLAYED = 'one_two_card_played'
     ONE_TWO_DONE = "one_two_done"
+    SEDUCTION_DONE = 'seduction_done'
 
 
 @db_session
