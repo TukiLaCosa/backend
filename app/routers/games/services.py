@@ -271,8 +271,7 @@ def play_action_card(game_name: str, play_info: PlayInformation):
         verify_adjacent_players(play_info.player_id,
                                 play_info.objective_player_id,
                                 players_not_eliminated - 1)
-        objective_player: Player = find_player_by_id(
-            play_info.objective_player_id)
+        objective_player: Player = find_player_by_id(play_info.objective_player_id)
 
         if game.turn != 0 and objective_player.position < player.position:
             game.turn = game.turn - 1
@@ -287,6 +286,7 @@ def play_action_card(game_name: str, play_info: PlayInformation):
                                 players_not_eliminated - 1)
         objective_player: Player = find_player_by_id(
             play_info.objective_player_id)
+
         # Armo listado de cartas del jugador objetivo para enviar en el body response
         result = process_analysis_card(game, player, card, objective_player)
 

@@ -155,7 +155,6 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
         "card_type": get_card_type_by_id(game_data.card_id)
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
-
     return {"message": "Card discarded"}
 
 
@@ -253,6 +252,7 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
         game = find_game_by_name(game_name)
         player_id_turn = select(
             p for p in game.players if p.position == game.turn).first().id
+    
     json_msg = {
         "event": utils.Events.NEW_TURN,
         "next_player_name": get_player_name_by_id(player_id_turn),
@@ -260,7 +260,6 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
         "round_direction": game.round_direction
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
-
     return {"message": "Card interchange terminated."}
 
 
