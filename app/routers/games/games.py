@@ -252,7 +252,7 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
         game = find_game_by_name(game_name)
         player_id_turn = select(
             p for p in game.players if p.position == game.turn).first().id
-    
+
     json_msg = {
         "event": utils.Events.NEW_TURN,
         "next_player_name": get_player_name_by_id(player_id_turn),
