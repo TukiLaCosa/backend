@@ -181,7 +181,7 @@ async def play_action_card(game_name: str, play_info: PlayInformation):
         }
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
-        if not is_flamethrower(play_info.card_id):
+        if not is_flamethrower(play_info.card_id) or not is_whiskey(play_info.card_id):
             with db_session:
                 game = find_game_by_name(game_name)
                 player_id_turn = select(
