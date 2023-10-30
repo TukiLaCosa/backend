@@ -7,7 +7,7 @@ from .schemas import *
 from ..websockets.utils import player_connections
 from .utils import find_game_by_name, is_the_game_finished
 from ..players.utils import get_player_name_by_id
-from ..cards.utils import get_card_name_by_id, get_card_type_by_id, is_flamethrower
+from ..cards.utils import get_card_name_by_id, get_card_type_by_id, is_flamethrower, is_whiskey
 from .services import finish_game
 
 
