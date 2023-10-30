@@ -10,7 +10,7 @@ import random
 import asyncio
 
 
-async def send_players_eliminated_event(game: Game, eliminated_id: int, eliminated_name: str):
+async def send_players_eliminated_event(game: Game, eliminated_by: int, eliminated_id: int, eliminated_name: str):
     players_positions = {}
     for p in game.players:
         if p.rol != PlayerRol.ELIMINATED:
@@ -20,7 +20,8 @@ async def send_players_eliminated_event(game: Game, eliminated_id: int, eliminat
         "event": Events.PLAYER_ELIMINATED,
         "player_id": eliminated_id,
         "player_name": eliminated_name,
-        "players_positions": players_positions
+        "players_positions": players_positions,
+        "eliminated_by": eliminated_by
     }
     for p in game.players:
         await player_connections.send_event_to(p.id, json_msg)
@@ -65,6 +66,7 @@ def process_flamethrower_card(game: Game, player: Player,
     player.hand.remove(card)
 
     asyncio.ensure_future(send_players_eliminated_event(game=game,
+                                                        eliminated_by=player.id,
                                                         eliminated_id=objective_player.id,
                                                         eliminated_name=objective_player.name))
 
