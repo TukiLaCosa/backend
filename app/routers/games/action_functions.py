@@ -46,6 +46,7 @@ async def send_players_whiskey_event(game: Game, player_id: int, player_name: st
         "player_id": player_id,
         "player_name": player_name
     }
+    asyncio.sleep(1)
     await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
 
 
