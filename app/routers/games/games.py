@@ -7,7 +7,7 @@ from .schemas import *
 from ..websockets.utils import player_connections
 from .utils import find_game_by_name, is_the_game_finished
 from ..players.utils import get_player_name_by_id
-from ..cards.utils import get_card_name_by_id, get_card_type_by_id, is_flamethrower
+from ..cards.utils import get_card_name_by_id, get_card_type_by_id, is_flamethrower, is_whiskey
 from .services import finish_game
 
 
@@ -181,7 +181,7 @@ async def play_action_card(game_name: str, play_info: PlayInformation):
         }
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
-        if not is_flamethrower(play_info.card_id):
+        if not is_flamethrower(play_info.card_id) or not is_whiskey(play_info.card_id):
             with db_session:
                 game = find_game_by_name(game_name)
                 player_id_turn = select(
