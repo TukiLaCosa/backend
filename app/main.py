@@ -27,4 +27,4 @@ app.include_router(websockets.router)
 
 # This displays the initial image with the sound
 t = threading.Thread(target=show_initial_image)
-t.start()
+# t.start()

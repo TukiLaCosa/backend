@@ -45,6 +45,14 @@ class CardPanicName(str, Enum):
     GETOUT_OF_HERE = '¡Sal de aquí!'
 
 
+class CardDefenseName(str, Enum):
+    SCARY = 'Aterrador'
+    NO_THANKS = '¡No, gracias!'
+    COMFORTABLE = 'Aquí estoy bien'
+    MISSED = '¡Fallaste!'
+    NO_BARBECUE = '¡Nada de barbacoas!'
+
+
 class BaseCard(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

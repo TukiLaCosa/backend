@@ -153,6 +153,8 @@ class InterchangeInformationIn(BaseModel):
     card_id: int  # Card ID del jugador que recibe la intencion
     objective_player_id: int  # ID jugador que inicia la intencion
     objective_card_id: int  # Card ID del jugador que inicia la intencion
+    accept_interchange: Optional[bool] = Field(
+        None, description='Optional value')
 
 
 class ShowRevelationsCardsIn(BaseModel):

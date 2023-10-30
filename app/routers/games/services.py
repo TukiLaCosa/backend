@@ -8,7 +8,7 @@ from .utils import *
 from ..cards import services as cards_services
 from ..cards.utils import find_card_by_id, verify_action_card, verify_panic_card
 from ..players.utils import find_player_by_id, verify_card_in_hand, verify_player_not_in_quarentine
-from ..cards.schemas import CardActionName, CardResponse, CardPanicName
+from ..cards.schemas import CardActionName, CardResponse, CardPanicName, CardDefenseName
 from ..players.schemas import PlayerRol
 from .action_functions import *
 from .panic_functions import *
@@ -600,3 +600,26 @@ def card_one_two_effect(game_data: OneTwoEffectIn):
     tempPosition = player.position
     player.position = objective_player.position
     objective_player.position = tempPosition
+
+
+@db_session
+def interchange_intention_response(game_data: InterchangeInformationIn):
+    player: Player = find_player_by_id(game_data.player_id)
+    objective_player: Player = find_player_by_id(game_data.objective_player_id)
+    player_card: Card = find_card_by_id(game_data.card_id)
+    objective_player_card: Card = find_card_by_id(game_data.objective_card_id)
+
+    if game_data.accept_interchange:
+        player.hand.add(objective_player_card)
+        player.hand.remove(player_card)
+        objective_player.hand.add(player_card)
+        objective_player.hand.remove(objective_player_card)
+    else:
+        if player_card.name == CardDefenseName.SCARY or player_card.name == CardDefenseName.NO_THANKS:
+            player.hand.remove(player_card)
+            card_from_deck = get_stay_away_cards_from_decks(player.game, 1)
+            player.hand.add(card_from_deck[0])
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"The card is not a valid defense card.")

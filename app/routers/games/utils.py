@@ -42,6 +42,8 @@ class Events(str, Enum):
     ONE_TWO_CARD_PLAYED = 'one_two_card_played'
     ONE_TWO_DONE = "one_two_done"
     SEDUCTION_DONE = 'seduction_done'
+    INTERCHANGE_INTENTION = 'interchange_intention'
+    INTERCHANGE_INTENTION_DONE = 'interchange_intention_done'
 
 
 @db_session
@@ -553,3 +555,27 @@ def update_game_turn(game_name: str):
         game.turn = (game.turn + 1) % players_playing
     else:
         game.turn = (game.turn - 1) % players_playing
+
+
+@db_session
+def get_stay_away_cards_from_decks(game_name: str, quantity: int) -> List[Card]:
+    game: Game = find_game_by_name(game_name)
+    random_draw_deck_cards: list[Card] = []
+    random_draw_deck_cards = select(
+        c for c in game.draw_deck if c.type == CardType.STAY_AWAY).random(quantity)[:]
+    num_cards = len(random_draw_deck_cards)
+    random_discard_deck_cards: list[Card] = []
+    if num_cards < quantity:
+        random_discard_deck_cards = select(
+            c for c in game.discard_deck if c.type == CardType.STAY_AWAY).random(quantity-num_cards)[:]
+    for card in random_discard_deck_cards:
+        random_draw_deck_cards.append(card)
+
+    for card in random_draw_deck_cards:
+        if card in game.draw_deck:
+            game.draw_deck.remove(card)
+            game.draw_deck_order.remove(card.id)
+        else:
+            game.discard_deck.remove(card)
+
+    return random_draw_deck_cards

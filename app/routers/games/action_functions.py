@@ -44,6 +44,19 @@ async def send_seduction_done_event(player_id: int, objective_player_id: int):
     await player_connections.send_event_to(objective_player_id, json_msg)
 
 
+async def send_interchange_intention_event(player: Player, objective_player: Player, card: Card, card_to_exchange: Card):
+    json_msg = {
+        "event": Events.INTERCHANGE_INTENTION,
+        "player_id": player.id,
+        "player_name": player.name,
+        "card_played": card.id,
+        "card_name": card.name,
+        "card_to_exchange_id": card_to_exchange.id,
+        "card_to_exchange_name": card_to_exchange.name
+    }
+    await player_connections.send_event_to(objective_player.id, json_msg)
+
+
 @db_session
 def process_flamethrower_card(game: Game, player: Player,
                               card: Card, objective_player: Player):
@@ -147,9 +160,14 @@ def process_better_run_card(game: Game, player: Player,
 
 
 @db_session
-def process_seduction_card(game: Game, player: Player,
-                           card: Card, objective_player: Player,
-                           card_to_exchange: Card):
+def process_seduction_card(game: Game, player: Player, card: Card, objective_player: Player, card_to_exchange: Card):
+    asyncio.ensure_future(send_interchange_intention_event(
+        player, objective_player, card, card_to_exchange))
+    game.discard_deck.add(card)
+    player.hand.remove(card)
+    '''
+    Implementacion vieja:
+
     objective_player_hand_list = list(objective_player.hand)
     eligible_cards = [
         c for c in objective_player_hand_list if c.type != CardType.THE_THING]
@@ -164,3 +182,4 @@ def process_seduction_card(game: Game, player: Player,
     player.hand.remove(card)
 
     send_seduction_done_event(player.id, objective_player.id)
+    '''

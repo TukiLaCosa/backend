@@ -310,3 +310,18 @@ async def card_one_two_effect(game_name: str, game_data: OneTwoEffectIn):
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
     return {"message": "One two effect terminated"}
+
+
+@router.patch("/{game_name}/interchange-intention-response", status_code=status.HTTP_200_OK)
+async def interchange_intention_response(game_name: str, game_data: InterchangeInformationIn):
+    utils.verify_player_in_game(game_data.player_id, game_name)
+    utils.verify_player_in_game(game_data.objective_player_id, game_name)
+    services.interchange_intention_response(game_data)
+
+    json_msg = {
+        "event": utils.Events.INTERCHANGE_INTENTION_DONE
+    }
+    await player_connections.send_event_to(game_data.player_id, json_msg)
+    await player_connections.send_event_to(game_data.objective_player_id, json_msg)
+
+    return {"message": "Interchange intention terminated"}
