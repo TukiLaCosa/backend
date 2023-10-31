@@ -11,6 +11,8 @@ class Player(db.Entity):
     rol = Optional(str, nullable=True)
     position = Required(int, default="-1")
     hand = Set('Card')
+    intention_creator = Optional('Intention', reverse='player')
+    intention_objective = Optional('Intention', reverse='objective_player')
 
 
 class Game(db.Entity):
@@ -38,3 +40,9 @@ class Card(db.Entity):
     games_discard_deck = Set(Game, reverse='discard_deck')
     games_draw_deck = Set(Game, reverse='draw_deck')
     players_hand = Set(Player)
+
+
+class Intention(db.Entity):
+    player = Required(Player)
+    objective_player = Required(Player)
+    action_type = Required(str)
