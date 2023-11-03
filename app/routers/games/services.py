@@ -13,7 +13,7 @@ from ..players.schemas import PlayerRol
 from .action_functions import *
 import random
 from app.routers.games import utils
-from .intention import create_intention, ActionType
+from .intention import create_intention_in_game, ActionType
 
 
 def get_unstarted_games() -> List[GameResponse]:
@@ -280,7 +280,8 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
             game.turn = game.turn - 1
 
         # process_flamethrower_card(game, player, card, objective_player)
-        create_intention(ActionType.FLAMETHROWER, player, objective_player)
+        create_intention_in_game(
+            game, ActionType.FLAMETHROWER, player, objective_player)
 
     # Analisis
     if card.name == CardActionName.ANALYSIS:
@@ -330,16 +331,18 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
             play_info.objective_player_id)
 
         # process_change_places_card(game, player, card, objective_player)
-        create_intention(ActionType.CHANGE_PLACES, player, objective_player)
+        create_intention_in_game(
+            game, ActionType.CHANGE_PLACES, player, objective_player)
 
     # Mas vale que corras
     if card.name == CardActionName.BETTER_RUN:
         verify_player_in_game(play_info.objective_player_id, game_name)
         objective_player: Player = find_player_by_id(
             play_info.objective_player_id)
-        
+
         # process_better_run_card(game, player, card, objective_player)
-        create_intention(ActionType.BETTER_RUN, player, objective_player)
+        create_intention_in_game(
+            game, ActionType.BETTER_RUN, player, objective_player)
 
     # Seduccion (Ojo porque esta carta modifica la mano del jugador objetivo)
     if card.name == CardActionName.SEDUCTION:

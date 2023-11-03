@@ -28,6 +28,7 @@ class Game(db.Entity):
     draw_deck = Set('Card', reverse='games_draw_deck')
     draw_deck_order = Required(Json, default=[])
     round_direction = Required(str, default=RoundDirection.CLOCKWISE)
+    intention = Optional('Intention', reverse='game')
 
 
 class Card(db.Entity):
@@ -43,6 +44,7 @@ class Card(db.Entity):
 
 
 class Intention(db.Entity):
+    game = Required(Game)
     player = Required(Player)
     objective_player = Required(Player)
     action_type = Required(str)
