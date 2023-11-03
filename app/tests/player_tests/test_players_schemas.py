@@ -1,6 +1,5 @@
 from app.routers.players.schemas import PlayerInfo
 from app.routers.cards.schemas import CardResponse
-from typing import List
 
 
 def test_PlayerInfo_schema_was_the_thing_true_success():
@@ -18,7 +17,7 @@ def test_PlayerInfo_schema_was_the_thing_true_success():
     ]
     player = PlayerInfo(name="player", id=1, position=1,
                         rol="THE_THING", hand=cards)
-    assert player.was_the_thing == True, "El jugador debería tener la carta 'La Cosa' en su mano."
+    assert player.was_the_thing == True, "Error en el schema. El jugador debería tener la carta 'La Cosa' en su mano."
 
 
 def test_PlayerInfo_schema_was_the_thing_false_success():
@@ -32,4 +31,4 @@ def test_PlayerInfo_schema_was_the_thing_false_success():
     ]
     player = PlayerInfo(name="player", id=1, position=1,
                         rol="THE_THING", hand=cards)
-    assert player.was_the_thing == False, "El jugador no debería tener la carta 'La Cosa' en su mano."
+    assert player.was_the_thing == False, "Error en el schema. El jugador no debería tener la carta 'La Cosa' en su mano."
