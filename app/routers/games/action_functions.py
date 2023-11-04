@@ -188,4 +188,5 @@ def process_seduction_card(game: Game, player: Player,
     game.discard_deck.add(card)
     player.hand.remove(card)
 
-    send_seduction_done_event(player.id, objective_player.id)
+    asyncio.ensure_future(send_seduction_done_event(
+        player.id, objective_player.id))

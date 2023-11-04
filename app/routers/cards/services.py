@@ -48,10 +48,6 @@ def find_card_by_id(id: int) -> Card:
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Card with id '{id}' not found."
         )
-    if id != card.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Something went wrong with the card id"
-        )
 
     return card
 
