@@ -432,6 +432,22 @@ def get_id_of_next_player_in_turn(game_name):
     return next_player_id
 
 
+@db_session
+def get_next_player_in_turn(game: Game) -> Player:
+    players_playing = game.players.select(
+        lambda p: p.rol != PlayerRol.ELIMINATED).count()
+
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        next_turn = (game.turn + 1) % players_playing
+    else:
+        next_turn = (game.turn - 1) % players_playing
+
+    next_player = game.players.select(
+        lambda p: p.position == next_turn).first()
+
+    return next_player
+
+
 def is_the_game_finished(game_name: str) -> bool:
     game: Game = find_game_by_name(game_name)
     try:

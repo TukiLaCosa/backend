@@ -9,6 +9,7 @@ from .utils import find_game_by_name, is_the_game_finished
 from ..players.utils import get_player_name_by_id
 from ..cards.utils import get_card_name_by_id, get_card_type_by_id, is_flamethrower
 from .services import finish_game
+from .intention import *
 
 
 router = APIRouter(
@@ -219,15 +220,21 @@ async def draw_card(game_name: str, game_data: DrawInformationIn):
 @router.patch("/{game_name}/intention-to-interchange-card", status_code=status.HTTP_200_OK)
 async def intention_to_interchange_card(game_name: str, interchange_info: IntentionExchangeInformationIn):
     utils.verify_if_interchange_can_be_done(game_name, interchange_info)
-    objective_player_id = utils.get_id_of_next_player_in_turn(game_name)
+
+    exchange_intention = services.register_card_exchange_intention(
+        game_name, interchange_info)
+
     json_msg = {
         "event": "exchange_intention",
-        "player_id": interchange_info.player_id,
-        "player_name": get_player_name_by_id(interchange_info.player_id),
-        "card_to_exchange": interchange_info.card_id
+        "player_id": exchange_intention.player.id,
+        "player_name": exchange_intention.player.name,
+        "card_to_exchange": interchange_info.card_id,
+        "defense_cards": player_can_defend_himself(ActionType.EXCHANGE_OFFER, exchange_intention.objective_player)
     }
-    await player_connections.send_event_to(objective_player_id, json_msg)
-    return {"message": "Card interchange intention terminated."}
+
+    await player_connections.send_event_to(exchange_intention.objective_player.id, json_msg)
+
+    return {"message": "Card exchange intention generated."}
 
 
 @router.patch("/{game_name}/card-interchange-response", status_code=status.HTTP_200_OK)

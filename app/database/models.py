@@ -48,3 +48,4 @@ class Intention(db.Entity):
     player = Required(Player)
     objective_player = Required(Player)
     action_type = Required(str)
+    exchange_payload = Optional(Json, default={})

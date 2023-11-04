@@ -1,6 +1,6 @@
 from pony.orm import *
 from typing import List
-from app.database.models import Game, Player, Card
+from app.database.models import Game, Player, Card, Intention
 from .schemas import *
 from ..players.schemas import PlayerRol
 from fastapi import HTTPException, status
@@ -432,6 +432,19 @@ def get_game_result(name: str) -> GameResult:
         winners=[PlayerInfo.model_validate(p) for p in winners],
         losers=[PlayerInfo.model_validate(p) for p in losers]
     )
+
+
+@db_session
+def register_card_exchange_intention(game_name: str, exchange_info: IntentionExchangeInformationIn) -> Intention:
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(exchange_info.player_id)
+    objective_player = utils.get_next_player_in_turn(game)
+    exchange_payload = {"card_id": exchange_info.card_id}
+
+    exchange_intention = create_intention_in_game(
+        game, ActionType.EXCHANGE_OFFER, player, objective_player, exchange_payload)
+
+    return exchange_intention
 
 
 @db_session

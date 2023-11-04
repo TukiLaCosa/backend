@@ -28,7 +28,7 @@ def player_can_defend_himself(action_type: ActionType, player: Player) -> list[i
     defense_cards = response_to_action_type[action_type]
     player_defense_cards = []
 
-    for card in player.hand:
+    for card in player.hand.select():
         if card.name in defense_cards:
             player_defense_cards.append(card.id)
 
