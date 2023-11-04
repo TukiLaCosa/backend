@@ -21,7 +21,7 @@ async def send_players_eliminated_event(game: Game, killer_id: int, killer_name:
         "killer_player_id": killer_id,
         "killer_player_name": killer_name,
         "eliminated_player_id": eliminated_id,
-        "player_name": eliminated_name,
+        "eliminated_player_name": eliminated_name,
         "players_positions": players_positions
     }
     for p in game.players:
