@@ -260,3 +260,15 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
     return {"message": "Card interchange terminated."}
+
+
+@router.post("/{game_name}/play-defense-card")
+async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):
+    utils.verify_defense_card_can_be_played(game_name, defense_info)
+
+    if defense_info.card_id:
+        services.play_defense_card(game_name, defense_info)
+    else:
+        process_intention_in_game(game_name)
+
+    clean_intention_in_game(game_name)

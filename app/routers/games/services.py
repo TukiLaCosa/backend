@@ -279,7 +279,6 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
         if game.turn != 0 and objective_player.position < player.position:
             game.turn = game.turn - 1
 
-        # process_flamethrower_card(game, player, card, objective_player)
         create_intention_in_game(
             game, ActionType.FLAMETHROWER, player, objective_player)
 
@@ -330,7 +329,6 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
         objective_player: Player = find_player_by_id(
             play_info.objective_player_id)
 
-        # process_change_places_card(game, player, card, objective_player)
         create_intention_in_game(
             game, ActionType.CHANGE_PLACES, player, objective_player)
 
@@ -340,7 +338,6 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
         objective_player: Player = find_player_by_id(
             play_info.objective_player_id)
 
-        # process_better_run_card(game, player, card, objective_player)
         create_intention_in_game(
             game, ActionType.BETTER_RUN, player, objective_player)
 
@@ -358,6 +355,9 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
         verify_card_in_hand(player, card_to_exchange)
         process_seduction_card(
             game, player, card, objective_player, card_to_exchange)
+
+    game.discard_deck.add(card)
+    player.hand.remove(card)
 
     update_game_turn(game_name)
 
@@ -456,10 +456,15 @@ def card_interchange_response(game_name: str, game_data: InterchangeInformationI
     next_player: Player = find_player_by_id(game_data.player_id)
     next_player_card: Card = Card[game_data.card_id]
 
-    player.hand.remove(player_card)
-    next_player.hand.remove(next_player_card)
-
-    player.hand.add(next_player_card)
-    next_player.hand.add(player_card)
+    process_card_exchange(player, next_player, player_card, next_player_card)
 
     update_game_turn(game_name)
+
+
+@db_session
+def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):
+    game: Game = find_game_by_name(game_name)
+    card: Card = find_card_by_id(defense_info.card_id)
+    intention: Intention = game.intention
+
+    intention.objective_player.hand.remove(card)

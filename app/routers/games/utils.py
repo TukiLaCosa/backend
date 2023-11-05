@@ -8,6 +8,8 @@ from ..websockets.utils import player_connections, get_players_id
 from ..players.schemas import PlayerRol
 from ..players.utils import find_player_by_id
 from ..cards.schemas import CardType, CardSubtype
+from ..cards.services import find_card_by_id
+from ..games.defense_functions import player_cards_to_defend_himself
 
 
 class Events(str, Enum):
@@ -466,3 +468,42 @@ def update_game_turn(game_name: str):
         game.turn = (game.turn + 1) % players_playing
     else:
         game.turn = (game.turn - 1) % players_playing
+
+
+@db_session
+def verify_defense_card_can_be_played(game_name: str, defense_info: PlayDefenseInformation):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(defense_info.player_id)
+
+    if not game.intention:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='No intention to conclude in the game.'
+        )
+
+    if game.intention.objective_player != defense_info.player_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Does not correspond to the objective player for the intention.'
+        )
+
+    if defense_info.card_id:
+        card: Card = find_card_by_id(defense_info.card_id)
+
+        if card.subtype != CardSubtype.DEFENSE:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='The card is not for defense.'
+            )
+
+        if not card in player.hand.select():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='The card is not in the player hand.'
+            )
+
+        if not card.id not in player_cards_to_defend_himself(game.intention.action_type, player):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='The card does not work to defend this action type.'
+            )
