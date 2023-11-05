@@ -502,7 +502,7 @@ def verify_defense_card_can_be_played(game_name: str, defense_info: PlayDefenseI
                 detail='The card is not in the player hand.'
             )
 
-        if not card.id not in player_cards_to_defend_himself(game.intention.action_type, player):
+        if not card.id in player_cards_to_defend_himself(game.intention.action_type, player):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail='The card does not work to defend this action type.'
