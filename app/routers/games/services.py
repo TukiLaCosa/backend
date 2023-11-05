@@ -365,19 +365,25 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
 
 
 @db_session
+def draw_card_by_drawing_order(game: Game) -> Card:
+    if len(game.draw_deck_order) == 1:
+        merge_decks_of_card(game)
+
+    top_card_id = game.draw_deck_order.pop(0)
+    top_card = game.draw_deck.select(
+        lambda card: card.id == top_card_id).first()
+    game.draw_deck.remove(top_card)
+
+    return top_card
+
+
+@db_session
 def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOut:
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(game_data.player_id)
 
-    if len(game.draw_deck_order) == 1:
-        merge_decks_of_card(game_name)
-
-    top_card_id = game.draw_deck_order.pop(0)
-    card = select(card for card in game.draw_deck if card.id ==
-                  top_card_id).first()
-
+    card = draw_card_by_drawing_order(game)
     player.hand.add(card)
-    game.draw_deck.remove(card)
 
     top_card_face = select(
         card for card in game.draw_deck if card.id == game.draw_deck_order[0]).first().type
@@ -468,3 +474,9 @@ def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):
     intention: Intention = game.intention
 
     intention.objective_player.hand.remove(card)
+
+    # Draw card until a card of type StayAway is obtained
+    while (top_card := draw_card_by_drawing_order(game)).type != CardType.STAY_AWAY:
+        game.discard_deck.add(top_card)
+
+    intention.objective_player.hand.add(top_card)

@@ -287,8 +287,7 @@ def verify_adjacent_players(player_id: int, other_player_id: int, max_position: 
 
 
 @db_session
-def merge_decks_of_card(game_name: str):
-    game: Game = find_game_by_name(game_name)
+def merge_decks_of_card(game: Game):
     top_card_id = game.draw_deck_order.pop(0)
     new_deck_list = list(game.draw_deck) + list(game.discard_deck)
     game.draw_deck.clear()
