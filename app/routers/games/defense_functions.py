@@ -24,7 +24,7 @@ response_to_action_type = {
 
 
 @db_session
-def player_can_defend_himself(action_type: ActionType, player: Player) -> list[int]:
+def player_cards_to_defend_himself(action_type: ActionType, player: Player) -> list[int]:
     defense_cards = response_to_action_type[action_type]
     player_defense_cards = []
 

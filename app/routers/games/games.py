@@ -229,7 +229,7 @@ async def intention_to_interchange_card(game_name: str, interchange_info: Intent
         "player_id": exchange_intention.player.id,
         "player_name": exchange_intention.player.name,
         "card_to_exchange": interchange_info.card_id,
-        "defense_cards": player_can_defend_himself(ActionType.EXCHANGE_OFFER, exchange_intention.objective_player)
+        "defense_cards": player_cards_to_defend_himself(ActionType.EXCHANGE_OFFER, exchange_intention.objective_player)
     }
 
     await player_connections.send_event_to(exchange_intention.objective_player.id, json_msg)
