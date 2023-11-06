@@ -2,6 +2,8 @@ from pony.orm import *
 from .defense_functions import *
 from app.database import Intention, Game, Player
 from ..cards.services import find_card_by_id
+from app.routers.websockets.utils import player_connections
+import asyncio
 from .services import (
     find_game_by_name,
     process_change_places_card,
@@ -11,8 +13,17 @@ from .services import (
 )
 
 
+async def send_intention_event(action_type: ActionType, objective_player: Player):
+    json_msg = {
+        "event": action_type,
+        "defense_cards": player_cards_to_defend_himself(action_type, objective_player)
+    }
+
+    await player_connections.send_event_to(objective_player.id, json_msg)
+
+
 @db_session
-def create_intention_in_game(game: Game, action_type: ActionType, player: Player, objective_player: Player, exchange_payload=None) -> Intention:
+def create_intention_in_game(game: Game, action_type: ActionType, player: Player, objective_player: Player, exchange_payload={}) -> Intention:
     intention = Intention(
         action_type=action_type,
         player=player,
@@ -21,6 +32,8 @@ def create_intention_in_game(game: Game, action_type: ActionType, player: Player
         exchange_payload=exchange_payload
     )
     game.intention = intention
+
+    asyncio.ensure_future(send_intention_event(action_type, objective_player))
 
     return intention
 
@@ -59,3 +72,10 @@ def process_intention_in_game(game_name) -> Intention:
 def clean_intention_in_game(game_name):
     game: Game = find_game_by_name(game_name)
     Intention.get(game=game).delete()
+
+
+@db_session
+def get_intention_in_game(game_name: str) -> Intention:
+    game: Game = find_game_by_name(game_name)
+
+    return game.intention

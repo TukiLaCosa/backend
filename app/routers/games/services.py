@@ -353,8 +353,10 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
                 detail="The card to exchange cannot be The Thing"
             )
         verify_card_in_hand(player, card_to_exchange)
-        process_seduction_card(
-            game, player, card, objective_player, card_to_exchange)
+        # process_seduction_card(
+        #     game, player, card, objective_player, card_to_exchange)
+        create_intention_in_game(
+            game, ActionType.EXCHANGE_OFFER, player, objective_player)
 
     game.discard_deck.add(card)
     player.hand.remove(card)

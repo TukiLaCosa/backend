@@ -6,8 +6,8 @@ from . import utils
 from .schemas import *
 from ..websockets.utils import player_connections
 from .utils import find_game_by_name, is_the_game_finished
-from ..players.utils import get_player_name_by_id
-from ..cards.utils import get_card_name_by_id, get_card_type_by_id, is_flamethrower
+from ..players.utils import get_player_name_by_id, find_player_by_id
+from ..cards.utils import get_card_name_by_id, get_card_type_by_id, is_flamethrower, is_whiskey
 from .services import finish_game
 from .intention import *
 
@@ -182,7 +182,7 @@ async def play_action_card(game_name: str, play_info: PlayInformation):
         }
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
-        if not is_flamethrower(play_info.card_id):
+        if not is_flamethrower(play_info.card_id) or not is_whiskey(play_info.card_id):
             with db_session:
                 game = find_game_by_name(game_name)
                 player_id_turn = select(
@@ -220,21 +220,23 @@ async def draw_card(game_name: str, game_data: DrawInformationIn):
 @router.patch("/{game_name}/intention-to-interchange-card", status_code=status.HTTP_200_OK)
 async def intention_to_interchange_card(game_name: str, interchange_info: IntentionExchangeInformationIn):
     utils.verify_if_interchange_can_be_done(game_name, interchange_info)
+    objective_player_id = utils.get_id_of_next_player_in_turn(game_name)
 
-    exchange_intention = services.register_card_exchange_intention(
-        game_name, interchange_info)
+    '''exchange_intention = services.register_card_exchange_intention(
+        game_name, interchange_info)'''
+
+    with db_session:
+        objective_player = find_player_by_id(objective_player_id)
 
     json_msg = {
         "event": "exchange_intention",
-        "player_id": exchange_intention.player.id,
-        "player_name": exchange_intention.player.name,
+        "player_id": interchange_info.player_id,
+        "player_name": get_player_name_by_id(interchange_info.player_id),
         "card_to_exchange": interchange_info.card_id,
-        "defense_cards": player_cards_to_defend_himself(ActionType.EXCHANGE_OFFER, exchange_intention.objective_player)
+        "defense_cards": player_cards_to_defend_himself(ActionType.EXCHANGE_OFFER, objective_player)
     }
-
-    await player_connections.send_event_to(exchange_intention.objective_player.id, json_msg)
-
-    return {"message": "Card exchange intention generated."}
+    await player_connections.send_event_to(objective_player_id, json_msg)
+    return {"message": "Card interchange intention terminated."}
 
 
 @router.patch("/{game_name}/card-interchange-response", status_code=status.HTTP_200_OK)
@@ -270,6 +272,13 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
 
     if defense_info.card_id:
         services.play_defense_card(game_name, defense_info)
+
+        json_msg = {
+            "event": get_intention_in_game(game_name).action_type,
+            "player_id": defense_info.player_id,
+            "card_id": defense_info.card_id
+        }
+        await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
     else:
         process_intention_in_game(game_name)
 
