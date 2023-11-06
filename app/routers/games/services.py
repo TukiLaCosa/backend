@@ -457,10 +457,11 @@ def register_card_exchange_intention(game_name: str, exchange_info: IntentionExc
 def card_interchange_response(game_name: str, game_data: InterchangeInformationIn):
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(game_data.objective_player_id)
-    player_card: Card = Card[game_data.objective_card_id]
+    player_card: Card = cards_services.find_card_by_id(
+        game_data.objective_card_id)
 
     next_player: Player = find_player_by_id(game_data.player_id)
-    next_player_card: Card = Card[game_data.card_id]
+    next_player_card: Card = cards_services.find_card_by_id(game_data.card_id)
 
     process_card_exchange(player, next_player, player_card, next_player_card)
 

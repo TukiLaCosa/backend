@@ -241,6 +241,8 @@ async def intention_to_interchange_card(game_name: str, interchange_info: Intent
 async def card_interchange_response(game_name: str, game_data: InterchangeInformationIn):
     utils.verify_if_interchange_response_can_be_done(game_name, game_data)
     services.card_interchange_response(game_name, game_data)
+    clean_intention_in_game(game_name)
+
     json_msg = {
         "event": "exchange_done"
     }
