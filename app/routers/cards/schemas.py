@@ -30,6 +30,14 @@ class CardActionName(str, Enum):
     SEDUCTION = 'Seducción'
 
 
+class CardDefenseName(str, Enum):
+    SCARY = 'Aterrador'
+    I_AM_COMFORTABLE = 'Aquí estoy bien'
+    NO_THANKS = '¡No, gracias!'
+    MISSED = '¡Fallaste!'
+    NO_BARBECUE = '¡Nada de barbacoas!'
+
+
 class BaseCard(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
