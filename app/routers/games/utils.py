@@ -371,6 +371,12 @@ def verify_if_interchange_response_can_be_done(game_name: str, game_data: Interc
     objective_player: Player = find_player_by_id(game_data.objective_player_id)
     objective_player_card: Card = find_card_by_id(game_data.objective_card_id)
 
+    if not game.intention:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='No intention to exchange.'
+        )
+
     if player_card.type == CardType.THE_THING or objective_player_card.type == CardType.THE_THING:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
