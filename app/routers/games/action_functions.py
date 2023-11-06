@@ -26,20 +26,6 @@ async def send_players_eliminated_event(game: Game, eliminated_by: int, eliminat
     for p in game.players:
         await player_connections.send_event_to(p.id, json_msg)
 
-    # Espera 4 segundos antes de enviar el siguiente evento
-    await asyncio.sleep(2)
-
-    with db_session:
-        player_id_turn = select(
-            p for p in game.players if p.position == game.turn).first().id
-        json_msg = {
-            "event": Events.NEW_TURN,
-            "next_player_name": get_player_name_by_id(player_id_turn),
-            "next_player_id": player_id_turn,
-            "round_direction": game.round_direction
-        }
-    await player_connections.send_event_to_all_players_in_game(game.name, json_msg)
-
 
 async def send_players_whiskey_event(game: Game, player_id: int, player_name: str):
     json_msg = {
@@ -49,19 +35,6 @@ async def send_players_whiskey_event(game: Game, player_id: int, player_name: st
     }
     await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
 
-    await asyncio.sleep(2)
-
-    with db_session:
-        player_id_turn = select(
-            p for p in game.players if p.position == game.turn).first().id
-        json_msg = {
-            "event": Events.NEW_TURN,
-            "next_player_name": get_player_name_by_id(player_id_turn),
-            "next_player_id": player_id_turn,
-            "round_direction": game.round_direction
-        }
-    await player_connections.send_event_to_all_players_in_game(game.name, json_msg)
-
 
 async def send_seduction_done_event(player_id: int, objective_player_id: int):
     json_msg = {
@@ -69,19 +42,6 @@ async def send_seduction_done_event(player_id: int, objective_player_id: int):
     }
     await player_connections.send_event_to(player_id, json_msg)
     await player_connections.send_event_to(objective_player_id, json_msg)
-
-
-async def send_interchange_intention_event(player: Player, objective_player: Player, card: Card, card_to_exchange: Card):
-    json_msg = {
-        "event": Events.INTERCHANGE_INTENTION,
-        "player_id": player.id,
-        "player_name": player.name,
-        "card_played": card.id,
-        "card_name": card.name,
-        "card_to_exchange_id": card_to_exchange.id,
-        "card_to_exchange_name": card_to_exchange.name
-    }
-    await player_connections.send_event_to(objective_player.id, json_msg)
 
 
 @db_session

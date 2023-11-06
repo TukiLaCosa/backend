@@ -48,6 +48,7 @@ def is_flamethrower(card_id: int) -> bool:
     card: Card = find_card_by_id(card_id)
     return (card.name == CardActionName.FLAMETHROWER)
 
+
 @db_session
 def is_whiskey(card_id: int) -> bool:
     card: Card = find_card_by_id(card_id)

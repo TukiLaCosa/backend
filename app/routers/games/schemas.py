@@ -154,11 +154,13 @@ class InterchangeInformationIn(BaseModel):
     objective_player_id: int  # ID jugador que inicia la intencion
     objective_card_id: int  # Card ID del jugador que inicia la intencion
 
+
 class PlayDefenseInformation(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     player_id: int
     card_id: Optional[int]
+
 
 class ShowRevelationsCardsIn(BaseModel):
     model_config = ConfigDict(from_attributes=True)
