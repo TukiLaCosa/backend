@@ -5,7 +5,7 @@ from . import services
 from . import utils
 from .schemas import *
 from ..websockets.utils import player_connections
-from .utils import find_game_by_name, is_the_game_finished
+from .utils import find_game_by_name, is_the_game_finished, Events
 from ..players.utils import get_player_name_by_id, find_player_by_id
 from ..cards.utils import get_card_name_by_id, get_card_type_by_id, is_flamethrower, is_whiskey
 from .services import finish_game
@@ -151,8 +151,9 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
             p for p in game.players if p.position == game.turn).first().id
 
     json_msg = {
-        "event": "discard_card",
+        "event": Events.DISCARD_CARD,
         "player_name": get_player_name_by_id(game_data.player_id),
+        "player_id": game_data.player_id,
         "card_type": get_card_type_by_id(game_data.card_id)
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
