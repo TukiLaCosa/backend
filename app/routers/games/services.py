@@ -314,7 +314,7 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
 
     # Determinacion
     if card.name == CardActionName.RESOLUTE:
-        pass
+        process_resolute_card(game, player, card)
 
     # Vigila tus espaldas
     if card.name == CardActionName.WATCH_YOUR_BACK:
@@ -469,6 +469,25 @@ def card_interchange_response(game_name: str, game_data: InterchangeInformationI
 
     update_game_turn(game_name)
 
+
+@db_session
+def card_resolute_exchange(game_name: str, game_data: ResoluteExchangeIn):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(game_data.player_id)
+    player_card: Card = find_card_by_id(game_data.card_in_hand)
+    deck_card: Card = find_card_by_id(game_data.card_in_deck)
+
+    player.hand.remove(player_card)
+    player.hand.add(deck_card)
+
+    game.discard_deck.add(player_card)
+
+    if deck_card in game.draw_deck:
+        game.draw_deck.remove(deck_card)
+        game.draw_deck_order.remove(deck_card.id)
+
+    elif deck_card in game.discard_deck:
+        game.discard_deck.remove(deck_card)
 
 @db_session
 def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):

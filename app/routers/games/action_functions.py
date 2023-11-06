@@ -64,6 +64,13 @@ async def send_players_whiskey_event(game: Game, player_id: int, player_name: st
     await player_connections.send_event_to_all_players_in_game(game.name, json_msg)
 
 
+async def send_resolute_card_played_event(game: Game, player_id: int, option_cards: list[int]):
+    json_msg = {
+        "event": Events.RESOLUTE_CARD_PLAYED,
+        "option_cards": option_cards
+    }
+    await player_connections.send_event_to(player_id, json_msg)
+
 async def send_seduction_done_event(player_id: int, objective_player_id: int):
     json_msg = {
         "event": Events.SEDUCTION_DONE
@@ -129,6 +136,25 @@ def process_suspicious_card(game: Game, player: Player, objective_player: Player
 def process_whiskey_card(game: Game, player: Player):
     asyncio.ensure_future(send_players_whiskey_event(
         game, player.id, player.name))
+
+
+@db_session
+def process_resolute_card(game: Game, player: Player, card: Card):
+    game.discard_deck.add(card)
+    player.hand.remove(card)
+
+    random_draw_deck_cards = select(
+        c for c in game.draw_deck if 2 <= c.id and c.id <= 88).random(3)
+    random_discard_deck_cards = select(
+        c for c in game.discard_deck if 2 <= c.id and c.id <= 88).random(3)
+
+    while (len(random_draw_deck_cards) < 3):
+        random_draw_deck_cards.append(random_discard_deck_cards.pop())
+
+    option_cards_id = [card.id for card in random_draw_deck_cards]
+
+    asyncio.ensure_future(send_resolute_card_played_event(
+        game, player.id, option_cards_id))
 
 
 @db_session
