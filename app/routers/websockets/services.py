@@ -16,6 +16,8 @@ async def send_list_of_cheats(player_id: int):
         '[lz | lanzallamas | flamethrower]: Obtienes una carta lanzallamas',
         '[ws | whiskey | whisky]: Obtienes una carta whiskey',
         '[ups | ooops]: Obtienes una carta ups!',
+        '[det | determinación | resolute]: Obtienes una carta determinación'
+    ,
         '[olv | olvidadizo | forgetful]: Obtienes una carta olvidadizo',
         '[uno dos | one two]: Obtienes una carta uno, dos...',
         '[sed | seducción | seduction]: Obtienes una carta de seducción'
@@ -60,6 +62,10 @@ async def handle_message(data, player_id):
 
     elif message == 'sed' or message == 'seducción' or message == 'seduction':
         apply_cheat(game_name, player_id, range(55, 62))
+        await send_event_cheat_used(player_id)
+
+    elif message == 'det' or message == 'determinación' or message == 'resolute':
+        apply_cheat(game_name, player_id, range(43, 48))
         await send_event_cheat_used(player_id)
 
 

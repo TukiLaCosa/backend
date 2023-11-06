@@ -26,6 +26,8 @@ class Events(str, Enum):
     PLAYED_CARD = 'played_card'
     PLAYER_ELIMINATED = 'player_eliminated'
     WHISKEY_CARD_PLAYED = 'whiskey_card_played'
+    RESOLUTE_CARD_PLAYED = 'resolute_card_played'
+    RESOLUTE_DONE = 'resolute_done'
     PLAYER_DRAW_CARD = 'player_draw_card'
     NEW_TURN = 'new_turn'
     BETWEEN_US_CARD_PLAYED = 'between_us_card_played'
