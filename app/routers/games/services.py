@@ -1,6 +1,6 @@
 from pony.orm import *
 from typing import List
-from app.database.models import Game, Player, Card
+from app.database.models import Game, Player, Card, Intention
 from .schemas import *
 from ..players.schemas import PlayerRol
 from fastapi import HTTPException, status
@@ -13,6 +13,7 @@ from ..players.schemas import PlayerRol
 from .action_functions import *
 import random
 from app.routers.games import utils
+from .intention import create_intention_in_game, ActionType
 
 
 def get_unstarted_games() -> List[GameResponse]:
@@ -278,7 +279,8 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
         if game.turn != 0 and objective_player.position < player.position:
             game.turn = game.turn - 1
 
-        process_flamethrower_card(game, player, card, objective_player)
+        create_intention_in_game(
+            game, ActionType.FLAMETHROWER, player, objective_player)
 
     # Analisis
     if card.name == CardActionName.ANALYSIS:
@@ -326,14 +328,18 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
                                 players_not_eliminated - 1)
         objective_player: Player = find_player_by_id(
             play_info.objective_player_id)
-        process_change_places_card(game, player, card, objective_player)
+
+        create_intention_in_game(
+            game, ActionType.CHANGE_PLACES, player, objective_player)
 
     # Mas vale que corras
     if card.name == CardActionName.BETTER_RUN:
         verify_player_in_game(play_info.objective_player_id, game_name)
         objective_player: Player = find_player_by_id(
             play_info.objective_player_id)
-        process_better_run_card(game, player, card, objective_player)
+
+        create_intention_in_game(
+            game, ActionType.BETTER_RUN, player, objective_player)
 
     # Seduccion (Ojo porque esta carta modifica la mano del jugador objetivo)
     if card.name == CardActionName.SEDUCTION:
@@ -347,8 +353,13 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
                 detail="The card to exchange cannot be The Thing"
             )
         verify_card_in_hand(player, card_to_exchange)
-        process_seduction_card(
-            game, player, card, objective_player, card_to_exchange)
+        # process_seduction_card(
+        #     game, player, card, objective_player, card_to_exchange)
+        create_intention_in_game(
+            game, ActionType.EXCHANGE_OFFER, player, objective_player)
+
+    game.discard_deck.add(card)
+    player.hand.remove(card)
 
     update_game_turn(game_name)
 
@@ -356,19 +367,25 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
 
 
 @db_session
+def draw_card_by_drawing_order(game: Game) -> Card:
+    if len(game.draw_deck_order) == 1:
+        merge_decks_of_card(game)
+
+    top_card_id = game.draw_deck_order.pop(0)
+    top_card = game.draw_deck.select(
+        lambda card: card.id == top_card_id).first()
+    game.draw_deck.remove(top_card)
+
+    return top_card
+
+
+@db_session
 def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOut:
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(game_data.player_id)
 
-    if len(game.draw_deck_order) == 1:
-        merge_decks_of_card(game_name)
-
-    top_card_id = game.draw_deck_order.pop(0)
-    card = select(card for card in game.draw_deck if card.id ==
-                  top_card_id).first()
-
+    card = draw_card_by_drawing_order(game)
     player.hand.add(card)
-    game.draw_deck.remove(card)
 
     top_card_face = select(
         card for card in game.draw_deck if card.id == game.draw_deck_order[0]).first().type
@@ -426,18 +443,43 @@ def get_game_result(name: str) -> GameResult:
 
 
 @db_session
+def register_card_exchange_intention(game_name: str, exchange_info: IntentionExchangeInformationIn) -> Intention:
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(exchange_info.player_id)
+    objective_player = utils.get_next_player_in_turn(game)
+    exchange_payload = {"card_id": exchange_info.card_id}
+
+    exchange_intention = create_intention_in_game(
+        game, ActionType.EXCHANGE_OFFER, player, objective_player, exchange_payload)
+
+    return exchange_intention
+
+
+@db_session
 def card_interchange_response(game_name: str, game_data: InterchangeInformationIn):
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(game_data.objective_player_id)
-    player_card: Card = Card[game_data.objective_card_id]
+    player_card: Card = cards_services.find_card_by_id(
+        game_data.objective_card_id)
 
     next_player: Player = find_player_by_id(game_data.player_id)
-    next_player_card: Card = Card[game_data.card_id]
+    next_player_card: Card = cards_services.find_card_by_id(game_data.card_id)
 
-    player.hand.remove(player_card)
-    next_player.hand.remove(next_player_card)
-
-    player.hand.add(next_player_card)
-    next_player.hand.add(player_card)
+    process_card_exchange(player, next_player, player_card, next_player_card)
 
     update_game_turn(game_name)
+
+
+@db_session
+def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):
+    game: Game = find_game_by_name(game_name)
+    card: Card = find_card_by_id(defense_info.card_id)
+    intention: Intention = game.intention
+
+    intention.objective_player.hand.remove(card)
+
+    # Draw card until a card of type StayAway is obtained
+    while (top_card := draw_card_by_drawing_order(game)).type != CardType.STAY_AWAY:
+        game.discard_deck.add(top_card)
+
+    intention.objective_player.hand.add(top_card)

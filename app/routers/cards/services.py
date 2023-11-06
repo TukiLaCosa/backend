@@ -1,7 +1,5 @@
 from pony.orm import *
 from app.database.models import Game, Player, Card
-from app.routers.games.utils import find_game_by_name
-from app.routers.players.services import find_player_by_id
 import random
 from .schemas import *
 from fastapi import HTTPException, status
