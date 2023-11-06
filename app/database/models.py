@@ -12,6 +12,8 @@ class Player(db.Entity):
     isQuarentined = Optional(bool, default=False)
     position = Required(int, default="-1")
     hand = Set('Card')
+    intention_creator = Optional('Intention', reverse='player')
+    intention_objective = Optional('Intention', reverse='objective_player')
 
 
 class Game(db.Entity):
@@ -27,6 +29,7 @@ class Game(db.Entity):
     draw_deck = Set('Card', reverse='games_draw_deck')
     draw_deck_order = Required(Json, default=[])
     round_direction = Required(str, default=RoundDirection.CLOCKWISE)
+    intention = Optional('Intention', reverse='game')
 
 
 class Card(db.Entity):
@@ -39,3 +42,11 @@ class Card(db.Entity):
     games_discard_deck = Set(Game, reverse='discard_deck')
     games_draw_deck = Set(Game, reverse='draw_deck')
     players_hand = Set(Player)
+
+
+class Intention(db.Entity):
+    game = Required(Game)
+    player = Required(Player)
+    objective_player = Required(Player)
+    action_type = Required(str)
+    exchange_payload = Optional(Json, default={})

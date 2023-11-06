@@ -26,6 +26,20 @@ async def send_players_eliminated_event(game: Game, eliminated_by: int, eliminat
     for p in game.players:
         await player_connections.send_event_to(p.id, json_msg)
 
+    # Espera 4 segundos antes de enviar el siguiente evento
+    await asyncio.sleep(2)
+
+    with db_session:
+        player_id_turn = select(
+            p for p in game.players if p.position == game.turn).first().id
+        json_msg = {
+            "event": Events.NEW_TURN,
+            "next_player_name": get_player_name_by_id(player_id_turn),
+            "next_player_id": player_id_turn,
+            "round_direction": game.round_direction
+        }
+    await player_connections.send_event_to_all_players_in_game(game.name, json_msg)
+
 
 async def send_players_whiskey_event(game: Game, player_id: int, player_name: str):
     json_msg = {
@@ -34,6 +48,19 @@ async def send_players_whiskey_event(game: Game, player_id: int, player_name: st
         "player_name": player_name
     }
     await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
+
+    await asyncio.sleep(2)
+
+    with db_session:
+        player_id_turn = select(
+            p for p in game.players if p.position == game.turn).first().id
+        json_msg = {
+            "event": Events.NEW_TURN,
+            "next_player_name": get_player_name_by_id(player_id_turn),
+            "next_player_id": player_id_turn,
+            "round_direction": game.round_direction
+        }
+    await player_connections.send_event_to_all_players_in_game(game.name, json_msg)
 
 
 async def send_seduction_done_event(player_id: int, objective_player_id: int):
@@ -58,8 +85,7 @@ async def send_interchange_intention_event(player: Player, objective_player: Pla
 
 
 @db_session
-def process_flamethrower_card(game: Game, player: Player,
-                              card: Card, objective_player: Player):
+def process_flamethrower_card(game: Game, player: Player, objective_player: Player):
     objective_player.rol = PlayerRol.ELIMINATED
 
     # Las cartas del jugador eliminado van al mazo de descarte
@@ -75,9 +101,6 @@ def process_flamethrower_card(game: Game, player: Player,
             p.position -= 1
     objective_player.position = -1
 
-    game.discard_deck.add(card)
-    player.hand.remove(card)
-
     asyncio.ensure_future(send_players_eliminated_event(game=game,
                                                         eliminated_by=player.id,
                                                         eliminated_id=objective_player.id,
@@ -85,8 +108,7 @@ def process_flamethrower_card(game: Game, player: Player,
 
 
 @db_session
-def process_analysis_card(game: Game, player: Player,
-                          card: Card, objective_player: Player):
+def process_analysis_card(game: Game, player: Player, objective_player: Player):
     result = [CardResponse(id=c.id,
                            number=c.number,
                            type=c.type,
@@ -94,14 +116,12 @@ def process_analysis_card(game: Game, player: Player,
                            name=c.name,
                            description=c.description
                            ) for c in objective_player.hand]
-    game.discard_deck.add(card)
-    player.hand.remove(card)
+
     return result
 
 
 @db_session
-def process_suspicious_card(game: Game, player: Player,
-                            card: Card, objective_player: Player):
+def process_suspicious_card(game: Game, player: Player, objective_player: Player):
     objective_player_hand_list = list(objective_player.hand)
     random_card = random.choice(objective_player_hand_list)
     result = CardResponse(
@@ -112,74 +132,65 @@ def process_suspicious_card(game: Game, player: Player,
         name=random_card.name,
         description=random_card.description
     )
-    game.discard_deck.add(card)
-    player.hand.remove(card)
+
     return result
 
 
 @db_session
-def process_whiskey_card(game: Game, player: Player, card: Card):
-    game.discard_deck.add(card)
-    player.hand.remove(card)
+def process_whiskey_card(game: Game, player: Player):
     asyncio.ensure_future(send_players_whiskey_event(
         game, player.id, player.name))
 
 
 @db_session
-def process_watch_your_back_card(game: Game, player: Player, card: Card):
+def process_watch_your_back_card(game: Game, player: Player):
     if game.round_direction == RoundDirection.CLOCKWISE:
         game.round_direction = RoundDirection.COUNTERCLOCKWISE
     else:
         game.round_direction = RoundDirection.CLOCKWISE
 
-    game.discard_deck.add(card)
-    player.hand.remove(card)
-
 
 @db_session
-def process_change_places_card(game: Game, player: Player, card: Card, objective_player: Player):
+def process_change_places_card(game: Game, player: Player, objective_player: Player):
     # Intercambio de posiciones entre los jugadores
     tempPosition = player.position
     player.position = objective_player.position
     objective_player.position = tempPosition
 
-    game.discard_deck.add(card)
-    player.hand.remove(card)
+    # enviar evento de intercambio de lugar
 
 
 @db_session
-def process_better_run_card(game: Game, player: Player,
-                            card: Card, objective_player: Player):
+def process_better_run_card(game: Game, player: Player, objective_player: Player):
     # Intercambio de posiciones entre los jugadores
     tempPosition = player.position
     player.position = objective_player.position
     objective_player.position = tempPosition
 
-    game.discard_deck.add(card)
-    player.hand.remove(card)
+    # enviar evento de cambio de lugar
 
 
 @db_session
-def process_seduction_card(game: Game, player: Player, card: Card, objective_player: Player, card_to_exchange: Card):
-    asyncio.ensure_future(send_interchange_intention_event(
-        player, objective_player, card, card_to_exchange))
-    game.discard_deck.add(card)
-    player.hand.remove(card)
-    '''
-    Implementacion vieja:
+def process_card_exchange(player: Player, objective_player: Player, player_card: Card, objective_player_card: Card):
+    player.hand.remove(player_card)
+    player.hand.add(objective_player_card)
 
+    objective_player.hand.remove(objective_player_card)
+    objective_player.hand.add(player_card)
+
+    # enviar evento de intercambio de carta
+
+
+@db_session
+def process_seduction_card(game: Game, player: Player, objective_player: Player,
+                           card_to_exchange: Card):
     objective_player_hand_list = list(objective_player.hand)
     eligible_cards = [
         c for c in objective_player_hand_list if c.type != CardType.THE_THING]
     random_card = random.choice(eligible_cards)
 
-    player.hand.add(random_card)
-    player.hand.remove(card_to_exchange)
-    objective_player.hand.remove(random_card)
-    objective_player.hand.add(card_to_exchange)
+    process_card_exchange(player, objective_player,
+                          card_to_exchange, random_card)
 
-    game.discard_deck.add(card)
-    player.hand.remove(card)
-
-    send_seduction_done_event(player.id, objective_player.id)
-    '''
+    asyncio.ensure_future(send_seduction_done_event(
+        player.id, objective_player.id))

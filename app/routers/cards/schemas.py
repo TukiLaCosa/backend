@@ -47,8 +47,8 @@ class CardPanicName(str, Enum):
 
 class CardDefenseName(str, Enum):
     SCARY = 'Aterrador'
+    I_AM_COMFORTABLE = 'Aquí estoy bien'
     NO_THANKS = '¡No, gracias!'
-    COMFORTABLE = 'Aquí estoy bien'
     MISSED = '¡Fallaste!'
     NO_BARBECUE = '¡Nada de barbacoas!'
 
