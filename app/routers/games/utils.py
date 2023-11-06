@@ -8,6 +8,8 @@ from ..websockets.utils import player_connections, get_players_id
 from ..players.schemas import PlayerRol
 from ..players.utils import find_player_by_id
 from ..cards.schemas import CardType, CardSubtype
+from ..cards.services import find_card_by_id
+from ..games.defense_functions import player_cards_to_defend_himself
 
 
 class Events(str, Enum):
@@ -288,8 +290,7 @@ def verify_adjacent_players(player_id: int, other_player_id: int, max_position: 
 
 
 @db_session
-def merge_decks_of_card(game_name: str):
-    game: Game = find_game_by_name(game_name)
+def merge_decks_of_card(game: Game):
     top_card_id = game.draw_deck_order.pop(0)
     new_deck_list = list(game.draw_deck) + list(game.discard_deck)
     game.draw_deck.clear()
@@ -341,7 +342,7 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
 def verify_if_interchange_can_be_done(game_name: str, interchange_info: IntentionExchangeInformationIn):
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(interchange_info.player_id)
-    card: Card = Card[interchange_info.card_id]
+    card: Card = find_card_by_id(interchange_info.card_id)
 
     if game.turn != player.position:
         raise HTTPException(
@@ -369,20 +370,10 @@ def verify_if_interchange_can_be_done(game_name: str, interchange_info: Intentio
 def verify_if_interchange_response_can_be_done(game_name: str, game_data: InterchangeInformationIn):
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(game_data.player_id)
-    player_card: Card = Card[game_data.card_id]
+    player_card: Card = find_card_by_id(game_data.card_id)
     objective_player: Player = find_player_by_id(game_data.objective_player_id)
-    objective_player_card: Card = Card[game_data.objective_card_id]
+    objective_player_card: Card = find_card_by_id(game_data.objective_card_id)
 
-    if not player_card:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Card of next player in turn not found'
-        )
-    if not objective_player_card:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Card of the player in turn not found'
-        )
     if player_card.type == CardType.THE_THING or objective_player_card.type == CardType.THE_THING:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -435,6 +426,22 @@ def get_id_of_next_player_in_turn(game_name):
     return next_player_id
 
 
+@db_session
+def get_next_player_in_turn(game: Game) -> Player:
+    players_playing = game.players.select(
+        lambda p: p.rol != PlayerRol.ELIMINATED).count()
+
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        next_turn = (game.turn + 1) % players_playing
+    else:
+        next_turn = (game.turn - 1) % players_playing
+
+    next_player = game.players.select(
+        lambda p: p.position == next_turn).first()
+
+    return next_player
+
+
 def is_the_game_finished(game_name: str) -> bool:
     game: Game = find_game_by_name(game_name)
     try:
@@ -453,3 +460,42 @@ def update_game_turn(game_name: str):
         game.turn = (game.turn + 1) % players_playing
     else:
         game.turn = (game.turn - 1) % players_playing
+
+
+@db_session
+def verify_defense_card_can_be_played(game_name: str, defense_info: PlayDefenseInformation):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(defense_info.player_id)
+
+    if not game.intention:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='No intention to conclude in the game.'
+        )
+
+    if game.intention.objective_player != defense_info.player_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Does not correspond to the objective player for the intention.'
+        )
+
+    if defense_info.card_id:
+        card: Card = find_card_by_id(defense_info.card_id)
+
+        if card.subtype != CardSubtype.DEFENSE:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='The card is not for defense.'
+            )
+
+        if not card in player.hand.select():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='The card is not in the player hand.'
+            )
+
+        if not card.id in player_cards_to_defend_himself(game.intention.action_type, player):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='The card does not work to defend this action type.'
+            )

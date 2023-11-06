@@ -1,7 +1,5 @@
 from pony.orm import *
 from app.database.models import Game, Player, Card
-from app.routers.games.utils import find_game_by_name
-from app.routers.players.services import find_player_by_id
 import random
 from .schemas import *
 from fastapi import HTTPException, status
@@ -47,10 +45,6 @@ def find_card_by_id(id: int) -> Card:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Card with id '{id}' not found."
-        )
-    if id != card.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Something went wrong with the card id"
         )
 
     return card

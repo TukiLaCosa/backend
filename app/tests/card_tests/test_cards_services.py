@@ -12,12 +12,12 @@ client = TestClient(app)
 
 @db_session
 def create_card_for_testing(id: int) -> Card:
-    return Card(id=id, number=4, type="THE_THING", name="The Thing",
+    return Card(id=id, number=4, type="THE_THING", subtype=CardSubtype.CONTAGION, name="The Thing",
                 description="You are the thing, infect or kill everyone")
 
 
 @db_session
-def create_test_player(name: str):
+def create_test_player(name: str) -> Player:
     return Player(name=name)
 
 
@@ -120,5 +120,25 @@ def test_build_draw_deck_4_players() -> None:
 
     assert len(
         draw_deck) == 19, f"El tamaño del mazo de robo esperado es 19. El tamaño del mazo de robo obtenido es {len(draw_deck)}."
+
+    cleanup_database()
+
+
+@db_session
+def test_card_is_in_player_hand_success():
+    cleanup_database()
+    # Create a player and add a card to their hand
+    player = create_test_player("test_player")
+    card = create_card_for_testing(1)
+    player.hand.add(card)
+    commit()
+
+    # Test that the function returns True when the card is in the player's hand
+    assert card_is_in_player_hand(
+        "The Thing", player), f"Error: The function did not return True when the card was in the player's hand."
+
+    # Test that the function returns False when the card is not in the player's hand
+    assert card_is_in_player_hand(
+        "nonexistent_card", player) == False, f"Error: The function did not return False when the card was not in the player's hand."
 
     cleanup_database()
