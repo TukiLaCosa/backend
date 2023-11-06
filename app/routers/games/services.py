@@ -625,29 +625,6 @@ def card_one_two_effect(game_data: OneTwoEffectIn):
 
 
 @db_session
-def interchange_intention_response(game_data: InterchangeInformationIn):
-    player: Player = find_player_by_id(game_data.player_id)
-    objective_player: Player = find_player_by_id(game_data.objective_player_id)
-    player_card: Card = find_card_by_id(game_data.card_id)
-    objective_player_card: Card = find_card_by_id(game_data.objective_card_id)
-
-    if game_data.accept_interchange:
-        player.hand.add(objective_player_card)
-        player.hand.remove(player_card)
-        objective_player.hand.add(player_card)
-        objective_player.hand.remove(objective_player_card)
-    else:
-        if player_card.name == CardDefenseName.SCARY or player_card.name == CardDefenseName.NO_THANKS:
-            player.hand.remove(player_card)
-            card_from_deck = get_stay_away_cards_from_decks(player.game, 1)
-            player.hand.add(card_from_deck[0])
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"The card is not a valid defense card.")
-
-
-@db_session
 def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):
     game: Game = find_game_by_name(game_name)
     card: Card = find_card_by_id(defense_info.card_id)
