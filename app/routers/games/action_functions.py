@@ -44,6 +44,7 @@ async def send_resolute_card_played_event(game: Game, player_id: int, option_car
     }
     await player_connections.send_event_to(player_id, json_msg)
 
+
 async def send_seduction_done_event(player_id: int, objective_player_id: int):
     json_msg = {
         "event": Events.SEDUCTION_DONE

@@ -643,6 +643,7 @@ def card_resolute_exchange(game_name: str, game_data: ResoluteExchangeIn):
     elif deck_card in game.discard_deck:
         game.discard_deck.remove(deck_card)
 
+
 @db_session
 def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):
     game: Game = find_game_by_name(game_name)

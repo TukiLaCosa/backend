@@ -162,6 +162,7 @@ class ResoluteExchangeIn(BaseModel):
     card_in_hand: int
     card_in_deck: int
 
+
 class PlayDefenseInformation(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

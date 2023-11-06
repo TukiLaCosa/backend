@@ -16,8 +16,7 @@ async def send_list_of_cheats(player_id: int):
         '[lz | lanzallamas | flamethrower]: Obtienes una carta lanzallamas',
         '[ws | whiskey | whisky]: Obtienes una carta whiskey',
         '[ups | ooops]: Obtienes una carta ups!',
-        '[det | determinación | resolute]: Obtienes una carta determinación'
-    ,
+        '[det | determinación | resolute]: Obtienes una carta determinación',
         '[olv | olvidadizo | forgetful]: Obtienes una carta olvidadizo',
         '[uno dos | one two]: Obtienes una carta uno, dos...',
         '[sed | seducción | seduction]: Obtienes una carta de seducción'
