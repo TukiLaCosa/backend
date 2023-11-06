@@ -162,8 +162,30 @@ class ResoluteExchangeIn(BaseModel):
     card_in_hand: int
     card_in_deck: int
 
+
 class PlayDefenseInformation(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     player_id: int
     card_id: Optional[int]
+
+
+class ShowRevelationsCardsIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    original_player_id: int  # ID del jugador que jugo la carta Revelaciones
+    show_my_cards: bool
+
+
+class ForgetfulExchangeIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    cards_for_exchange: List[int]
+
+
+class OneTwoEffectIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    objective_player_id: int

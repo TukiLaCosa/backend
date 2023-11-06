@@ -7,6 +7,7 @@ from .schemas import *
 from ..websockets.utils import player_connections, get_players_id
 from ..players.schemas import PlayerRol
 from ..players.utils import find_player_by_id
+from ..cards.utils import find_card_by_id
 from ..cards.schemas import CardType, CardSubtype
 from ..cards.services import find_card_by_id
 from ..games.defense_functions import player_cards_to_defend_himself
@@ -29,7 +30,24 @@ class Events(str, Enum):
     RESOLUTE_DONE = 'resolute_done'
     PLAYER_DRAW_CARD = 'player_draw_card'
     NEW_TURN = 'new_turn'
+    BETWEEN_US_CARD_PLAYED = 'between_us_card_played'
+    ROUND_AND_ROUND_START = 'round_and_round_start'
+    ROUND_AND_ROUND_END = 'round_and_round_end'
+    REVELATIONS_CARD_PLAYED = 'revelations_card_played'
+    REVELATIONS_SHOW = 'revelations_show'
+    REVELATIONS_DONE = 'revelations_done'
+    EXCHANGE_INTENTION = 'exchange_intention'
+    EXCHANGE_DONE = 'exchange_done'
+    BLIND_DATE_SELECTION = 'blind_date_selection'
+    BLIND_DATE_DONE = 'blind_date_done'
+    OOOPS_CARD_PLAYED = 'ooops_card_played'
+    FORGETFUL_CARD_PLAYED = 'forgetful_card_played'
+    FORGETFUL_DONE = 'forgetful_done'
+    ONE_TWO_CARD_PLAYED = 'one_two_card_played'
+    ONE_TWO_DONE = "one_two_done"
     SEDUCTION_DONE = 'seduction_done'
+    INTERCHANGE_INTENTION = 'interchange_intention'
+    INTERCHANGE_INTENTION_DONE = 'interchange_intention_done'
 
 
 @db_session
@@ -339,6 +357,49 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
 
 
 @db_session
+def verify_player_is_next_in_turn(game_name: str, player_id: int, other_player_id: int):
+    game = find_game_by_name(game_name)
+    player = find_player_by_id(player_id)
+    other_player = find_player_by_id(other_player_id)
+
+    players_not_eliminated = select(
+        p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
+
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        next_turn = (player.position - 1) % players_not_eliminated
+    else:
+        next_turn = (player.position + 1) % players_not_eliminated
+
+    if next_turn != other_player.position:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The player selected is not the next in turn"
+        )
+
+
+@db_session
+def verify_pass_card_can_be_done(game_name: str, play_info: PlayInformation):
+    player: Player = find_player_by_id(play_info.player_id)
+    card: Card = find_card_by_id(play_info.card_id)
+    verify_player_in_game(play_info.player_id, game_name)
+    verify_player_in_game(play_info.objective_player_id, game_name)
+    verify_player_is_next_in_turn(
+        play_info.player_id, play_info.objective_player_id)
+    if card.type == CardType.THE_THING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The Thing cannot be passed"
+        )
+    is_card_in_player = select(
+        c for c in player.hand if (c.id == card.id)).exists()
+    if not is_card_in_player:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The card is not in the hand of the player"
+        )
+
+
+@db_session
 def verify_if_interchange_can_be_done(game_name: str, interchange_info: IntentionExchangeInformationIn):
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(interchange_info.player_id)
@@ -460,6 +521,30 @@ def update_game_turn(game_name: str):
         game.turn = (game.turn + 1) % players_playing
     else:
         game.turn = (game.turn - 1) % players_playing
+
+
+@db_session
+def get_stay_away_cards_from_decks(game_name: str, quantity: int) -> List[Card]:
+    game: Game = find_game_by_name(game_name)
+    random_draw_deck_cards: list[Card] = []
+    random_draw_deck_cards = select(
+        c for c in game.draw_deck if c.type == CardType.STAY_AWAY).random(quantity)[:]
+    num_cards = len(random_draw_deck_cards)
+    random_discard_deck_cards: list[Card] = []
+    if num_cards < quantity:
+        random_discard_deck_cards = select(
+            c for c in game.discard_deck if c.type == CardType.STAY_AWAY).random(quantity-num_cards)[:]
+    for card in random_discard_deck_cards:
+        random_draw_deck_cards.append(card)
+
+    for card in random_draw_deck_cards:
+        if card in game.draw_deck:
+            game.draw_deck.remove(card)
+            game.draw_deck_order.remove(card.id)
+        else:
+            game.discard_deck.remove(card)
+
+    return random_draw_deck_cards
 
 
 @db_session

@@ -30,6 +30,21 @@ class CardActionName(str, Enum):
     SEDUCTION = 'Seducción'
 
 
+class CardPanicName(str, Enum):
+    JUST_BETWEEN_US = 'Que quede entre nosotros...'
+    REVELATIONS = 'Revelaciones'
+    ROTTEN_ROPES = 'Cuerdas podridas'
+    ONE_TWO = 'Uno, dos...'
+    THREE_FOUR = 'Tres, cuatro...'
+    SO_THIS_IS_THE_PARTY = '¿Es aquí la fiesta?'
+    OOOPS = '¡Ups!'
+    FORGETFUL = 'Olvidadizo'
+    ROUND_AND_ROUND = 'Vuelta y vuelta'
+    CANT_WE_BE_FRIENDS = '¿No podemos ser amigos?'
+    BLIND_DATE = 'Cita a ciegas'
+    GETOUT_OF_HERE = '¡Sal de aquí!'
+
+
 class CardDefenseName(str, Enum):
     SCARY = 'Aterrador'
     I_AM_COMFORTABLE = 'Aquí estoy bien'

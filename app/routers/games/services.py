@@ -6,11 +6,12 @@ from ..players.schemas import PlayerRol
 from fastapi import HTTPException, status
 from .utils import *
 from ..cards import services as cards_services
-from ..cards.utils import find_card_by_id, verify_action_card
-from ..players.utils import find_player_by_id, verify_card_in_hand
-from ..cards.schemas import CardActionName, CardResponse
+from ..cards.utils import find_card_by_id, verify_action_card, verify_panic_card
+from ..players.utils import find_player_by_id, verify_card_in_hand, verify_player_not_in_quarentine
+from ..cards.schemas import CardActionName, CardResponse, CardPanicName, CardDefenseName
 from ..players.schemas import PlayerRol
 from .action_functions import *
+from .panic_functions import *
 import random
 from app.routers.games import utils
 from .intention import create_intention_in_game, ActionType
@@ -230,8 +231,6 @@ def discard_card(game_name: str, game_data: DiscardInformationIn) -> Game:
     if game and card:
         game.discard_deck.add(card)
 
-    update_game_turn(game_name)
-
     return game
 
 
@@ -255,7 +254,7 @@ async def finish_game(name: str) -> Game:
 
 
 @db_session
-def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
+def play_action_card(game_name: str, play_info: PlayInformation):
     result = {"message": "Action card played"}
     game: Game = find_game_by_name(game_name)
     verify_player_in_game(play_info.player_id, game_name)
@@ -353,15 +352,8 @@ def play_action_card(game_name: str, play_info: PlayInformation) -> Game:
                 detail="The card to exchange cannot be The Thing"
             )
         verify_card_in_hand(player, card_to_exchange)
-        # process_seduction_card(
-        #     game, player, card, objective_player, card_to_exchange)
-        create_intention_in_game(
-            game, ActionType.EXCHANGE_OFFER, player, objective_player)
-
-    game.discard_deck.add(card)
-    player.hand.remove(card)
-
-    update_game_turn(game_name)
+        process_seduction_card(
+            game, player, card, objective_player, card_to_exchange)
 
     return result
 
@@ -443,6 +435,90 @@ def get_game_result(name: str) -> GameResult:
 
 
 @db_session
+def play_panic_card(game_name: str, play_info: PlayInformation):
+    result = {"message": "Panic card played"}
+    game = find_game_by_name(game_name)
+    verify_player_in_game(play_info.player_id, game_name)
+    player = find_player_by_id(play_info.player_id)
+    card = find_card_by_id(play_info.card_id)
+    verify_panic_card(card)
+    verify_card_in_hand(player, card)
+
+    players_not_eliminated = select(
+        p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
+
+    # Que quede entre nosotros
+    if card.name == CardPanicName.JUST_BETWEEN_US:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        objective_player: Player = find_player_by_id(
+            play_info.objective_player_id)
+        verify_adjacent_players(play_info.player_id,
+                                play_info.objective_player_id,
+                                players_not_eliminated - 1)
+        process_between_us_card(game, player, card)
+
+    # Revelaciones
+    if card.name == CardPanicName.REVELATIONS:
+        process_revelations_card(game, player, card)
+
+    # Cuerdas podridas
+    if card.name == CardPanicName.ROTTEN_ROPES:
+        pass
+
+    # Uno, dos...
+    if card.name == CardPanicName.ONE_TWO:
+        process_one_two_card(game, player, card)
+
+    # Tres, cuatro
+    if card.name == CardPanicName.THREE_FOUR:
+        pass
+
+    # ¿Es aquí la fiesta?
+    if card.name == CardPanicName.SO_THIS_IS_THE_PARTY:
+        pass
+
+    # Ups
+    if card.name == CardPanicName.OOOPS:
+        process_ooops_card(game, player, card)
+
+    # Olvidadizo
+    if card.name == CardPanicName.FORGETFUL:
+        process_forgetful_card(game, player, card)
+
+    # Vuelta y vuelta
+    if card.name == CardPanicName.ROUND_AND_ROUND:
+        process_round_and_round_card(game, player, card)
+
+    # ¿No podemos ser amigos?
+    if card.name == CardPanicName.CANT_WE_BE_FRIENDS:
+        pass
+
+    # Cita a ciegas
+    if card.name == CardPanicName.BLIND_DATE:
+        process_blind_date_card(game, player, card)
+
+    # ¡Sal de aquí!
+    if card.name == CardPanicName.GETOUT_OF_HERE:
+        verify_player_in_game(play_info.objective_player_id, game_name)
+        objective_player: Player = find_player_by_id(
+            play_info.objective_player_id)
+        verify_player_not_in_quarentine(objective_player)
+        process_getout_of_here_card(game, player, card, objective_player)
+
+    return result
+
+
+@db_session
+def pass_card(play_info: PlayInformation):
+    player: Player = find_player_by_id(play_info.player_id)
+    objective_player: Player = find_player_by_id(play_info.objective_player_id)
+    card: Card = find_card_by_id(play_info.card_id)
+
+    objective_player.hand.add(card)
+    player.hand.remove(card)
+
+
+@db_session
 def register_card_exchange_intention(game_name: str, exchange_info: IntentionExchangeInformationIn) -> Intention:
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(exchange_info.player_id)
@@ -470,6 +546,84 @@ def card_interchange_response(game_name: str, game_data: InterchangeInformationI
     update_game_turn(game_name)
 
 
+async def show_revelations_cards(game_name: str, player_id: int, game_data: ShowRevelationsCardsIn):
+    if game_data.show_my_cards:
+        json_msg = {
+            "event": utils.Events.REVELATIONS_SHOW,
+            "player_id": player_id
+        }
+        await player_connections.send_event_to_other_players_in_game(game_name, json_msg, player_id)
+    if player_id != game_data.original_player_id:
+        next_player_id = get_id_of_next_player_in_turn(game_name)
+        json_msg = {
+            "event": Events.REVELATIONS_CARD_PLAYED,
+            "original_player_id": game_data.original_player_id
+        }
+        await player_connections.send_event_to(next_player_id, json_msg)
+
+
+@db_session
+def blind_date_interchange(game_name: str, game_data: IntentionExchangeInformationIn):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(game_data.player_id)
+    player_card: Card = find_card_by_id(game_data.card_id)
+
+    card_to_exchange = select(
+        c for c in game.draw_deck if 2 <= c.id and c.id <= 88).first()
+    if card_to_exchange:
+        game.draw_deck.remove(card_to_exchange)
+        game.draw_deck_order.remove(card_to_exchange.id)
+    else:
+        card_to_exchange = select(
+            c for c in game.discard_deck if 2 <= c.id and c.id <= 88).first()
+        if card_to_exchange:
+            game.discard_deck.remove(card_to_exchange)
+    if card_to_exchange and player_card:
+        player.hand.remove(player_card)
+        player.hand.add(card_to_exchange)
+
+
+@db_session
+def card_forgetful_exchange(game_name: str, game_data: ForgetfulExchangeIn):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(game_data.player_id)
+    player_cards: list[Card] = []
+
+    for cardId in game_data.cards_for_exchange:
+        card = find_card_by_id(cardId)
+        player_cards.append(card)
+
+    for card in player_cards:
+        player.hand.remove(card)
+        game.discard_deck.add(card)
+
+    random_draw_deck_cards = select(
+        c for c in game.draw_deck if 2 <= c.id and c.id <= 88).random(3)
+    random_discard_deck_cards = select(
+        c for c in game.discard_deck if 2 <= c.id and c.id <= 88).random(3)
+
+    while (len(random_draw_deck_cards) < 3):
+        random_draw_deck_cards.append(random_discard_deck_cards.pop())
+
+    for card in random_draw_deck_cards:
+        player.hand.add(card)
+        if card in game.draw_deck:
+            game.draw_deck.remove(card)
+            game.draw_deck_order.remove(card.id)
+        elif card in game.discard_deck:
+            game.discard_deck.remove(card)
+
+
+@db_session
+def card_one_two_effect(game_data: OneTwoEffectIn):
+    player: Player = find_player_by_id(game_data.player_id)
+    objective_player: Player = find_player_by_id(game_data.objective_player_id)
+
+    tempPosition = player.position
+    player.position = objective_player.position
+    objective_player.position = tempPosition
+
+
 @db_session
 def card_resolute_exchange(game_name: str, game_data: ResoluteExchangeIn):
     game: Game = find_game_by_name(game_name)
@@ -488,6 +642,7 @@ def card_resolute_exchange(game_name: str, game_data: ResoluteExchangeIn):
 
     elif deck_card in game.discard_deck:
         game.discard_deck.remove(deck_card)
+
 
 @db_session
 def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):
