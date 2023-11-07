@@ -150,7 +150,7 @@ def verify_player_is_the_thing(player_id, game_name):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"The player {player.name}, with id= {player.id} is not The Thing"
         )
-    
+
 
 @db_session
 def verify_game_can_be_finished(game: Game):
