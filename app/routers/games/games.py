@@ -248,10 +248,11 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
     # clean_intention_in_game(game_name)
 
     json_msg = {
-        "event": utils.Events.EXCHANGE_DONE
+        "event": utils.Events.EXCHANGE_DONE,
+        "player_name": get_player_name_by_id(game_data.player_id),
+        "objective_player_name": get_player_name_by_id(game_data.objective_player_id)
     }
-    await player_connections.send_event_to(game_data.player_id, json_msg)
-    await player_connections.send_event_to(game_data.objective_player_id, json_msg)
+    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
     with db_session:
         game = find_game_by_name(game_name)
