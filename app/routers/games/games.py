@@ -354,7 +354,7 @@ async def the_thing_end_game(game_name: str, player_id: int):
     services.finish_game_by_the_thing(game_name)
     
     json_msg = {
-        "event": utils.Events.GAME_ENDED_BY_THE_THING
+        "event": utils.Events.GAME_ENDED
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
