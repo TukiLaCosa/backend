@@ -69,19 +69,14 @@ async def send_blind_date_selection_event(player_id: int):
 
 
 @db_session
-def process_revelations_card(game: Game, player: Player, card: Card):
-    game.discard_deck.add(card)
-    player.hand.remove(card)
+def process_revelations_card(game: Game, player: Player):
     next_player_id = get_id_of_next_player_in_turn(game.name)
     asyncio.ensure_future(send_revelations_card_played_event(
         game.name, player.id, next_player_id))
 
 
 @db_session
-def process_one_two_card(game: Game, player: Player, card: Card):
-    game.discard_deck.add(card)
-    player.hand.remove(card)
-
+def process_one_two_card(game: Game, player: Player):
     players_in_game = len(
         select(p for p in game.players if p.rol != PlayerRol.ELIMINATED)[:])
     players_list: list[int] = []
@@ -103,50 +98,34 @@ def process_one_two_card(game: Game, player: Player, card: Card):
 
 
 @db_session
-def process_ooops_card(game: Game, player: Player, card: Card):
-    game.discard_deck.add(card)
-    player.hand.remove(card)
+def process_ooops_card(game: Game, player: Player):
     asyncio.ensure_future(send_ooops_card_played_event(
         game.name, player.name, player.id))
 
 
 @db_session
-def process_between_us_card(game: Game, player: Player, card: Card, objective_player: Player):
-    game.discard_deck.add(card)
-    player.hand.remove(card)
-
+def process_between_us_card(game: Game, player: Player, objective_player: Player):
     asyncio.ensure_future(send_player_between_us_event(
         objective_player.id, player.id, player.name))
 
 
 @db_session
-def process_forgetful_card(game: Game, player: Player, card: Card):
-    game.discard_deck.add(card)
-    player.hand.remove(card)
+def process_forgetful_card(game: Game, player: Player):
     asyncio.ensure_future(send_forgetful_card_played(player.id, player.name))
 
 
 @db_session
-def process_round_and_round_card(game: Game, player: Player, card: Card):
-    game.discard_deck.add(card)
-    player.hand.remove(card)
-
+def process_round_and_round_card(game: Game, player: Player):
     asyncio.ensure_future(send_round_and_round_start_event(game.name))
 
 
 @db_session
-def process_getout_of_here_card(game: Game, player: Player, card: Card, objective_player: Player):
+def process_getout_of_here_card(game: Game, player: Player, objective_player: Player):
     tempPosition = player.position
     player.position = objective_player.position
     objective_player.position = tempPosition
 
-    game.discard_deck.add(card)
-    player.hand.remove(card)
-
 
 @db_session
-def process_blind_date_card(game: Game, player: Player, card: Card):
-    game.discard_deck.add(card)
-    player.hand.remove(card)
-
+def process_blind_date_card(game: Game, player: Player):
     asyncio.ensure_future(send_blind_date_selection_event(player.id))
