@@ -167,7 +167,7 @@ async def play_action_card(game_name: str, play_info: PlayInformation):
     if is_the_game_finished(game_name):
         await finish_game(game_name)
     else:
-        send_played_card_event(
+        await send_played_card_event(
             game_name, play_info.player_id, play_info.card_id)
 
     return result
@@ -179,7 +179,7 @@ async def play_panic_card(game_name: str, play_info: PlayInformation):
     if is_the_game_finished(game_name):
         await finish_game(game_name)
     else:
-        send_played_card_event(
+        await send_played_card_event(
             game_name, play_info.player_id, play_info.card_id)
 
     return result

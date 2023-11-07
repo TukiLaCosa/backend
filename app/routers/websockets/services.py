@@ -18,8 +18,9 @@ async def send_list_of_cheats(player_id: int):
         '[ups | ooops]: Obtienes una carta ups!',
         '[det | determinación | resolute]: Obtienes una carta determinación',
         '[olv | olvidadizo | forgetful]: Obtienes una carta olvidadizo',
-        '[uno dos | one two]: Obtienes una carta uno, dos...',
+        '[uno_dos | one_two]: Obtienes una carta uno, dos...',
         '[sed | seducción | seduction]: Obtienes una carta de seducción'
+        '[vig | vigila_tus_espaldas | watch_your_back]: Obtienes una carta vigila tus espaldas'
     ]
     for message in cheat_messages:
         await player_connections.send_message(player_id, 'Loki', message)
@@ -55,7 +56,7 @@ async def handle_message(data, player_id):
         apply_cheat(game_name, player_id, range(93, 94))
         await send_event_cheat_used(player_id)
 
-    elif message == 'uno dos' or message == 'one two':
+    elif message == 'uno_dos' or message == 'one_two':
         apply_cheat(game_name, player_id, range(94, 96))
         await send_event_cheat_used(player_id)
 
@@ -65,6 +66,10 @@ async def handle_message(data, player_id):
 
     elif message == 'det' or message == 'determinación' or message == 'resolute':
         apply_cheat(game_name, player_id, range(43, 48))
+        await send_event_cheat_used(player_id)
+    
+    elif message == 'vig' or message == 'vigila_tus_espaldas' or message == 'watch_your_back':
+        apply_cheat(game_name, player_id, range(53, 55))
         await send_event_cheat_used(player_id)
 
 
