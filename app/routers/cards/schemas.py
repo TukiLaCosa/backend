@@ -31,7 +31,7 @@ class CardActionName(str, Enum):
 
 
 class CardPanicName(str, Enum):
-    JUST_BETWEEN_US = 'Que quede entre nosotros...'
+    JUST_BETWEEN_US = 'Que quede entre nosotros…'
     REVELATIONS = 'Revelaciones'
     ROTTEN_ROPES = 'Cuerdas podridas'
     ONE_TWO = 'Uno, dos...'

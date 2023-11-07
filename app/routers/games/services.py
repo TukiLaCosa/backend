@@ -458,11 +458,11 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
         verify_adjacent_players(play_info.player_id,
                                 play_info.objective_player_id,
                                 players_not_eliminated - 1)
-        process_between_us_card(game, player, card)
+        process_between_us_card(game, player, objective_player)
 
     # Revelaciones
     if card.name == CardPanicName.REVELATIONS:
-        process_revelations_card(game, player, card)
+        process_revelations_card(game, player)
 
     # Cuerdas podridas
     if card.name == CardPanicName.ROTTEN_ROPES:
@@ -470,7 +470,7 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
 
     # Uno, dos...
     if card.name == CardPanicName.ONE_TWO:
-        process_one_two_card(game, player, card)
+        process_one_two_card(game, player)
 
     # Tres, cuatro
     if card.name == CardPanicName.THREE_FOUR:
@@ -482,15 +482,15 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
 
     # Ups
     if card.name == CardPanicName.OOOPS:
-        process_ooops_card(game, player, card)
+        process_ooops_card(game, player)
 
     # Olvidadizo
     if card.name == CardPanicName.FORGETFUL:
-        process_forgetful_card(game, player, card)
+        process_forgetful_card(game, player)
 
     # Vuelta y vuelta
     if card.name == CardPanicName.ROUND_AND_ROUND:
-        process_round_and_round_card(game, player, card)
+        process_round_and_round_card(game, player)
 
     # ¿No podemos ser amigos?
     if card.name == CardPanicName.CANT_WE_BE_FRIENDS:
@@ -498,7 +498,7 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
 
     # Cita a ciegas
     if card.name == CardPanicName.BLIND_DATE:
-        process_blind_date_card(game, player, card)
+        process_blind_date_card(game, player)
 
     # ¡Sal de aquí!
     if card.name == CardPanicName.GETOUT_OF_HERE:
@@ -506,7 +506,10 @@ def play_panic_card(game_name: str, play_info: PlayInformation):
         objective_player: Player = find_player_by_id(
             play_info.objective_player_id)
         verify_player_not_in_quarentine(objective_player)
-        process_getout_of_here_card(game, player, card, objective_player)
+        process_getout_of_here_card(game, player, objective_player)
+
+    game.discard_deck.add(card)
+    player.hand.remove(card)
 
     return result
 
