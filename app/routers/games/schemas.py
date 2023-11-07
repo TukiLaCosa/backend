@@ -167,7 +167,8 @@ class PlayDefenseInformation(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     player_id: int
-    card_id: Optional[int]
+    card_id: Optional[int] = Field(
+        None, description="Optional defense card.")
 
 
 class ShowRevelationsCardsIn(BaseModel):
