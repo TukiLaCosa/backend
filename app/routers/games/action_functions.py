@@ -113,10 +113,7 @@ def process_whiskey_card(game: Game, player: Player):
 
 
 @db_session
-def process_resolute_card(game: Game, player: Player, card: Card):
-    game.discard_deck.add(card)
-    player.hand.remove(card)
-
+def process_resolute_card(game: Game, player: Player):
     random_draw_deck_cards = select(
         c for c in game.draw_deck if 2 <= c.id and c.id <= 88).random(3)
     random_discard_deck_cards = select(
@@ -132,7 +129,7 @@ def process_resolute_card(game: Game, player: Player, card: Card):
 
 
 @db_session
-def process_watch_your_back_card(game: Game, player: Player):
+def process_watch_your_back_card(game: Game):
     if game.round_direction == RoundDirection.CLOCKWISE:
         game.round_direction = RoundDirection.COUNTERCLOCKWISE
     else:

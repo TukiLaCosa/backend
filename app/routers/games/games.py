@@ -5,7 +5,7 @@ from . import services
 from . import utils
 from .schemas import *
 from ..websockets.utils import player_connections
-from .utils import find_game_by_name, is_the_game_finished, Events
+from .utils import find_game_by_name, is_the_game_finished, Events, send_played_card_event
 from ..players.utils import get_player_name_by_id, find_player_by_id
 from ..cards.utils import get_card_name_by_id, get_card_type_by_id, is_flamethrower, is_whiskey
 from .services import finish_game
@@ -167,12 +167,8 @@ async def play_action_card(game_name: str, play_info: PlayInformation):
     if is_the_game_finished(game_name):
         await finish_game(game_name)
     else:
-        json_msg = {
-            "event": utils.Events.PLAYED_CARD,
-            "player_name": get_player_name_by_id(play_info.player_id),
-            "card_id": play_info.card_id
-        }
-        await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+        send_played_card_event(
+            game_name, play_info.player_id, play_info.card_id)
 
     return result
 
@@ -183,12 +179,8 @@ async def play_panic_card(game_name: str, play_info: PlayInformation):
     if is_the_game_finished(game_name):
         await finish_game(game_name)
     else:
-        json_msg = {
-            "event": utils.Events.PLAYED_CARD,
-            "player_name": get_player_name_by_id(play_info.player_id),
-            "card_name": get_card_name_by_id(play_info.card_id)
-        }
-        await player_connections.send_event_to_other_players_in_game(game_name, json_msg, play_info.player_id)
+        send_played_card_event(
+            game_name, play_info.player_id, play_info.card_id)
 
     return result
 

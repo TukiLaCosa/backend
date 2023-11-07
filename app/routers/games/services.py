@@ -291,7 +291,7 @@ def play_action_card(game_name: str, play_info: PlayInformation):
             play_info.objective_player_id)
 
         # Armo listado de cartas del jugador objetivo para enviar en el body response
-        result = process_analysis_card(game, player, card, objective_player)
+        result = process_analysis_card(game, player, objective_player)
 
     # Hacha
     if card.name == CardActionName.AXE:
@@ -305,19 +305,19 @@ def play_action_card(game_name: str, play_info: PlayInformation):
                                 players_not_eliminated - 1)
         objective_player: Player = find_player_by_id(
             play_info.objective_player_id)
-        result = process_suspicious_card(game, player, card, objective_player)
+        result = process_suspicious_card(game, player, objective_player)
 
     # Whisky
     if card.name == CardActionName.WHISKEY:
-        process_whiskey_card(game, player, card)
+        process_whiskey_card(game, player)
 
     # Determinacion
     if card.name == CardActionName.RESOLUTE:
-        process_resolute_card(game, player, card)
+        process_resolute_card(game, player)
 
     # Vigila tus espaldas
     if card.name == CardActionName.WATCH_YOUR_BACK:
-        process_watch_your_back_card(game, player, card)
+        process_watch_your_back_card(game)
 
     # Cambio de lugar
     if card.name == CardActionName.CHANGE_PLACES:
@@ -353,7 +353,10 @@ def play_action_card(game_name: str, play_info: PlayInformation):
             )
         verify_card_in_hand(player, card_to_exchange)
         process_seduction_card(
-            game, player, card, objective_player, card_to_exchange)
+            game, player, objective_player, card_to_exchange)
+
+    player.hand.remove(card)
+    game.discard_deck.add(card)
 
     return result
 

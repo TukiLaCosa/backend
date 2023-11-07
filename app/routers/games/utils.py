@@ -6,8 +6,8 @@ from pony.orm import *
 from .schemas import *
 from ..websockets.utils import player_connections, get_players_id
 from ..players.schemas import PlayerRol
-from ..players.utils import find_player_by_id
-from ..cards.utils import find_card_by_id
+from ..players.utils import find_player_by_id, get_player_name_by_id
+from ..cards.utils import find_card_by_id, get_card_name_by_id
 from ..cards.schemas import CardType, CardSubtype
 from ..cards.services import find_card_by_id
 from ..games.defense_functions import player_cards_to_defend_himself
@@ -49,6 +49,16 @@ class Events(str, Enum):
     SEDUCTION_DONE = 'seduction_done'
     INTERCHANGE_INTENTION = 'interchange_intention'
     INTERCHANGE_INTENTION_DONE = 'interchange_intention_done'
+
+
+async def send_played_card_event(game_name: str, player_id: int, card_id: int):
+    json_msg = {
+        "event": Events.PLAYED_CARD,
+        "player_name": get_player_name_by_id(player_id),
+        "card_id": card_id,
+        "card_name": get_card_name_by_id(card_id)
+    }
+    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
 
 @db_session
