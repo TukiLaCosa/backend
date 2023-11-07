@@ -55,6 +55,7 @@ async def send_played_card_event(game_name: str, player_id: int, card_id: int):
     json_msg = {
         "event": Events.PLAYED_CARD,
         "player_name": get_player_name_by_id(player_id),
+        "player_id": player_id,
         "card_id": card_id,
         "card_name": get_card_name_by_id(card_id)
     }
