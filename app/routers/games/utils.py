@@ -20,6 +20,7 @@ class Events(str, Enum):
     GAME_STARTED = 'game_started'
     GAME_CANCELED = 'game_canceled'
     GAME_ENDED = 'game_ended'
+    GAME_ENDED_BY_THE_THING = 'game_ended_by_the_thing'
     PLAYER_JOINED = 'player_joined'
     PLAYER_LEFT = 'player_left'
     PLAYER_INIT_HAND = 'player_init_hand'
@@ -142,9 +143,20 @@ def verify_game_can_be_abandon(game_name: str, player_id: int):
 
 
 @db_session
+def verify_player_is_the_thing(player_id, game_name):
+    verify_player_in_game(player_id, game_name)
+    player: Player = find_player_by_id(player_id)
+    if player.rol != PlayerRol.THE_THING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"The player {player.name}, with id= {player.id} is not The Thing"
+        )
+    
+
+@db_session
 def verify_game_can_be_finished(game: Game):
-    if not (no_human_remains(game) or the_thing_is_eliminated(game)):
-        raise Exception('There are living Humans and The Thing')
+    if not (the_thing_is_eliminated(game) or all_humans_were_eliminated(game)):
+        raise Exception('The Thing is alive, cannot auto-finish the game')
 
 
 @db_session
@@ -164,6 +176,16 @@ def no_human_remains(game: Game) -> bool:
         lambda p: p.rol == PlayerRol.HUMAN).count()
 
     return the_thing_exists and number_of_humans == 0
+
+
+def all_humans_were_eliminated(game: Game) -> bool:
+    the_thing_exists = game.players.select(
+        lambda p: p.rol == PlayerRol.THE_THING).exists()
+
+    number_of_eliminated_players = game.players.select(
+        lambda p: p.rol == PlayerRol.ELIMINATED).count()
+
+    return the_thing_exists and number_of_eliminated_players == game.players.count() - 1
 
 
 @db_session
