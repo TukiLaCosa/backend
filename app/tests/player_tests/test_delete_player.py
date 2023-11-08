@@ -16,7 +16,7 @@ def test_delete_player_idempotent():
     response = client.delete(
         '/players/2',
     )
-    assert response.status_code == 201, "El código de estado de la respuesta no es 404 (Not Found)."
+    assert response.status_code == 404, "El código de estado de la respuesta no es 404 (Not Found)."
 
 
 def test_delete_inexistent_player():
