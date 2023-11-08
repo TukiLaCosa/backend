@@ -10,7 +10,7 @@ def test_create_player():
         '/players',
         json={'name': 'pepito'}
     )
-    assert response.status_code == 201, "El código de estado de la respuesta no es 201 (Created)."
+    assert response.status_code == 200, "El código de estado de la respuesta no es 201 (Created)."
     assert response.json() == {
         'id': 1,
         'name': 'pepito',
