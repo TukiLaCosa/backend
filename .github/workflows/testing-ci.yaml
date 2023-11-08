@@ -13,9 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: show env
-        run: env
-
       - name: Install dependencies
         run: |
           pip install poetry
@@ -23,5 +20,5 @@ jobs:
 
       - name: Test Game module
         run: |
-          poetry run coverage run -m pytest $TEST_DIRECTORY/game_tests
+          poetry run -m pytest $TEST_DIRECTORY/game_tests
           rm -f $TEST_DB_FILE
