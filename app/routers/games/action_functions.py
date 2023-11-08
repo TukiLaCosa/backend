@@ -165,12 +165,14 @@ def process_card_exchange(player: Player, objective_player: Player, player_card:
     objective_player.hand.add(player_card)
 
     if (player.rol == PlayerRol.THE_THING and player_card.type == CardSubtype.CONTAGION):
-        objective_player.rol = PlayerRol.INFECTED
-        objective_player.game_last_infected = objective_player.game   
+        if objective_player.rol != PlayerRol.INFECTED:
+            objective_player.rol = PlayerRol.INFECTED
+            objective_player.game_last_infected = objective_player.game   
 
     elif (objective_player.rol == PlayerRol.THE_THING and objective_player_card.type == CardSubtype.CONTAGION):
-        player.rol = PlayerRol.INFECTED
-        player.game_last_infected = player.game
+        if player.rol != PlayerRol.INFECTED:
+            player.rol = PlayerRol.INFECTED
+            player.game_last_infected = player.game
 
     # enviar evento de intercambio de carta
 
