@@ -7,8 +7,8 @@ jobs:
 
     env:
       ENVIRONMENT: test
-      TEST_DB_FILE: ./app/database/database_test.sqlite
-      TEST_DIRECTORY: ./app/tests
+      TEST_DIRECTORY: ${{ github.workspace }}/app/tests
+      TEST_DB_FILE: ${{ github.workspace }}/app/database/database_test.sqlite
 
     steps:
       - uses: actions/checkout@v3
