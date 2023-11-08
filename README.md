@@ -58,3 +58,15 @@ In the Makefile, you have the following targets:
 
 **Remember to create a .env file with the necessary environment variables before using the Makefile**
 **To know the necessary environment variables you can see the `.env.example` file.**
+
+
+## Running the Application in Containers - Docker
+
+### Building the Docker Image
+`docker build -t backend-tuki .`
+
+### Run a container based on the built image
+`docker run --name backend-tuki-container -p 8000:8000 backend-tuki`
+
+### Running the Application in Containers - Docker Compose
+`docker-compose up --build`
