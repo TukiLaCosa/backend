@@ -138,17 +138,55 @@ class GameResult(BaseModel):
     winners: List[PlayerInfo]
     losers: List[PlayerInfo]
 
+
 class IntentionExchangeInformationIn(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    player_id: int # ID jugador que inicia la intencion
-    card_id: int # Card ID del jugador que inicia la intencion
+    player_id: int  # ID jugador que inicia la intencion
+    card_id: int  # Card ID del jugador que inicia la intencion
+
 
 class InterchangeInformationIn(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    player_id: int # ID jugador que recibe la intencion
-    card_id: int # Card ID del jugador que recibe la intencion
-    objective_player_id: int # ID jugador que inicia la intencion
-    objective_card_id: int # Card ID del jugador que inicia la intencion
+    player_id: int  # ID jugador que recibe la intencion
+    card_id: int  # Card ID del jugador que recibe la intencion
+    objective_player_id: int  # ID jugador que inicia la intencion
+    objective_card_id: int  # Card ID del jugador que inicia la intencion
 
+
+class ResoluteExchangeIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    card_in_hand: int
+    card_in_deck: int
+
+
+class PlayDefenseInformation(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    card_id: Optional[int] = Field(
+        None, description="Optional defense card.")
+
+
+class ShowRevelationsCardsIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    original_player_id: int  # ID del jugador que jugo la carta Revelaciones
+    show_my_cards: bool
+
+
+class ForgetfulExchangeIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    cards_for_exchange: List[int]
+
+
+class OneTwoEffectIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    objective_player_id: int

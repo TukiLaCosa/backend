@@ -11,6 +11,11 @@ omit =
     app/routers/games/__init__.py
     app/routers/players/__init__.py
     app/tests/*
+    app/routers/websockets/*
+    app/utils.py
+    app/database/utils.py
+    app/database/initialize_data.py
+    app/routers/games/intention.py
 
 [html]
 directory = htmlcov

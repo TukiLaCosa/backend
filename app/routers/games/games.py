@@ -5,10 +5,11 @@ from . import services
 from . import utils
 from .schemas import *
 from ..websockets.utils import player_connections
-from .utils import find_game_by_name, is_the_game_finished
-from ..players.utils import get_player_name_by_id
-from ..cards.utils import get_card_name_by_id, get_card_type_by_id
+from .utils import find_game_by_name, is_the_game_finished, Events, send_played_card_event
+from ..players.utils import get_player_name_by_id, find_player_by_id
+from ..cards.utils import get_card_name_by_id, get_card_type_by_id, is_flamethrower, is_whiskey
 from .services import finish_game
+from .intention import *
 
 
 router = APIRouter(
@@ -148,22 +149,14 @@ async def discard_card(game_name: str, game_data: DiscardInformationIn):
     with db_session:
         player_id_turn = select(
             p for p in game.players if p.position == game.turn).first().id
-    
+
     json_msg = {
-        "event": "discard_card",
+        "event": Events.DISCARD_CARD,
         "player_name": get_player_name_by_id(game_data.player_id),
+        "player_id": game_data.player_id,
         "card_type": get_card_type_by_id(game_data.card_id)
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
-    
-    json_msg = {
-        "event": utils.Events.NEW_TURN,
-        "next_player_name": get_player_name_by_id(player_id_turn),
-        "next_player_id": player_id_turn,
-        "round_direction": game.round_direction
-    }
-    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
-    
     return {"message": "Card discarded"}
 
 
@@ -174,24 +167,20 @@ async def play_action_card(game_name: str, play_info: PlayInformation):
     if is_the_game_finished(game_name):
         await finish_game(game_name)
     else:
-        json_msg = {
-            "event": utils.Events.PLAYED_CARD,
-            "player_name": get_player_name_by_id(play_info.player_id),
-            "card_id": play_info.card_id
-        }
-        await player_connections.send_event_to_all_players_in_game(game_name,json_msg)
+        await send_played_card_event(
+            game_name, play_info.player_id, play_info.card_id)
 
-        with db_session:
-            game = find_game_by_name(game_name)
-            player_id_turn = select(
-                p for p in game.players if p.position == game.turn).first().id
-        json_msg = {
-            "event": utils.Events.NEW_TURN,
-            "next_player_name": get_player_name_by_id(player_id_turn),
-            "next_player_id": player_id_turn,
-            "round_direction": game.round_direction
-        }
-        await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+    return result
+
+
+@router.post("/{game_name}/play-panic-card", status_code=status.HTTP_200_OK)
+async def play_panic_card(game_name: str, play_info: PlayInformation):
+    result = services.play_panic_card(game_name, play_info)
+    if is_the_game_finished(game_name):
+        await finish_game(game_name)
+    else:
+        await send_played_card_event(
+            game_name, play_info.player_id, play_info.card_id)
 
     return result
 
@@ -215,15 +204,37 @@ async def draw_card(game_name: str, game_data: DrawInformationIn):
     return draw_card_information.card
 
 
+@router.patch("/{game_name}/pass-card", status_code=status.HTTP_200_OK)
+async def pass_card(game_name: str, play_info: PlayInformation):
+    result = {"message": "pass card completed"}
+    utils.verify_pass_card_can_be_done(game_name, play_info)
+    services.pass_card(play_info)
+
+    json_msg = {
+        "event": utils.Events.ROUND_AND_ROUND_END
+    }
+    await player_connections.send_event_to(play_info.objective_player_id, json_msg)
+
+    return result
+
+
 @router.patch("/{game_name}/intention-to-interchange-card", status_code=status.HTTP_200_OK)
 async def intention_to_interchange_card(game_name: str, interchange_info: IntentionExchangeInformationIn):
     utils.verify_if_interchange_can_be_done(game_name, interchange_info)
     objective_player_id = utils.get_id_of_next_player_in_turn(game_name)
+
+    '''exchange_intention = services.register_card_exchange_intention(
+        game_name, interchange_info)'''
+
+    with db_session:
+        objective_player = find_player_by_id(objective_player_id)
+
     json_msg = {
         "event": "exchange_intention",
         "player_id": interchange_info.player_id,
         "player_name": get_player_name_by_id(interchange_info.player_id),
-        "card_to_exchange": interchange_info.card_id
+        "card_to_exchange": interchange_info.card_id,
+        "defense_cards": player_cards_to_defend_himself(ActionType.EXCHANGE_OFFER, objective_player)
     }
     await player_connections.send_event_to(objective_player_id, json_msg)
     return {"message": "Card interchange intention terminated."}
@@ -233,17 +244,21 @@ async def intention_to_interchange_card(game_name: str, interchange_info: Intent
 async def card_interchange_response(game_name: str, game_data: InterchangeInformationIn):
     utils.verify_if_interchange_response_can_be_done(game_name, game_data)
     services.card_interchange_response(game_name, game_data)
+
+    # clean_intention_in_game(game_name)
+
     json_msg = {
-        "event": "exchange_done"
+        "event": utils.Events.EXCHANGE_DONE,
+        "player_name": get_player_name_by_id(game_data.player_id),
+        "objective_player_name": get_player_name_by_id(game_data.objective_player_id)
     }
-    await player_connections.send_event_to(game_data.player_id, json_msg)
-    await player_connections.send_event_to(game_data.objective_player_id, json_msg)
-    
+    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
     with db_session:
         game = find_game_by_name(game_name)
         player_id_turn = select(
             p for p in game.players if p.position == game.turn).first().id
+
     json_msg = {
         "event": utils.Events.NEW_TURN,
         "next_player_name": get_player_name_by_id(player_id_turn),
@@ -251,5 +266,84 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
         "round_direction": game.round_direction
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
-    
     return {"message": "Card interchange terminated."}
+
+
+@router.post("/{game_name}/show-revelations-cards/{player_id}", status_code=status.HTTP_200_OK)
+async def show_revelations_cards(game_name: str, player_id: int, game_data: ShowRevelationsCardsIn):
+    utils.verify_player_in_game(player_id, game_name)
+    utils.verify_player_in_game(game_data.original_player_id, game_name)
+    services.show_cards(game_name, player_id, game_data)
+    if player_id == game_data.original_player_id:
+        json_msg = {
+            "event": utils.Events.REVELATIONS_DONE
+        }
+        await player_connections.send_event_to(player_id, json_msg)
+    return {"message": "Show card terminated."}
+
+
+@router.patch("/{game_name}/blind-date-interchange", status_code=status.HTTP_200_OK)
+async def blind_date_interchange(game_name: str, game_data: IntentionExchangeInformationIn):
+    utils.verify_player_in_game(game_data.player_id, game_name)
+    services.blind_date_interchange(game_name, game_data)
+    json_msg = {
+        "event": utils.Events.BLIND_DATE_DONE
+    }
+    await player_connections.send_event_to(game_data.player_id, json_msg)
+    return {"message": "Blind date interchange terminated."}
+
+
+@router.patch("/{game_name}/forgetful-exchange", status_code=status.HTTP_200_OK)
+async def card_forgetful_exchange(game_name: str, game_data: ForgetfulExchangeIn):
+    utils.verify_player_in_game(game_data.player_id, game_name)
+    services.card_forgetful_exchange(game_name, game_data)
+    json_msg = {
+        "event": utils.Events.FORGETFUL_DONE
+    }
+    await player_connections.send_event_to(game_data.player_id, json_msg)
+
+    return {"message": "Forgetful exchange terminated"}
+
+
+@router.patch("/{game_name}/one-two-effect", status_code=status.HTTP_200_OK)
+async def card_one_two_effect(game_name: str, game_data: OneTwoEffectIn):
+    utils.verify_player_in_game(game_data.player_id, game_name)
+    utils.verify_player_in_game(game_data.objective_player_id, game_name)
+    services.card_one_two_effect(game_data)
+    json_msg = {
+        "event": utils.Events.ONE_TWO_DONE
+    }
+    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+
+    return {"message": "One two effect terminated"}
+
+
+@router.patch("/{game_name}/resolute-exchange", status_code=status.HTTP_200_OK)
+async def card_resolute_exchange(game_name: str, game_data: ResoluteExchangeIn):
+    utils.verify_player_in_game(game_data.player_id, game_name)
+    services.card_resolute_exchange(game_name, game_data)
+    json_msg = {
+        "event": utils.Events.RESOLUTE_DONE
+    }
+    await player_connections.send_event_to(game_data.player_id, json_msg)
+
+    return {"message": "Resolute exchange terminated"}
+
+
+@router.post("/{game_name}/play-defense-card")
+async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):
+    utils.verify_defense_card_can_be_played(game_name, defense_info)
+
+    if defense_info.card_id:
+        services.play_defense_card(game_name, defense_info)
+
+        json_msg = {
+            "event": get_intention_in_game(game_name).action_type,
+            "player_id": defense_info.player_id,
+            "card_id": defense_info.card_id
+        }
+        await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+    else:
+        process_intention_in_game(game_name)
+
+    clean_intention_in_game(game_name)

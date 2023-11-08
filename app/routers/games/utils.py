@@ -6,8 +6,11 @@ from pony.orm import *
 from .schemas import *
 from ..websockets.utils import player_connections, get_players_id
 from ..players.schemas import PlayerRol
-from ..players.utils import find_player_by_id
+from ..players.utils import find_player_by_id, get_player_name_by_id
+from ..cards.utils import find_card_by_id, get_card_name_by_id
 from ..cards.schemas import CardType, CardSubtype
+from ..cards.services import find_card_by_id
+from ..games.defense_functions import player_cards_to_defend_himself
 
 
 class Events(str, Enum):
@@ -21,10 +24,42 @@ class Events(str, Enum):
     PLAYER_LEFT = 'player_left'
     PLAYER_INIT_HAND = 'player_init_hand'
     PLAYED_CARD = 'played_card'
+    DISCARD_CARD = 'discard_card'
     PLAYER_ELIMINATED = 'player_eliminated'
     WHISKEY_CARD_PLAYED = 'whiskey_card_played'
+    RESOLUTE_CARD_PLAYED = 'resolute_card_played'
+    RESOLUTE_DONE = 'resolute_done'
     PLAYER_DRAW_CARD = 'player_draw_card'
     NEW_TURN = 'new_turn'
+    BETWEEN_US_CARD_PLAYED = 'between_us_card_played'
+    ROUND_AND_ROUND_START = 'round_and_round_start'
+    ROUND_AND_ROUND_END = 'round_and_round_end'
+    REVELATIONS_CARD_PLAYED = 'revelations_card_played'
+    REVELATIONS_SHOW = 'revelations_show'
+    REVELATIONS_DONE = 'revelations_done'
+    EXCHANGE_INTENTION = 'exchange_intention'
+    EXCHANGE_DONE = 'exchange_done'
+    BLIND_DATE_SELECTION = 'blind_date_selection'
+    BLIND_DATE_DONE = 'blind_date_done'
+    OOOPS_CARD_PLAYED = 'ooops_card_played'
+    FORGETFUL_CARD_PLAYED = 'forgetful_card_played'
+    FORGETFUL_DONE = 'forgetful_done'
+    ONE_TWO_CARD_PLAYED = 'one_two_card_played'
+    ONE_TWO_DONE = "one_two_done"
+    SEDUCTION_DONE = 'seduction_done'
+    INTERCHANGE_INTENTION = 'interchange_intention'
+    INTERCHANGE_INTENTION_DONE = 'interchange_intention_done'
+
+
+async def send_played_card_event(game_name: str, player_id: int, card_id: int):
+    json_msg = {
+        "event": Events.PLAYED_CARD,
+        "player_name": get_player_name_by_id(player_id),
+        "player_id": player_id,
+        "card_id": card_id,
+        "card_name": get_card_name_by_id(card_id)
+    }
+    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
 
 @db_session
@@ -285,8 +320,7 @@ def verify_adjacent_players(player_id: int, other_player_id: int, max_position: 
 
 
 @db_session
-def merge_decks_of_card(game_name: str):
-    game: Game = find_game_by_name(game_name)
+def merge_decks_of_card(game: Game):
     top_card_id = game.draw_deck_order.pop(0)
     new_deck_list = list(game.draw_deck) + list(game.discard_deck)
     game.draw_deck.clear()
@@ -335,10 +369,53 @@ def verify_draw_can_be_done(game_name: str, game_data: DiscardInformationIn):
 
 
 @db_session
+def verify_player_is_next_in_turn(game_name: str, player_id: int, other_player_id: int):
+    game = find_game_by_name(game_name)
+    player = find_player_by_id(player_id)
+    other_player = find_player_by_id(other_player_id)
+
+    players_not_eliminated = select(
+        p for p in game.players if p.rol != PlayerRol.ELIMINATED).count()
+
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        next_turn = (player.position - 1) % players_not_eliminated
+    else:
+        next_turn = (player.position + 1) % players_not_eliminated
+
+    if next_turn != other_player.position:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The player selected is not the next in turn"
+        )
+
+
+@db_session
+def verify_pass_card_can_be_done(game_name: str, play_info: PlayInformation):
+    player: Player = find_player_by_id(play_info.player_id)
+    card: Card = find_card_by_id(play_info.card_id)
+    verify_player_in_game(play_info.player_id, game_name)
+    verify_player_in_game(play_info.objective_player_id, game_name)
+    verify_player_is_next_in_turn(
+        play_info.player_id, play_info.objective_player_id)
+    if card.type == CardType.THE_THING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The Thing cannot be passed"
+        )
+    is_card_in_player = select(
+        c for c in player.hand if (c.id == card.id)).exists()
+    if not is_card_in_player:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The card is not in the hand of the player"
+        )
+
+
+@db_session
 def verify_if_interchange_can_be_done(game_name: str, interchange_info: IntentionExchangeInformationIn):
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(interchange_info.player_id)
-    card: Card = Card[interchange_info.card_id]
+    card: Card = find_card_by_id(interchange_info.card_id)
 
     if game.turn != player.position:
         raise HTTPException(
@@ -360,26 +437,16 @@ def verify_if_interchange_can_be_done(game_name: str, interchange_info: Intentio
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='The player cannot pass the card Infected because is not The Thing'
         )
-    
+
 
 @db_session
 def verify_if_interchange_response_can_be_done(game_name: str, game_data: InterchangeInformationIn):
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(game_data.player_id)
-    player_card: Card = Card[game_data.card_id]
+    player_card: Card = find_card_by_id(game_data.card_id)
     objective_player: Player = find_player_by_id(game_data.objective_player_id)
-    objective_player_card: Card = Card[game_data.objective_card_id]
+    objective_player_card: Card = find_card_by_id(game_data.objective_card_id)
 
-    if not player_card:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Card of next player in turn not found'
-        )
-    if not objective_player_card:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Card of the player in turn not found'
-        )
     if player_card.type == CardType.THE_THING or objective_player_card.type == CardType.THE_THING:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -431,6 +498,23 @@ def get_id_of_next_player_in_turn(game_name):
         p.id for p in game.players if p.position == next_turn).first()
     return next_player_id
 
+
+@db_session
+def get_next_player_in_turn(game: Game) -> Player:
+    players_playing = game.players.select(
+        lambda p: p.rol != PlayerRol.ELIMINATED).count()
+
+    if game.round_direction == RoundDirection.CLOCKWISE:
+        next_turn = (game.turn + 1) % players_playing
+    else:
+        next_turn = (game.turn - 1) % players_playing
+
+    next_player = game.players.select(
+        lambda p: p.position == next_turn).first()
+
+    return next_player
+
+
 def is_the_game_finished(game_name: str) -> bool:
     game: Game = find_game_by_name(game_name)
     try:
@@ -438,7 +522,7 @@ def is_the_game_finished(game_name: str) -> bool:
         return True
     except:
         return False
-    
+
 
 @db_session
 def update_game_turn(game_name: str):
@@ -450,3 +534,65 @@ def update_game_turn(game_name: str):
     else:
         game.turn = (game.turn - 1) % players_playing
 
+
+@db_session
+def get_stay_away_cards_from_decks(game_name: str, quantity: int) -> List[Card]:
+    game: Game = find_game_by_name(game_name)
+    random_draw_deck_cards: list[Card] = []
+    random_draw_deck_cards = select(
+        c for c in game.draw_deck if c.type == CardType.STAY_AWAY).random(quantity)[:]
+    num_cards = len(random_draw_deck_cards)
+    random_discard_deck_cards: list[Card] = []
+    if num_cards < quantity:
+        random_discard_deck_cards = select(
+            c for c in game.discard_deck if c.type == CardType.STAY_AWAY).random(quantity-num_cards)[:]
+    for card in random_discard_deck_cards:
+        random_draw_deck_cards.append(card)
+
+    for card in random_draw_deck_cards:
+        if card in game.draw_deck:
+            game.draw_deck.remove(card)
+            game.draw_deck_order.remove(card.id)
+        else:
+            game.discard_deck.remove(card)
+
+    return random_draw_deck_cards
+
+
+@db_session
+def verify_defense_card_can_be_played(game_name: str, defense_info: PlayDefenseInformation):
+    game: Game = find_game_by_name(game_name)
+    player: Player = find_player_by_id(defense_info.player_id)
+
+    if not game.intention:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='No intention to conclude in the game.'
+        )
+
+    if game.intention.objective_player != defense_info.player_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Does not correspond to the objective player for the intention.'
+        )
+
+    if defense_info.card_id:
+        card: Card = find_card_by_id(defense_info.card_id)
+
+        if card.subtype != CardSubtype.DEFENSE:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='The card is not for defense.'
+            )
+
+        if not card in player.hand.select():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='The card is not in the player hand.'
+            )
+
+        if not card.id in player_cards_to_defend_himself(game.intention.action_type, player):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='The card does not work to defend this action type.'
+            )
