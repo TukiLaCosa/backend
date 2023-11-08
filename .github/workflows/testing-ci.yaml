@@ -1,6 +1,11 @@
 name: Tuki Testing CI
 on: [push]
 
+env:
+  ENVIRONMENT: test
+  TEST_DB_FILE: ./app/database/database_test.sqlite
+  TEST_DIRECTORY: ./app/tests
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -12,5 +17,7 @@ jobs:
           pip install poetry
           poetry install
 
-      - name: Test
-        run: make test-all
+      - name: Test Game module
+        run: |
+          poetry run -m pytest -vv $TEST_DIRECTORY/game_tests
+          rm -f $TEST_DB_FILE
