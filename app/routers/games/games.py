@@ -347,3 +347,16 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
         process_intention_in_game(game_name)
 
     clean_intention_in_game(game_name)
+
+
+@router.patch("/{game_name}/the-thing-end-game")
+async def the_thing_end_game(game_name: str, player_id: int):
+    utils.verify_player_is_the_thing(player_id, game_name)
+    services.finish_game_by_the_thing(game_name)
+
+    json_msg = {
+        "event": utils.Events.GAME_ENDED
+    }
+    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+
+    return {"message": "The thing ended the game"}

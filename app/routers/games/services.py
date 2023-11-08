@@ -254,6 +254,14 @@ async def finish_game(name: str) -> Game:
 
 
 @db_session
+async def finish_game_by_the_thing(name: str) -> Game:
+    game: Game = find_game_by_name(name)
+    game.status = GameStatus.ENDED
+
+    return game
+
+
+@db_session
 def play_action_card(game_name: str, play_info: PlayInformation):
     result = {"message": "Action card played"}
     game: Game = find_game_by_name(game_name)
@@ -415,13 +423,6 @@ def get_game_result(name: str) -> GameResult:
         losers = game.players.select(
             lambda p: p.rol in [PlayerRol.INFECTED, PlayerRol.ELIMINATED])[:]
 
-    elif no_human_remains(game):
-        reason = "No queda ningún Humano en la partida."
-        winners = game.players.select(
-            lambda p: p.rol in [PlayerRol.THE_THING, PlayerRol.INFECTED])[:]
-        losers = game.players.select(
-            lambda p: p.rol == PlayerRol.ELIMINATED)[:]
-
     elif the_thing_infected_everyone(game):
         reason = '''La Cosa ha logrado infectar a todos los demás jugadores
                     sin que haya sido eliminado ningún Humano de la partida.'''
@@ -429,6 +430,21 @@ def get_game_result(name: str) -> GameResult:
             lambda p: p.rol == PlayerRol.THE_THING)[:]
         losers = game.players.select(
             lambda p: p.rol != PlayerRol.THE_THING)[:]
+
+    elif no_human_remains(game):
+        reason = "No queda ningún Humano en la partida."
+        winners = game.players.select(
+            lambda p: p.rol in [PlayerRol.THE_THING, PlayerRol.INFECTED])[:]
+        losers = game.players.select(
+            lambda p: p.rol == PlayerRol.ELIMINATED)[:]
+
+    # elif the_thing_declared_a_wrong_victory(game):
+    else:
+        reason = '''La Cosa ha declarado una victoria equivocada. Todavia queda algún humano vivo.'''
+        winners = game.players.select(
+            lambda p: p.rol == PlayerRol.HUMAN)[:]
+        losers = game.players.select(
+            lambda p: p.rol != PlayerRol.HUMAN)[:]
 
     return GameResult(
         reason=reason,

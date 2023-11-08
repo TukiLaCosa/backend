@@ -5,8 +5,8 @@ from app.routers.players import players
 from app.routers.games import games
 from app.routers.cards import cards
 from app.routers.websockets import websockets
-from .utils import show_initial_image
-import threading
+# from .utils import show_initial_image
+# import threading
 
 app = FastAPI()
 
@@ -26,5 +26,5 @@ app.include_router(cards.router)
 app.include_router(websockets.router)
 
 # This displays the initial image with the sound
-t = threading.Thread(target=show_initial_image)
+# t = threading.Thread(target=show_initial_image)
 # t.start()
