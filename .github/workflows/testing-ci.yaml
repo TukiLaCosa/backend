@@ -13,10 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-          pip install poetry
-          poetry install
+      - name: Install and caching poetry dependencies
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: "poetry"
+      - run: poetry install
 
       - name: Test Game module
         run: |
