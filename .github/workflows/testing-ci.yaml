@@ -1,14 +1,15 @@
 name: Tuki Testing CI
 on: [push]
 
-env:
-  ENVIRONMENT: test
-  TEST_DB_FILE: ./app/database/database_test.sqlite
-  TEST_DIRECTORY: ./app/tests
-
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    env:
+      ENVIRONMENT: test
+      TEST_DB_FILE: ./app/database/database_test.sqlite
+      TEST_DIRECTORY: ./app/tests
+
     steps:
       - uses: actions/checkout@v3
 
@@ -19,5 +20,5 @@ jobs:
 
       - name: Test Game module
         run: |
-          poetry run -m pytest -vv $TEST_DIRECTORY/game_tests
+          poetry run pytest -vv $TEST_DIRECTORY/game_tests
           rm -f $TEST_DB_FILE
