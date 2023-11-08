@@ -23,5 +23,5 @@ jobs:
 
       - name: Test Game module
         run: |
-          poetry run pytest -vv $TEST_DIRECTORY/game_tests
-          rm -f $TEST_DB_FILE
+          poetry run coverage run -m pytest
+          # rm -f $TEST_DB_FILE
