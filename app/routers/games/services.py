@@ -657,6 +657,7 @@ def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):
     intention: Intention = game.intention
 
     intention.objective_player.hand.remove(card)
+    game.discard_deck.add(card)
 
     # Draw card until a card of type StayAway is obtained
     while (top_card := draw_card_by_drawing_order(game)).type != CardType.STAY_AWAY:
