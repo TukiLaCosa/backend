@@ -1,14 +1,14 @@
 from pony.orm import *
 from app.database.models import Player
-from ..cards.schemas import CardActionName, CardDefenseName
+from ..cards.schemas import CardDefenseName
 from enum import Enum
 
 
 class ActionType(str, Enum):
-    EXCHANGE_OFFER = "Ofrecimiento de intercambio"
-    CHANGE_PLACES = CardActionName.CHANGE_PLACES.value
-    BETTER_RUN = CardActionName.BETTER_RUN.value
-    FLAMETHROWER = CardActionName.FLAMETHROWER.value
+    EXCHANGE_OFFER = "exchange_offer"
+    CHANGE_PLACES = "change_places"
+    BETTER_RUN = "better_run"
+    FLAMETHROWER = "flamethrower"
 
 
 response_to_action_type = {
