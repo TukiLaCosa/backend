@@ -592,7 +592,7 @@ def verify_defense_card_can_be_played(game_name: str, defense_info: PlayDefenseI
             detail='No intention to conclude in the game.'
         )
 
-    if game.intention.objective_player != defense_info.player_id:
+    if game.intention.objective_player.id != defense_info.player_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Does not correspond to the objective player for the intention.'
