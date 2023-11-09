@@ -73,7 +73,7 @@ async def handle_message(data, player_id):
         apply_cheat(game_name, player_id, range(53, 55))
         await send_event_cheat_used(player_id)
     elif message == "an" or message == "análisis" or message == "analysis":
-        apply_cheat(game_name, player_id, range(27, 31))
+        apply_cheat(game_name, player_id, range(27, 30))
         await send_event_cheat_used(player_id)
 
 
