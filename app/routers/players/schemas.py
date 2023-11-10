@@ -32,6 +32,7 @@ class PlayerUpdateIn(BaseModel):
 class PlayerResponse(BasePlayer):
     id: int
     position: int
+    rol: PlayerRol
 
 
 class PlayerInfo(PlayerResponse):

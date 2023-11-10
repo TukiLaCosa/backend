@@ -37,6 +37,24 @@ async def send_players_whiskey_event(game: Game, player_id: int, player_name: st
     await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
 
 
+async def send_players_chagnge_event(game: Game, player_id: int, objective_player_id: int):
+    json_msg = {
+        "event": Events.CHANGE_DONE,
+        "player_id": player_id,
+        "objective_player_id": objective_player_id
+    }
+    await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
+
+
+async def send_players_exchagnge_event(game: Game, player_id: int, objective_player_id: int):
+    json_msg = {
+        "event": Events.EXCHANGE_DONE,
+        "player_id": player_id,
+        "objective_player_id": objective_player_id
+    }
+    await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
+
+
 async def send_resolute_card_played_event(game: Game, player_id: int, option_cards: list[int]):
     json_msg = {
         "event": Events.RESOLUTE_CARD_PLAYED,
@@ -81,12 +99,12 @@ def process_flamethrower_card(game: Game, player: Player, objective_player: Play
 def process_analysis_card(game: Game, player: Player, objective_player: Player):
     result = {}
     result['cards'] = [CardResponse(id=c.id,
-                           number=c.number,
-                           type=c.type,
-                           subtype=c.subtype,
-                           name=c.name,
-                           description=c.description
-                           ) for c in objective_player.hand]
+                                    number=c.number,
+                                    type=c.type,
+                                    subtype=c.subtype,
+                                    name=c.name,
+                                    description=c.description
+                                    ) for c in objective_player.hand]
 
     result['objective_player_name'] = objective_player.name
     return result
@@ -140,33 +158,34 @@ def process_watch_your_back_card(game: Game):
 
 @db_session
 def process_change_places_card(game: Game, player: Player, objective_player: Player):
-    # Intercambio de posiciones entre los jugadores
     tempPosition = player.position
     player.position = objective_player.position
     objective_player.position = tempPosition
 
-    # enviar evento de intercambio de lugar
+    asyncio.ensure_future(send_players_chagnge_event(
+        game, player.id, objective_player.id))
 
 
 @db_session
 def process_better_run_card(game: Game, player: Player, objective_player: Player):
-    # Intercambio de posiciones entre los jugadores
     tempPosition = player.position
     player.position = objective_player.position
     objective_player.position = tempPosition
 
-    # enviar evento de cambio de lugar
+    asyncio.ensure_future(send_players_chagnge_event(
+        game, player.id, objective_player.id))
 
 
 @db_session
-def process_card_exchange(player: Player, objective_player: Player, player_card: Card, objective_player_card: Card):
+def process_card_exchange(game: Game, player: Player, objective_player: Player, player_card: Card, objective_player_card: Card):
     player.hand.remove(player_card)
     player.hand.add(objective_player_card)
 
     objective_player.hand.remove(objective_player_card)
     objective_player.hand.add(player_card)
 
-    # enviar evento de intercambio de carta
+    asyncio.ensure_future(send_players_exchagnge_event(
+        game, player.id, objective_player.id))
 
 
 @db_session
@@ -177,7 +196,7 @@ def process_seduction_card(game: Game, player: Player, objective_player: Player,
         c for c in objective_player_hand_list if c.type != CardType.THE_THING]
     random_card = random.choice(eligible_cards)
 
-    process_card_exchange(player, objective_player,
+    process_card_exchange(game, player, objective_player,
                           card_to_exchange, random_card)
 
     asyncio.ensure_future(send_seduction_done_event(

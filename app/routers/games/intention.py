@@ -58,7 +58,7 @@ def process_intention_in_game(game_name) -> Intention:
             objective_player_card = find_card_by_id(
                 exchange_info['objective_card_id'])
 
-            process_card_exchange(player, objective_player,
+            process_card_exchange(game, player, objective_player,
                                   player_card, objective_player_card)
 
         case ActionType.CHANGE_PLACES:
