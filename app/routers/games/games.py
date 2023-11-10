@@ -342,9 +342,7 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
             "event": utils.Events.DEFENSE_CARD_PLAYED,
             "card_id": defense_info.card_id,
             "player_id": intention.player.id,
-            "player_name": intention.player.name,
             "objective_player_id": intention.objective_player.id,
-            "objective_player_name": intention.objective_player.name,
             "action_type": intention.action_type
         }
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
