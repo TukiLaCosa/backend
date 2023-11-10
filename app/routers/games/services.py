@@ -254,7 +254,7 @@ async def finish_game(name: str) -> Game:
 
 
 @db_session
-async def finish_game_by_the_thing(name: str) -> Game:
+def finish_game_by_the_thing(name: str) -> Game:
     game: Game = find_game_by_name(name)
     game.status = GameStatus.ENDED
 
