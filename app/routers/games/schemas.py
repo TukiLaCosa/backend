@@ -190,3 +190,8 @@ class OneTwoEffectIn(BaseModel):
 
     player_id: int
     objective_player_id: int
+
+class TheThingEndGameIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
