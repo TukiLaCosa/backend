@@ -79,7 +79,8 @@ def process_flamethrower_card(game: Game, player: Player, objective_player: Play
 
 @db_session
 def process_analysis_card(game: Game, player: Player, objective_player: Player):
-    result = [CardResponse(id=c.id,
+    result = {}
+    result['cards'] = [CardResponse(id=c.id,
                            number=c.number,
                            type=c.type,
                            subtype=c.subtype,
@@ -87,6 +88,7 @@ def process_analysis_card(game: Game, player: Player, objective_player: Player):
                            description=c.description
                            ) for c in objective_player.hand]
 
+    result['objective_player_name'] = objective_player.name
     return result
 
 
