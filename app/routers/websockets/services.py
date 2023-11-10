@@ -21,7 +21,8 @@ async def send_list_of_cheats(player_id: int):
         '[uno_dos | one_two]: Obtienes una carta uno, dos...',
         '[sed | seducción | seduction]: Obtienes una carta de seducción',
         '[vig | vigila_tus_espaldas | watch_your_back]: Obtienes una carta vigila tus espaldas',
-        '[an | análisis | analysis]: Obtienes una carta análisis'
+        '[an | análisis | analysis]: Obtienes una carta análisis',
+        '[nb | nada_barbacoas | no_barbecue]: Obtienes una carta nada de barbacoas'
     ]
     for message in cheat_messages:
         await player_connections.send_message(player_id, 'Loki', message)
@@ -74,6 +75,9 @@ async def handle_message(data, player_id):
         await send_event_cheat_used(player_id)
     elif message == "an" or message == "análisis" or message == "analysis":
         apply_cheat(game_name, player_id, range(27, 30))
+        await send_event_cheat_used(player_id)
+    elif message == "nb" or message == "nada_barbacoas" or message == "no_barbecue":
+        apply_cheat(game_name, player_id, range(84, 86))
         await send_event_cheat_used(player_id)
 
 
