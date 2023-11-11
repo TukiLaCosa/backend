@@ -43,7 +43,7 @@ async def send_players_chagnge_event(game: Game, player_id: int, objective_playe
         "player_id": player_id,
         "objective_player_id": objective_player_id
     }
-    await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
+    await player_connections.send_event_to_all_players_in_game(game.name, json_msg, player_id)
 
 
 async def send_players_exchagnge_event(game: Game, player_id: int, objective_player_id: int):
@@ -52,7 +52,7 @@ async def send_players_exchagnge_event(game: Game, player_id: int, objective_pla
         "player_name": get_player_name_by_id(player_id),
         "objective_player_name": get_player_name_by_id(objective_player_id)
     }
-    await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
+    await player_connections.send_event_to_all_players_in_game(game.name, json_msg, player_id)
 
 
 async def send_resolute_card_played_event(game: Game, player_id: int, option_cards: list[int]):
