@@ -161,6 +161,7 @@ def process_change_places_card(game: Game, player: Player, objective_player: Pla
     tempPosition = player.position
     player.position = objective_player.position
     objective_player.position = tempPosition
+    game.turn = player.position
 
     asyncio.ensure_future(send_players_chagnge_event(
         game, player.id, objective_player.id))
@@ -171,6 +172,7 @@ def process_better_run_card(game: Game, player: Player, objective_player: Player
     tempPosition = player.position
     player.position = objective_player.position
     objective_player.position = tempPosition
+    game.turn = player.position
 
     asyncio.ensure_future(send_players_chagnge_event(
         game, player.id, objective_player.id))
@@ -199,5 +201,5 @@ def process_seduction_card(game: Game, player: Player, objective_player: Player,
     process_card_exchange(game, player, objective_player,
                           card_to_exchange, random_card)
 
-    asyncio.ensure_future(send_seduction_done_event(
-        player.id, objective_player.id))
+    # asyncio.ensure_future(send_seduction_done_event(
+    #    player.id, objective_player.id))
