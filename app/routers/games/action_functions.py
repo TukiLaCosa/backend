@@ -49,8 +49,8 @@ async def send_players_chagnge_event(game: Game, player_id: int, objective_playe
 async def send_players_exchagnge_event(game: Game, player_id: int, objective_player_id: int):
     json_msg = {
         "event": Events.EXCHANGE_DONE,
-        "player_id": player_id,
-        "objective_player_id": objective_player_id
+        "player_name": get_player_name_by_id(player_id),
+        "objective_player_name": get_player_name_by_id(objective_player_id)
     }
     await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
 
@@ -186,9 +186,6 @@ def process_card_exchange(game: Game, player: Player, objective_player: Player, 
     objective_player.hand.remove(objective_player_card)
     objective_player.hand.add(player_card)
 
-    asyncio.ensure_future(send_players_exchagnge_event(
-        game, player.id, objective_player.id))
-
 
 @db_session
 def process_seduction_card(game: Game, player: Player, objective_player: Player,
@@ -200,6 +197,9 @@ def process_seduction_card(game: Game, player: Player, objective_player: Player,
 
     process_card_exchange(game, player, objective_player,
                           card_to_exchange, random_card)
+
+    asyncio.ensure_future(send_players_exchagnge_event(
+        game, player.id, objective_player.id))
 
     # asyncio.ensure_future(send_seduction_done_event(
     #    player.id, objective_player.id))
