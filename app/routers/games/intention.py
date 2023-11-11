@@ -51,15 +51,15 @@ def process_intention_in_game(game_name) -> Intention:
     objective_player = intention.objective_player
 
     match intention.action_type:
-        case ActionType.EXCHANGE_OFFER:
-            exchange_info = intention.exchange_payload
+        # case ActionType.EXCHANGE_OFFER:
+        #     exchange_info = intention.exchange_payload
 
-            player_card = find_card_by_id(exchange_info['card_id'])
-            objective_player_card = find_card_by_id(
-                exchange_info['objective_card_id'])
+        #     player_card = find_card_by_id(exchange_info['card_id'])
+        #     objective_player_card = find_card_by_id(
+        #         exchange_info['objective_card_id'])
 
-            process_card_exchange(game, player, objective_player,
-                                  player_card, objective_player_card)
+        #     process_card_exchange(game, player, objective_player,
+        #                           player_card, objective_player_card)
 
         case ActionType.CHANGE_PLACES:
             process_change_places_card(game, player, objective_player)
