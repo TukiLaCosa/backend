@@ -88,6 +88,10 @@ def process_flamethrower_card(game: Game, player: Player, objective_player: Play
             p.position -= 1
     objective_player.position = -1
 
+    # Reacomodo el turno
+    if game.turn != 0 and objective_player.position < player.position:
+            game.turn = game.turn - 1
+
     asyncio.ensure_future(send_players_eliminated_event(game=game,
                                                         killer_id=player.id,
                                                         killer_name=player.name,
