@@ -223,20 +223,20 @@ async def intention_to_interchange_card(game_name: str, interchange_info: Intent
     utils.verify_if_interchange_can_be_done(game_name, interchange_info)
     objective_player_id = utils.get_id_of_next_player_in_turn(game_name)
 
-    '''exchange_intention = services.register_card_exchange_intention(
-        game_name, interchange_info)'''
+    services.register_card_exchange_intention(
+        game_name, interchange_info.player_id, interchange_info.card_id, objective_player_id)
 
-    with db_session:
-        objective_player = find_player_by_id(objective_player_id)
+    # with db_session:
+    #     objective_player = find_player_by_id(objective_player_id)
 
-    json_msg = {
-        "event": "exchange_intention",
-        "player_id": interchange_info.player_id,
-        "player_name": get_player_name_by_id(interchange_info.player_id),
-        "card_to_exchange": interchange_info.card_id,
-        "defense_cards": player_cards_to_defend_himself(ActionType.EXCHANGE_OFFER, objective_player)
-    }
-    await player_connections.send_event_to(objective_player_id, json_msg)
+    # json_msg = {
+    #     "event": "exchange_intention",
+    #     "player_id": interchange_info.player_id,
+    #     "player_name": get_player_name_by_id(interchange_info.player_id),
+    #     "card_to_exchange": interchange_info.card_id,
+    #     "defense_cards": player_cards_to_defend_himself(ActionType.EXCHANGE_OFFER, objective_player)
+    # }
+    # await player_connections.send_event_to(objective_player_id, json_msg)
     return {"message": "Card interchange intention terminated."}
 
 
@@ -245,7 +245,10 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
     utils.verify_if_interchange_response_can_be_done(game_name, game_data)
     services.card_interchange_response(game_name, game_data)
 
-    # clean_intention_in_game(game_name)
+    game: Game = find_game_by_name(game_name)
+    set_objective_card_in_exchange_payload(game, game_data.card_id)
+
+    clean_intention_in_game(game_name)
 
     json_msg = {
         "event": utils.Events.EXCHANGE_DONE,

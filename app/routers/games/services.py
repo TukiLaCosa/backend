@@ -357,8 +357,10 @@ def play_action_card(game_name: str, play_info: PlayInformation):
                 detail="The card to exchange cannot be The Thing"
             )
         verify_card_in_hand(player, card_to_exchange)
-        process_seduction_card(
-            game, player, objective_player, card_to_exchange)
+
+        exchange_payload = {"card_id": card_to_exchange.id}
+        create_intention_in_game(
+            game, ActionType.EXCHANGE_OFFER, player, objective_player, exchange_payload)
 
     player.hand.remove(card)
     game.discard_deck.add(card)
@@ -538,11 +540,11 @@ def pass_card(play_info: PlayInformation):
 
 
 @db_session
-def register_card_exchange_intention(game_name: str, exchange_info: IntentionExchangeInformationIn) -> Intention:
+def register_card_exchange_intention(game_name: str, player_id: int, card_id: int, objective_player_id: int) -> Intention:
     game: Game = find_game_by_name(game_name)
-    player: Player = find_player_by_id(exchange_info.player_id)
-    objective_player = utils.get_next_player_in_turn(game)
-    exchange_payload = {"card_id": exchange_info.card_id}
+    player: Player = find_player_by_id(player_id)
+    objective_player = find_player_by_id(objective_player_id)
+    exchange_payload = {"card_id": card_id}
 
     exchange_intention = create_intention_in_game(
         game, ActionType.EXCHANGE_OFFER, player, objective_player, exchange_payload)
