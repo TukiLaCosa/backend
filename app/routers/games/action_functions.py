@@ -43,16 +43,16 @@ async def send_players_chagnge_event(game: Game, player_id: int, objective_playe
         "player_id": player_id,
         "objective_player_id": objective_player_id
     }
-    await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
+    await player_connections.send_event_to_all_players_in_game(game.name, json_msg)
 
 
 async def send_players_exchagnge_event(game: Game, player_id: int, objective_player_id: int):
     json_msg = {
         "event": Events.EXCHANGE_DONE,
-        "player_id": player_id,
-        "objective_player_id": objective_player_id
+        "player_name": get_player_name_by_id(player_id),
+        "objective_player_name": get_player_name_by_id(objective_player_id)
     }
-    await player_connections.send_event_to_other_players_in_game(game.name, json_msg, player_id)
+    await player_connections.send_event_to_all_players_in_game(game.name, json_msg)
 
 
 async def send_resolute_card_played_event(game: Game, player_id: int, option_cards: list[int]):
@@ -87,6 +87,10 @@ def process_flamethrower_card(game: Game, player: Player, objective_player: Play
         if p.position > objective_player.position:
             p.position -= 1
     objective_player.position = -1
+
+    # Reacomodo el turno
+    if game.turn != 0 and objective_player.position < player.position:
+            game.turn = game.turn - 1
 
     asyncio.ensure_future(send_players_eliminated_event(game=game,
                                                         killer_id=player.id,
@@ -161,6 +165,7 @@ def process_change_places_card(game: Game, player: Player, objective_player: Pla
     tempPosition = player.position
     player.position = objective_player.position
     objective_player.position = tempPosition
+    game.turn = player.position
 
     asyncio.ensure_future(send_players_chagnge_event(
         game, player.id, objective_player.id))
@@ -171,6 +176,7 @@ def process_better_run_card(game: Game, player: Player, objective_player: Player
     tempPosition = player.position
     player.position = objective_player.position
     objective_player.position = tempPosition
+    game.turn = player.position
 
     asyncio.ensure_future(send_players_chagnge_event(
         game, player.id, objective_player.id))
@@ -194,9 +200,6 @@ def process_card_exchange(game : Game ,player: Player, objective_player: Player,
     objective_player.hand.remove(objective_player_card)
     objective_player.hand.add(player_card)
 
-    asyncio.ensure_future(send_players_exchagnge_event(
-        game, player.id, objective_player.id))
-
 
 @db_session
 def process_seduction_card(game: Game, player: Player, objective_player: Player,
@@ -209,5 +212,8 @@ def process_seduction_card(game: Game, player: Player, objective_player: Player,
     process_card_exchange(game, player, objective_player,
                           card_to_exchange, random_card)
 
-    asyncio.ensure_future(send_seduction_done_event(
-        player.id, objective_player.id))
+    asyncio.ensure_future(send_players_exchagnge_event(
+        game, player.id, objective_player.id))
+
+    # asyncio.ensure_future(send_seduction_done_event(
+    #    player.id, objective_player.id))

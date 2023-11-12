@@ -283,9 +283,6 @@ def play_action_card(game_name: str, play_info: PlayInformation):
         objective_player: Player = find_player_by_id(
             play_info.objective_player_id)
 
-        if game.turn != 0 and objective_player.position < player.position:
-            game.turn = game.turn - 1
-
         create_intention_in_game(
             game, ActionType.FLAMETHROWER, player, objective_player)
 
