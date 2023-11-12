@@ -68,5 +68,5 @@ In the Makefile, you have the following targets:
 ### Run a container based on the built image
 `docker run --name backend-tuki-container -p 8000:8000 backend-tuki`
 
-### Running the Application in Containers - Docker Compose
+## Running the Application in Containers - Docker Compose
 `docker-compose up --build`

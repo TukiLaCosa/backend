@@ -336,11 +336,14 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
 
     if defense_info.card_id:
         services.play_defense_card(game_name, defense_info)
+        intention: Intention = get_intention_in_game(game_name)
 
         json_msg = {
-            "event": get_intention_in_game(game_name).action_type,
-            "player_id": defense_info.player_id,
-            "card_id": defense_info.card_id
+            "event": utils.Events.DEFENSE_CARD_PLAYED,
+            "card_id": defense_info.card_id,
+            "player_id": intention.player.id,
+            "objective_player_id": intention.objective_player.id,
+            "action_type": intention.action_type
         }
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
     else:
@@ -350,8 +353,8 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
 
 
 @router.patch("/{game_name}/the-thing-end-game")
-async def the_thing_end_game(game_name: str, player_id: int):
-    utils.verify_player_is_the_thing(player_id, game_name)
+async def the_thing_end_game(game_name: str, game_data: TheThingEndGameIn):
+    utils.verify_player_is_the_thing(game_data.player_id, game_name)
     services.finish_game_by_the_thing(game_name)
 
     json_msg = {

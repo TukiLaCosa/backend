@@ -39,6 +39,11 @@ def create_intention_in_game(game: Game, action_type: ActionType, player: Player
 
 
 @db_session
+def set_objective_card_in_exchange_payload(game: Game, objective_card_id: int):
+    game.intention.exchange_payload['objective_card_id'] = objective_card_id
+
+
+@db_session
 def process_intention_in_game(game_name) -> Intention:
     game: Game = find_game_by_name(game_name)
     intention: Intention = game.intention
@@ -49,11 +54,11 @@ def process_intention_in_game(game_name) -> Intention:
         case ActionType.EXCHANGE_OFFER:
             exchange_info = intention.exchange_payload
 
-            player_card = find_card_by_id(exchange_info.card_id)
+            player_card = find_card_by_id(exchange_info['card_id'])
             objective_player_card = find_card_by_id(
-                exchange_info.objective_card_id)
+                exchange_info['objective_card_id'])
 
-            process_card_exchange(player, objective_player,
+            process_card_exchange(game, player, objective_player,
                                   player_card, objective_player_card)
 
         case ActionType.CHANGE_PLACES:

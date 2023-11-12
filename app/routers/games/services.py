@@ -254,7 +254,7 @@ async def finish_game(name: str) -> Game:
 
 
 @db_session
-async def finish_game_by_the_thing(name: str) -> Game:
+def finish_game_by_the_thing(name: str) -> Game:
     game: Game = find_game_by_name(name)
     game.status = GameStatus.ENDED
 
@@ -565,7 +565,8 @@ def card_interchange_response(game_name: str, game_data: InterchangeInformationI
     next_player: Player = find_player_by_id(game_data.player_id)
     next_player_card: Card = cards_services.find_card_by_id(game_data.card_id)
 
-    process_card_exchange(player, next_player, player_card, next_player_card)
+    process_card_exchange(game, player, next_player,
+                          player_card, next_player_card)
 
     update_game_turn(game_name)
 

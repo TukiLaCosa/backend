@@ -39,6 +39,7 @@ class Events(str, Enum):
     REVELATIONS_DONE = 'revelations_done'
     EXCHANGE_INTENTION = 'exchange_intention'
     EXCHANGE_DONE = 'exchange_done'
+    CHANGE_DONE = 'change_done'
     BLIND_DATE_SELECTION = 'blind_date_selection'
     BLIND_DATE_DONE = 'blind_date_done'
     OOOPS_CARD_PLAYED = 'ooops_card_played'
@@ -49,6 +50,7 @@ class Events(str, Enum):
     SEDUCTION_DONE = 'seduction_done'
     INTERCHANGE_INTENTION = 'interchange_intention'
     INTERCHANGE_INTENTION_DONE = 'interchange_intention_done'
+    DEFENSE_CARD_PLAYED = "defense_card_played"
 
 
 async def send_played_card_event(game_name: str, player_id: int, card_id: int):
@@ -591,7 +593,7 @@ def verify_defense_card_can_be_played(game_name: str, defense_info: PlayDefenseI
             detail='No intention to conclude in the game.'
         )
 
-    if game.intention.objective_player != defense_info.player_id:
+    if game.intention.objective_player.id != defense_info.player_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Does not correspond to the objective player for the intention.'
