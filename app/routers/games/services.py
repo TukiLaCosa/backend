@@ -429,11 +429,13 @@ def get_game_result(name: str) -> GameResult:
             lambda p: p.rol != PlayerRol.THE_THING)[:]
 
     elif no_human_remains(game):
-        reason = "No queda ningún Humano en la partida."
+        reason = '''No queda ningún Humano en la partida. Todos fueron infectados o eliminados.
+                    Pierden los eliminados y el último infectado.'''
         winners = game.players.select(
             lambda p: p.rol in [PlayerRol.THE_THING, PlayerRol.INFECTED])[:]
         losers = game.players.select(
             lambda p: p.rol == PlayerRol.ELIMINATED)[:]
+        losers.append(game.last_infected)
 
     # elif the_thing_declared_a_wrong_victory(game):
     else:
