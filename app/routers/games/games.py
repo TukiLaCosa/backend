@@ -245,18 +245,16 @@ async def intention_to_interchange_card(game_name: str, interchange_info: Intent
 @router.patch("/{game_name}/card-interchange-response", status_code=status.HTTP_200_OK)
 async def card_interchange_response(game_name: str, game_data: InterchangeInformationIn):
     #services.card_interchange_response(game_name, game_data)
-    intention: Intention = get_intention_in_game(game_name)
     with db_session:
+        intention: Intention = get_intention_in_game(game_name)
         game: Game = find_game_by_name(game_name)
         
-        print("\n\n\nIntention:", intention)
 
         player = find_player_by_id(intention.player.id)
         objective_player = find_player_by_id(intention.objective_player.id)
 
         player_card = find_card_by_id(intention.exchange_payload['card_id'])
         objective_player_card = find_card_by_id(game_data.card_id)
-
         interchange_verify_data = {
             "player_id": game_data.player_id,
             "card_id": game_data.card_id,
@@ -264,27 +262,44 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
             "objective_card_id": objective_player_card.id
         }
         interchange_verify = InterchangeInformationVerify(**interchange_verify_data)
-
     utils.verify_if_interchange_response_can_be_done(game_name, interchange_verify)
     services.update_game_turn(game_name)
+    
+    with db_session:
+        intention: Intention = get_intention_in_game(game_name)
+        game: Game = find_game_by_name(game_name)
+        
 
-    process_card_exchange(game, player, objective_player,
-                          player_card, objective_player_card)
+        player = find_player_by_id(intention.player.id)
+        objective_player = find_player_by_id(intention.objective_player.id)
+
+        player_card = find_card_by_id(intention.exchange_payload['card_id'])
+        objective_player_card = find_card_by_id(game_data.card_id)
+
+        process_card_exchange(game, player, objective_player,
+                            player_card, objective_player_card)
+        
+    print("\n\n\n LLEGUE 5 Intention:", intention.action_type)
 
     clean_intention_in_game(game_name)
 
-    json_msg = {
-        "event": utils.Events.EXCHANGE_DONE,
-        "player_name": get_player_name_by_id(game_data.player_id),
-        "objective_player_name": get_player_name_by_id(objective_player_card)
-    }
-    await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+    print("\n\n\n LLEGUE 6 Intention:")
+    with db_session:
+        json_msg = {
+            "event": utils.Events.EXCHANGE_DONE,
+            "player_name": get_player_name_by_id(game_data.player_id),
+            "objective_player_name": get_player_name_by_id(objective_player.id)
+        }
+        await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+
+    print("\n\n\n LLEGUE 7 Intention:")
 
     with db_session:
         game = find_game_by_name(game_name)
         player_id_turn = select(
             p for p in game.players if p.position == game.turn).first().id
 
+    print("\n\n\n LLEGUE 8 Intention:", intention.action_type)
     json_msg = {
         "event": utils.Events.NEW_TURN,
         "next_player_name": get_player_name_by_id(player_id_turn),
