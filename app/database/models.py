@@ -14,6 +14,8 @@ class Player(db.Entity):
     hand = Set('Card')
     intention_creator = Optional('Intention', reverse='player')
     intention_objective = Optional('Intention', reverse='objective_player')
+    game_last_infected = Optional(
+        'Game', reverse='last_infected', nullable=True)
 
 
 class Game(db.Entity):
@@ -30,6 +32,8 @@ class Game(db.Entity):
     draw_deck_order = Required(Json, default=[])
     round_direction = Required(str, default=RoundDirection.CLOCKWISE)
     intention = Optional('Intention', reverse='game')
+    last_infected = Optional(
+        Player, reverse='game_last_infected', nullable=True)
 
 
 class Card(db.Entity):
