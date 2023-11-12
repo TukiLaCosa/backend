@@ -1,7 +1,7 @@
 from pony.orm import db_session, select
 from app.database.models import Game, Card, Player
 from ..players.schemas import PlayerRol
-from ..cards.schemas import CardType, CardResponse
+from ..cards.schemas import CardType, CardResponse, CardSubtype
 from ..websockets.utils import player_connections
 from .utils import Events
 from .schemas import RoundDirection, GameStatus
@@ -177,7 +177,17 @@ def process_better_run_card(game: Game, player: Player, objective_player: Player
 
 
 @db_session
-def process_card_exchange(game: Game, player: Player, objective_player: Player, player_card: Card, objective_player_card: Card):
+def process_card_exchange(game : Game ,player: Player, objective_player: Player, player_card: Card, objective_player_card: Card):
+    if (player.rol == PlayerRol.THE_THING and player_card.subtype == CardSubtype.CONTAGION):
+        if objective_player.rol != PlayerRol.INFECTED:
+            objective_player.rol = PlayerRol.INFECTED
+            objective_player.game_last_infected = objective_player.game
+
+    elif (objective_player.rol == PlayerRol.THE_THING and objective_player_card.subtype == CardSubtype.CONTAGION):
+        if player.rol != PlayerRol.INFECTED:
+            player.rol = PlayerRol.INFECTED
+            player.game_last_infected = player.game
+
     player.hand.remove(player_card)
     player.hand.add(objective_player_card)
 
