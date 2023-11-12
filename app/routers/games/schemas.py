@@ -151,8 +151,6 @@ class InterchangeInformationIn(BaseModel):
 
     player_id: int  # ID jugador que recibe la intencion
     card_id: int  # Card ID del jugador que recibe la intencion
-    objective_player_id: int  # ID jugador que inicia la intencion
-    objective_card_id: int  # Card ID del jugador que inicia la intencion
 
 
 class ResoluteExchangeIn(BaseModel):

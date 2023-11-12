@@ -245,19 +245,19 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
     utils.verify_if_interchange_response_can_be_done(game_name, game_data)
     services.card_interchange_response(game_name, game_data)
 
-    with db_session:
-        game: Game = find_game_by_name(game_name)
+    # with db_session:
+    #     game: Game = find_game_by_name(game_name)
 
-        intention: Intention = get_intention_in_game(game_name)
+    #     intention: Intention = get_intention_in_game(game_name)
 
-        player = find_player_by_id(intention.player.id)
-        objective_player = find_player_by_id(intention.objective_player.id)
+    #     player = find_player_by_id(intention.player.id)
+    #     objective_player = find_player_by_id(intention.objective_player.id)
 
-        player_card = find_card_by_id(intention.exchange_payload['card_id'])
-        objective_player_card = find_card_by_id(game_data.card_id)
+    #     player_card = find_card_by_id(intention.exchange_payload['card_id'])
+    #     objective_player_card = find_card_by_id(game_data.card_id)
 
-    process_card_exchange(game, player, objective_player,
-                          player_card, objective_player_card)
+    # process_card_exchange(game, player, objective_player,
+    #                       player_card, objective_player_card)
 
     clean_intention_in_game(game_name)
 

@@ -14,7 +14,7 @@ from .action_functions import *
 from .panic_functions import *
 import random
 from app.routers.games import utils
-from .intention import create_intention_in_game, ActionType
+from .intention import create_intention_in_game, ActionType, get_intention_in_game
 
 
 def get_unstarted_games() -> List[GameResponse]:
@@ -555,9 +555,10 @@ def register_card_exchange_intention(game_name: str, player_id: int, card_id: in
 @db_session
 def card_interchange_response(game_name: str, game_data: InterchangeInformationIn):
     game: Game = find_game_by_name(game_name)
-    player: Player = find_player_by_id(game_data.objective_player_id)
+    intention: Intention = get_intention_in_game(game_name)
+    player: Player = intention.objective_player
     player_card: Card = cards_services.find_card_by_id(
-        game_data.objective_card_id)
+        intention.exchange_payload['card_id'])
 
     next_player: Player = find_player_by_id(game_data.player_id)
     next_player_card: Card = cards_services.find_card_by_id(game_data.card_id)
