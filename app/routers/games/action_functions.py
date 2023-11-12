@@ -177,7 +177,7 @@ def process_better_run_card(game: Game, player: Player, objective_player: Player
 
 
 @db_session
-def process_card_exchange(player: Player, objective_player: Player, player_card: Card, objective_player_card: Card):
+def process_card_exchange(game : Game ,player: Player, objective_player: Player, player_card: Card, objective_player_card: Card):
     if (player.rol == PlayerRol.THE_THING and player_card.subtype == CardSubtype.CONTAGION):
         if objective_player.rol != PlayerRol.INFECTED:
             objective_player.rol = PlayerRol.INFECTED
@@ -195,7 +195,7 @@ def process_card_exchange(player: Player, objective_player: Player, player_card:
     objective_player.hand.add(player_card)
 
     asyncio.ensure_future(send_players_exchagnge_event(
-        player.game, player.id, objective_player.id))
+        game, player.id, objective_player.id))
 
 
 @db_session
