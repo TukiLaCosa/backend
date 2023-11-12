@@ -195,7 +195,7 @@ def process_card_exchange(player: Player, objective_player: Player, player_card:
     objective_player.hand.add(player_card)
 
     asyncio.ensure_future(send_players_exchagnge_event(
-        game, player.id, objective_player.id))
+        player.game, player.id, objective_player.id))
 
 
 @db_session
