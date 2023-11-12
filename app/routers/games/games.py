@@ -268,7 +268,6 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
     with db_session:
         intention: Intention = get_intention_in_game(game_name)
         game: Game = find_game_by_name(game_name)
-        
 
         player = find_player_by_id(intention.player.id)
         objective_player = find_player_by_id(intention.objective_player.id)
@@ -279,11 +278,8 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
         process_card_exchange(game, player, objective_player,
                             player_card, objective_player_card)
         
-    print("\n\n\n LLEGUE 5 Intention:", intention.action_type)
-
     clean_intention_in_game(game_name)
 
-    print("\n\n\n LLEGUE 6 Intention:")
     with db_session:
         json_msg = {
             "event": utils.Events.EXCHANGE_DONE,
@@ -292,14 +288,11 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
         }
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
-    print("\n\n\n LLEGUE 7 Intention:")
-
     with db_session:
         game = find_game_by_name(game_name)
         player_id_turn = select(
             p for p in game.players if p.position == game.turn).first().id
 
-    print("\n\n\n LLEGUE 8 Intention:", intention.action_type)
     json_msg = {
         "event": utils.Events.NEW_TURN,
         "next_player_name": get_player_name_by_id(player_id_turn),
@@ -393,6 +386,21 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
     
     if (defense or intention.action_type!=ActionType.EXCHANGE_OFFER):
         clean_intention_in_game(game_name)
+    
+    if (defense and intention.action_type==ActionType.EXCHANGE_OFFER):
+        services.update_game_turn(game_name)
+        with db_session:
+            game = find_game_by_name(game_name)
+            player_id_turn = select(
+            p for p in game.players if p.position == game.turn).first().id
+
+        json_msg = {
+            "event": utils.Events.NEW_TURN,
+            "next_player_name": get_player_name_by_id(player_id_turn),
+            "next_player_id": player_id_turn,
+            "round_direction": game.round_direction
+        }
+        await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
 
 @router.patch("/{game_name}/the-thing-end-game")
