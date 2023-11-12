@@ -158,21 +158,22 @@ def process_better_run_card(game: Game, player: Player, objective_player: Player
 
 @db_session
 def process_card_exchange(player: Player, objective_player: Player, player_card: Card, objective_player_card: Card):
+    print(player_card.type)
+    if (player.rol == PlayerRol.THE_THING and player_card.subtype == CardSubtype.CONTAGION):
+        if objective_player.rol != PlayerRol.INFECTED:
+            objective_player.rol = PlayerRol.INFECTED
+            objective_player.game_last_infected = objective_player.game
+
+    elif (objective_player.rol == PlayerRol.THE_THING and objective_player_card.subtype == CardSubtype.CONTAGION):
+        if player.rol != PlayerRol.INFECTED:
+            player.rol = PlayerRol.INFECTED
+            player.game_last_infected = player.game
+
     player.hand.remove(player_card)
     player.hand.add(objective_player_card)
 
     objective_player.hand.remove(objective_player_card)
     objective_player.hand.add(player_card)
-
-    if (player.rol == PlayerRol.THE_THING and player_card.type == CardSubtype.CONTAGION):
-        if objective_player.rol != PlayerRol.INFECTED:
-            objective_player.rol = PlayerRol.INFECTED
-            objective_player.game_last_infected = objective_player.game   
-
-    elif (objective_player.rol == PlayerRol.THE_THING and objective_player_card.type == CardSubtype.CONTAGION):
-        if player.rol != PlayerRol.INFECTED:
-            player.rol = PlayerRol.INFECTED
-            player.game_last_infected = player.game
 
     # enviar evento de intercambio de carta
 

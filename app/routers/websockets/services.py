@@ -67,7 +67,7 @@ async def handle_message(data, player_id):
     elif message == 'det' or message == 'determinación' or message == 'resolute':
         apply_cheat(game_name, player_id, range(43, 48))
         await send_event_cheat_used(player_id)
-    
+
     elif message == 'vig' or message == 'vigila_tus_espaldas' or message == 'watch_your_back':
         apply_cheat(game_name, player_id, range(53, 55))
         await send_event_cheat_used(player_id)
