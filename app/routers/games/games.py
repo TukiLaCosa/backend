@@ -260,8 +260,8 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
         interchange_verify_data = {
             "player_id": game_data.player_id,
             "card_id": game_data.card_id,
-            "objective_player": objective_player.id,
-            "objective_player_card": objective_player_card.id
+            "objective_player_id": objective_player.id,
+            "objective_card_id": objective_player_card.id
         }
         interchange_verify = InterchangeInformationVerify(**interchange_verify_data)
 
@@ -359,10 +359,10 @@ async def card_resolute_exchange(game_name: str, game_data: ResoluteExchangeIn):
 @router.post("/{game_name}/play-defense-card")
 async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):
     utils.verify_defense_card_can_be_played(game_name, defense_info)
+    intention: Intention = get_intention_in_game(game_name)
     defense = False
     if defense_info.card_id:
         services.play_defense_card(game_name, defense_info)
-        intention: Intention = get_intention_in_game(game_name)
 
         json_msg = {
             "event": utils.Events.DEFENSE_CARD_PLAYED,
