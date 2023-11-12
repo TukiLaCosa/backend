@@ -10,6 +10,8 @@ from ..players.utils import get_player_name_by_id, find_player_by_id
 from ..cards.utils import get_card_name_by_id, get_card_type_by_id, is_flamethrower, is_whiskey
 from .services import finish_game
 from .intention import *
+from .defense_functions import ActionType
+
 
 
 router = APIRouter(
@@ -242,29 +244,39 @@ async def intention_to_interchange_card(game_name: str, interchange_info: Intent
 
 @router.patch("/{game_name}/card-interchange-response", status_code=status.HTTP_200_OK)
 async def card_interchange_response(game_name: str, game_data: InterchangeInformationIn):
-    utils.verify_if_interchange_response_can_be_done(game_name, game_data)
-    services.card_interchange_response(game_name, game_data)
+    #services.card_interchange_response(game_name, game_data)
+    intention: Intention = get_intention_in_game(game_name)
+    with db_session:
+        game: Game = find_game_by_name(game_name)
+        
+        print("\n\n\nIntention:", intention)
 
-    # with db_session:
-    #     game: Game = find_game_by_name(game_name)
+        player = find_player_by_id(intention.player.id)
+        objective_player = find_player_by_id(intention.objective_player.id)
 
-    #     intention: Intention = get_intention_in_game(game_name)
+        player_card = find_card_by_id(intention.exchange_payload['card_id'])
+        objective_player_card = find_card_by_id(game_data.card_id)
 
-    #     player = find_player_by_id(intention.player.id)
-    #     objective_player = find_player_by_id(intention.objective_player.id)
+        interchange_verify_data = {
+            "player_id": game_data.player_id,
+            "card_id": game_data.card_id,
+            "objective_player": objective_player.id,
+            "objective_player_card": objective_player_card.id
+        }
+        interchange_verify = InterchangeInformationVerify(**interchange_verify_data)
 
-    #     player_card = find_card_by_id(intention.exchange_payload['card_id'])
-    #     objective_player_card = find_card_by_id(game_data.card_id)
+    utils.verify_if_interchange_response_can_be_done(game_name, interchange_verify)
+    services.update_game_turn(game_name)
 
-    # process_card_exchange(game, player, objective_player,
-    #                       player_card, objective_player_card)
+    process_card_exchange(game, player, objective_player,
+                          player_card, objective_player_card)
 
     clean_intention_in_game(game_name)
 
     json_msg = {
         "event": utils.Events.EXCHANGE_DONE,
         "player_name": get_player_name_by_id(game_data.player_id),
-        "objective_player_name": get_player_name_by_id(game_data.objective_player_id)
+        "objective_player_name": get_player_name_by_id(objective_player_card)
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
@@ -347,7 +359,7 @@ async def card_resolute_exchange(game_name: str, game_data: ResoluteExchangeIn):
 @router.post("/{game_name}/play-defense-card")
 async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation):
     utils.verify_defense_card_can_be_played(game_name, defense_info)
-
+    defense = False
     if defense_info.card_id:
         services.play_defense_card(game_name, defense_info)
         intention: Intention = get_intention_in_game(game_name)
@@ -360,10 +372,12 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
             "action_type": intention.action_type
         }
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+        defense = True
     else:
         process_intention_in_game(game_name)
-
-    clean_intention_in_game(game_name)
+    
+    if (defense or intention.action_type!=ActionType.EXCHANGE_OFFER):
+        clean_intention_in_game(game_name)
 
 
 @router.patch("/{game_name}/the-thing-end-game")

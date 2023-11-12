@@ -152,6 +152,10 @@ class InterchangeInformationIn(BaseModel):
     player_id: int  # ID jugador que recibe la intencion
     card_id: int  # Card ID del jugador que recibe la intencion
 
+class InterchangeInformationVerify(InterchangeInformationIn):
+    objective_player: int
+    objective_player_card: int
+
 
 class ResoluteExchangeIn(BaseModel):
     model_config = ConfigDict(from_attributes=True)
