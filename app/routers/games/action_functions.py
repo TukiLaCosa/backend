@@ -99,6 +99,7 @@ async def send_infected_event(infected_id: int, infected_name: str, the_thing_id
         "the_thing_name": the_thing_name
     }
     await player_connections.send_event_to(infected_id, json_msg)
+    await player_connections.send_event_to(the_thing_id, json_msg)
 
 
 @db_session
