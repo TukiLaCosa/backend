@@ -70,6 +70,14 @@ async def send_seduction_done_event(player_id: int, objective_player_id: int):
     await player_connections.send_event_to(player_id, json_msg)
     await player_connections.send_event_to(objective_player_id, json_msg)
 
+async def send_suspicious_card_played_event(player_id: int, card_name: str):
+    json_msg = {
+        "event": Events.SUSPICIOUS_CARD_PLAYED,
+        "card_name": card_name
+    }
+    await player_connections.send_event_to(player_id, json_msg)
+    await asyncio.sleep(5)
+
 
 @db_session
 def process_flamethrower_card(game: Game, player: Player, objective_player: Player):
@@ -126,6 +134,8 @@ def process_suspicious_card(game: Game, player: Player, objective_player: Player
         name=random_card.name,
         description=random_card.description
     )
+
+    asyncio.ensure_future(send_suspicious_card_played_event(player.id, random_card.name))
 
     return result
 
