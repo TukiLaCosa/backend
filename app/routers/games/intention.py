@@ -25,6 +25,7 @@ async def send_intention_event(action_type: ActionType, player: Player, objectiv
 
 @db_session
 def create_intention_in_game(game: Game, action_type: ActionType, player: Player, objective_player: Player, exchange_payload={}) -> Intention:
+    clean_intention_in_game(game.name)
     intention = Intention(
         action_type=action_type,
         player=player,
@@ -67,7 +68,10 @@ def process_intention_in_game(game_name) -> Intention:
 @db_session
 def clean_intention_in_game(game_name):
     game: Game = find_game_by_name(game_name)
-    Intention.get(game=game).delete()
+    intention = game.intention
+    # Intention.get(game=game).delete()
+    if intention:
+        intention.delete()
 
 
 @db_session

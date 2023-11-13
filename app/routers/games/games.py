@@ -376,6 +376,8 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
         defense = True
     else:
         process_intention_in_game(game_name)
+        if is_the_game_finished(game_name):
+            await finish_game(game_name)
 
     if (defense or intention.action_type != ActionType.EXCHANGE_OFFER):
         clean_intention_in_game(game_name)
