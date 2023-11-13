@@ -299,8 +299,7 @@ def verify_discard_can_be_done(game_name: str, game_data: DiscardInformationIn):
             detail="It's not the turn of the player"
         )
     if player.rol == PlayerRol.INFECTED and card.name == '¡Infectado!':
-        infected_count = select(count(c)
-                                for c in player.hand if c.name == '¡Infectado!')
+        infected_count = select(c for c in player.hand if c.name == '¡Infectado!').count()
         if infected_count <= 1:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
