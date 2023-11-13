@@ -14,7 +14,7 @@ from .action_functions import *
 from .panic_functions import *
 import random
 from app.routers.games import utils
-from .intention import create_intention_in_game, ActionType, get_intention_in_game
+from .intention import clean_intention_in_game, create_intention_in_game, ActionType, get_intention_in_game
 
 
 def get_unstarted_games() -> List[GameResponse]:
@@ -108,6 +108,8 @@ def delete_game(game_name: str):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"The game is not ended."
         )
+
+    clean_intention_in_game(game_name)
 
     for player in game.players:
         player.hand.clear()
@@ -404,7 +406,7 @@ def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOu
 
 @db_session
 def get_game_result(name: str) -> GameResult:
-    game : Game = find_game_by_name(name)
+    game: Game = find_game_by_name(name)
 
     if game.status != GameStatus.ENDED:
         raise HTTPException(
