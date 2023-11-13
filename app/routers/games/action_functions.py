@@ -90,7 +90,7 @@ def process_flamethrower_card(game: Game, player: Player, objective_player: Play
 
     # Reacomodo el turno
     if game.turn != 0 and objective_player.position < player.position:
-            game.turn = game.turn - 1
+        game.turn = game.turn - 1
 
     asyncio.ensure_future(send_players_eliminated_event(game=game,
                                                         killer_id=player.id,
@@ -183,7 +183,7 @@ def process_better_run_card(game: Game, player: Player, objective_player: Player
 
 
 @db_session
-def process_card_exchange(game : Game ,player: Player, objective_player: Player, player_card: Card, objective_player_card: Card):
+def process_card_exchange(game: Game, player: Player, objective_player: Player, player_card: Card, objective_player_card: Card):
     if (player.rol == PlayerRol.THE_THING and player_card.subtype == CardSubtype.CONTAGION):
         if objective_player.rol != PlayerRol.INFECTED:
             objective_player.rol = PlayerRol.INFECTED

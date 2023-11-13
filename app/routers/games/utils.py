@@ -463,7 +463,7 @@ def verify_if_interchange_can_be_done(game_name: str, interchange_info: Intentio
 
 
 @db_session
-def verify_if_interchange_response_can_be_done(game_name: str, game_data: InterchangeInformationIn):
+def verify_if_interchange_response_can_be_done(game_name: str, game_data: InterchangeInformationVerify):
     game: Game = find_game_by_name(game_name)
     player: Player = find_player_by_id(game_data.player_id)
     player_card: Card = find_card_by_id(game_data.card_id)
