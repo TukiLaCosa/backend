@@ -404,7 +404,7 @@ def draw_card(game_name: str, game_data: DrawInformationIn) -> DrawInformationOu
 
 @db_session
 def get_game_result(name: str) -> GameResult:
-    game: Game = find_game_by_name(name)
+    game : Game = find_game_by_name(name)
 
     if game.status != GameStatus.ENDED:
         raise HTTPException(
@@ -435,8 +435,8 @@ def get_game_result(name: str) -> GameResult:
                     Pierden los eliminados y el último infectado.'''
         winners = game.players.select(
             lambda p: p.rol in [PlayerRol.THE_THING, PlayerRol.INFECTED])[:]
-        losers = game.players.select(
-            lambda p: p.rol == PlayerRol.ELIMINATED)[:]
+        losers = list(game.players.select(
+            lambda p: p.rol == PlayerRol.ELIMINATED)[:])
         losers.append(game.last_infected)
 
     # elif the_thing_declared_a_wrong_victory(game):

@@ -13,10 +13,11 @@ from .services import (
 )
 
 
-async def send_intention_event(action_type: ActionType, objective_player: Player):
+async def send_intention_event(action_type: ActionType, player: Player, objective_player: Player):
     json_msg = {
         "event": action_type,
-        "defense_cards": player_cards_to_defend_himself(action_type, objective_player)
+        "defense_cards": player_cards_to_defend_himself(action_type, objective_player),
+        "player_id": player.id
     }
 
     await player_connections.send_event_to(objective_player.id, json_msg)
@@ -33,7 +34,7 @@ def create_intention_in_game(game: Game, action_type: ActionType, player: Player
     )
     game.intention = intention
 
-    asyncio.ensure_future(send_intention_event(action_type, objective_player))
+    asyncio.ensure_future(send_intention_event(action_type, player, objective_player))
 
     return intention
 
