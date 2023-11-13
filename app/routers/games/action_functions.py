@@ -70,6 +70,7 @@ async def send_seduction_done_event(player_id: int, objective_player_id: int):
     await player_connections.send_event_to(player_id, json_msg)
     await player_connections.send_event_to(objective_player_id, json_msg)
 
+
 async def send_suspicious_card_played_event(player_id: int, card_name: str):
     json_msg = {
         "event": Events.SUSPICIOUS_CARD_PLAYED,
@@ -90,15 +91,15 @@ def process_flamethrower_card(game: Game, player: Player, objective_player: Play
             game.discard_deck.add(c)
             objective_player.hand.remove(c)
 
+    # Reacomodo el turno
+    if game.turn != 0 and objective_player.position < player.position:
+        game.turn = game.turn - 1
+
     # Reacomodo las posiciones
     for p in game.players:
         if p.position > objective_player.position:
             p.position -= 1
     objective_player.position = -1
-
-    # Reacomodo el turno
-    if game.turn != 0 and objective_player.position < player.position:
-        game.turn = game.turn - 1
 
     asyncio.ensure_future(send_players_eliminated_event(game=game,
                                                         killer_id=player.id,
@@ -135,7 +136,8 @@ def process_suspicious_card(game: Game, player: Player, objective_player: Player
         description=random_card.description
     )
 
-    asyncio.ensure_future(send_suspicious_card_played_event(player.id, random_card.name))
+    asyncio.ensure_future(send_suspicious_card_played_event(
+        player.id, random_card.name))
 
     return result
 
