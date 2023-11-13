@@ -52,6 +52,7 @@ class Events(str, Enum):
     INTERCHANGE_INTENTION_DONE = 'interchange_intention_done'
     DEFENSE_CARD_PLAYED = "defense_card_played"
     SUSPICIOUS_CARD_PLAYED = "suspicious_card_played"
+    ANALYSIS_CARD_PLAYED = "analysis_card_played"
 
 
 async def send_played_card_event(game_name: str, player_id: int, card_id: int):

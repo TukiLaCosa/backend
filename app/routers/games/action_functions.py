@@ -80,6 +80,16 @@ async def send_suspicious_card_played_event(player_id: int, card_name: str):
     await asyncio.sleep(5)
 
 
+async def send_analysis_card_played_event(player_id: int, player_name: str, cards: list[CardResponse]):
+    json_msg = {
+        "event": Events.ANALYSIS_CARD_PLAYED,
+        "cards": cards,
+        "player_name": player_name
+    }
+    await player_connections.send_event_to(player_id, json_msg)
+    await asyncio.sleep(5)
+
+
 @db_session
 def process_flamethrower_card(game: Game, player: Player, objective_player: Player):
     objective_player.rol = PlayerRol.ELIMINATED
@@ -118,6 +128,9 @@ def process_analysis_card(game: Game, player: Player, objective_player: Player):
                                     name=c.name,
                                     description=c.description
                                     ) for c in objective_player.hand]
+
+    asyncio.ensure_future(send_analysis_card_played_event(player.id,
+                                                          player.name, list(result['cards'])))
 
     result['objective_player_name'] = objective_player.name
     return result
