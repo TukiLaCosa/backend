@@ -272,7 +272,7 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
     with db_session:
         json_msg = {
             "event": utils.Events.EXCHANGE_DONE,
-            "player_name": get_player_name_by_id(game_data.player_id),
+            "player_name": get_player_name_by_id(player.id),
             "objective_player_name": get_player_name_by_id(objective_player.id)
         }
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
@@ -376,6 +376,8 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
         defense = True
     else:
         process_intention_in_game(game_name)
+        if is_the_game_finished(game_name):
+            await finish_game(game_name)
 
     if (defense or intention.action_type != ActionType.EXCHANGE_OFFER):
         clean_intention_in_game(game_name)

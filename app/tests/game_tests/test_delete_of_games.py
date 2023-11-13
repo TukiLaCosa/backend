@@ -34,6 +34,7 @@ class FakeGame:
         self.turn = turn
         self.status = status
         self.round_direction = round_direction
+        self.intention = None
 
     def delete(a):
         pass

@@ -70,6 +70,7 @@ async def send_seduction_done_event(player_id: int, objective_player_id: int):
     await player_connections.send_event_to(player_id, json_msg)
     await player_connections.send_event_to(objective_player_id, json_msg)
 
+
 async def send_suspicious_card_played_event(player_id: int, card_name: str):
     json_msg = {
         "event": Events.SUSPICIOUS_CARD_PLAYED,
@@ -77,6 +78,27 @@ async def send_suspicious_card_played_event(player_id: int, card_name: str):
     }
     await player_connections.send_event_to(player_id, json_msg)
     await asyncio.sleep(5)
+
+
+async def send_analysis_card_played_event(player_id: int, player_name: str, cards: list[str]):
+    json_msg = {
+        "event": Events.ANALYSIS_CARD_PLAYED,
+        "cards": cards,
+        "player_name": player_name
+    }
+    await player_connections.send_event_to(player_id, json_msg)
+    await asyncio.sleep(5)
+
+
+async def send_infected_event(infected_id: int, infected_name: str, the_thing_id: int, the_thing_name: str):
+    json_msg = {
+        "event": Events.NEW_INFECTED,
+        "infected_id": infected_id,
+        "infected_name": infected_name,
+        "the_thing_id": the_thing_id,
+        "the_thing_name": the_thing_name
+    }
+    await player_connections.send_event_to(infected_id, json_msg)
 
 
 @db_session
@@ -90,15 +112,15 @@ def process_flamethrower_card(game: Game, player: Player, objective_player: Play
             game.discard_deck.add(c)
             objective_player.hand.remove(c)
 
+    # Reacomodo el turno
+    if game.turn != 0 and objective_player.position < player.position:
+        game.turn = game.turn - 1
+
     # Reacomodo las posiciones
     for p in game.players:
         if p.position > objective_player.position:
             p.position -= 1
     objective_player.position = -1
-
-    # Reacomodo el turno
-    if game.turn != 0 and objective_player.position < player.position:
-        game.turn = game.turn - 1
 
     asyncio.ensure_future(send_players_eliminated_event(game=game,
                                                         killer_id=player.id,
@@ -110,15 +132,15 @@ def process_flamethrower_card(game: Game, player: Player, objective_player: Play
 @db_session
 def process_analysis_card(game: Game, player: Player, objective_player: Player):
     result = {}
-    result['cards'] = [CardResponse(id=c.id,
-                                    number=c.number,
-                                    type=c.type,
-                                    subtype=c.subtype,
-                                    name=c.name,
-                                    description=c.description
-                                    ) for c in objective_player.hand]
-
+    result['cards'] = [c.name for c in objective_player.hand]
     result['objective_player_name'] = objective_player.name
+
+    for i in range(1, (len(result['cards']))):
+        result["cards"][i] = " " + result["cards"][i]
+
+    asyncio.ensure_future(send_analysis_card_played_event(player.id,
+                                                          objective_player.name, result['cards']))
+
     return result
 
 
@@ -135,7 +157,8 @@ def process_suspicious_card(game: Game, player: Player, objective_player: Player
         description=random_card.description
     )
 
-    asyncio.ensure_future(send_suspicious_card_played_event(player.id, random_card.name))
+    asyncio.ensure_future(send_suspicious_card_played_event(
+        player.id, random_card.name))
 
     return result
 
@@ -198,11 +221,15 @@ def process_card_exchange(game: Game, player: Player, objective_player: Player, 
         if objective_player.rol != PlayerRol.INFECTED:
             objective_player.rol = PlayerRol.INFECTED
             objective_player.game_last_infected = objective_player.game
+            asyncio.ensure_future(send_infected_event(
+                objective_player.id, objective_player.name, player.id, player.name))
 
     elif (objective_player.rol == PlayerRol.THE_THING and objective_player_card.subtype == CardSubtype.CONTAGION):
         if player.rol != PlayerRol.INFECTED:
             player.rol = PlayerRol.INFECTED
             player.game_last_infected = player.game
+            asyncio.ensure_future(send_infected_event(
+                player.id, player.name, objective_player.id, objective_player.name))
 
     player.hand.remove(player_card)
     player.hand.add(objective_player_card)

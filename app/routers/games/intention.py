@@ -13,10 +13,11 @@ from .services import (
 )
 
 
-async def send_intention_event(action_type: ActionType, objective_player: Player):
+async def send_intention_event(action_type: ActionType, player: Player, objective_player: Player):
     json_msg = {
         "event": action_type,
-        "defense_cards": player_cards_to_defend_himself(action_type, objective_player)
+        "defense_cards": player_cards_to_defend_himself(action_type, objective_player),
+        "player_id": player.id
     }
 
     await player_connections.send_event_to(objective_player.id, json_msg)
@@ -24,6 +25,7 @@ async def send_intention_event(action_type: ActionType, objective_player: Player
 
 @db_session
 def create_intention_in_game(game: Game, action_type: ActionType, player: Player, objective_player: Player, exchange_payload={}) -> Intention:
+    clean_intention_in_game(game.name)
     intention = Intention(
         action_type=action_type,
         player=player,
@@ -33,7 +35,7 @@ def create_intention_in_game(game: Game, action_type: ActionType, player: Player
     )
     game.intention = intention
 
-    asyncio.ensure_future(send_intention_event(action_type, objective_player))
+    asyncio.ensure_future(send_intention_event(action_type, player, objective_player))
 
     return intention
 
@@ -66,7 +68,10 @@ def process_intention_in_game(game_name) -> Intention:
 @db_session
 def clean_intention_in_game(game_name):
     game: Game = find_game_by_name(game_name)
-    Intention.get(game=game).delete()
+    intention = game.intention
+    # Intention.get(game=game).delete()
+    if intention:
+        intention.delete()
 
 
 @db_session

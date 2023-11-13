@@ -14,7 +14,7 @@ from .action_functions import *
 from .panic_functions import *
 import random
 from app.routers.games import utils
-from .intention import create_intention_in_game, ActionType, get_intention_in_game
+from .intention import clean_intention_in_game, create_intention_in_game, ActionType, get_intention_in_game
 
 
 def get_unstarted_games() -> List[GameResponse]:
@@ -108,6 +108,8 @@ def delete_game(game_name: str):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"The game is not ended."
         )
+
+    clean_intention_in_game(game_name)
 
     for player in game.players:
         player.hand.clear()
@@ -433,11 +435,12 @@ def get_game_result(name: str) -> GameResult:
     elif no_human_remains(game):
         reason = '''No queda ningún Humano en la partida. Todos fueron infectados o eliminados.
                     Pierden los eliminados y el último infectado.'''
-        winners = game.players.select(
-            lambda p: p.rol in [PlayerRol.THE_THING, PlayerRol.INFECTED])[:]
-        losers = game.players.select(
-            lambda p: p.rol == PlayerRol.ELIMINATED)[:]
+        winners = list(game.players.select(
+            lambda p: p.rol in [PlayerRol.THE_THING, PlayerRol.INFECTED])[:])
+        losers = list(game.players.select(
+            lambda p: p.rol == PlayerRol.ELIMINATED)[:])
         losers.append(game.last_infected)
+        winners.remove(game.last_infected)
 
     # elif the_thing_declared_a_wrong_victory(game):
     else:

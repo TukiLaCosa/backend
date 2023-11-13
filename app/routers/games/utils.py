@@ -52,6 +52,8 @@ class Events(str, Enum):
     INTERCHANGE_INTENTION_DONE = 'interchange_intention_done'
     DEFENSE_CARD_PLAYED = "defense_card_played"
     SUSPICIOUS_CARD_PLAYED = "suspicious_card_played"
+    ANALYSIS_CARD_PLAYED = "analysis_card_played"
+    NEW_INFECTED = "new_infected"
 
 
 async def send_played_card_event(game_name: str, player_id: int, card_id: int):
@@ -297,8 +299,7 @@ def verify_discard_can_be_done(game_name: str, game_data: DiscardInformationIn):
             detail="It's not the turn of the player"
         )
     if player.rol == PlayerRol.INFECTED and card.name == '¡Infectado!':
-        infected_count = select(count(c)
-                                for c in player.hand if c.name == '¡Infectado!')
+        infected_count = select(c for c in player.hand if c.name == '¡Infectado!').count()
         if infected_count <= 1:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
