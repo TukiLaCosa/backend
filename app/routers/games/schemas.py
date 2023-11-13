@@ -152,6 +152,7 @@ class InterchangeInformationIn(BaseModel):
     player_id: int  # ID jugador que recibe la intencion
     card_id: int  # Card ID del jugador que recibe la intencion
 
+
 class InterchangeInformationVerify(InterchangeInformationIn):
     objective_player_id: int
     objective_card_id: int
@@ -192,6 +193,7 @@ class OneTwoEffectIn(BaseModel):
 
     player_id: int
     objective_player_id: int
+
 
 class TheThingEndGameIn(BaseModel):
     model_config = ConfigDict(from_attributes=True)

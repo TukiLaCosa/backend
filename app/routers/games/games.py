@@ -13,7 +13,6 @@ from .intention import *
 from .defense_functions import ActionType
 
 
-
 router = APIRouter(
     prefix="/games",
     tags=["games"],
@@ -227,28 +226,16 @@ async def intention_to_interchange_card(game_name: str, interchange_info: Intent
 
     services.register_card_exchange_intention(
         game_name, interchange_info.player_id, interchange_info.card_id, objective_player_id)
-
-    # with db_session:
-    #     objective_player = find_player_by_id(objective_player_id)
-
-    # json_msg = {
-    #     "event": "exchange_intention",
-    #     "player_id": interchange_info.player_id,
-    #     "player_name": get_player_name_by_id(interchange_info.player_id),
-    #     "card_to_exchange": interchange_info.card_id,
-    #     "defense_cards": player_cards_to_defend_himself(ActionType.EXCHANGE_OFFER, objective_player)
-    # }
-    # await player_connections.send_event_to(objective_player_id, json_msg)
+    
     return {"message": "Card interchange intention terminated."}
 
 
 @router.patch("/{game_name}/card-interchange-response", status_code=status.HTTP_200_OK)
 async def card_interchange_response(game_name: str, game_data: InterchangeInformationIn):
-    #services.card_interchange_response(game_name, game_data)
+    # services.card_interchange_response(game_name, game_data)
     with db_session:
         intention: Intention = get_intention_in_game(game_name)
         game: Game = find_game_by_name(game_name)
-        
 
         player = find_player_by_id(intention.player.id)
         objective_player = find_player_by_id(intention.objective_player.id)
@@ -261,10 +248,12 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
             "objective_player_id": objective_player.id,
             "objective_card_id": objective_player_card.id
         }
-        interchange_verify = InterchangeInformationVerify(**interchange_verify_data)
-    utils.verify_if_interchange_response_can_be_done(game_name, interchange_verify)
+        interchange_verify = InterchangeInformationVerify(
+            **interchange_verify_data)
+    utils.verify_if_interchange_response_can_be_done(
+        game_name, interchange_verify)
     services.update_game_turn(game_name)
-    
+
     with db_session:
         intention: Intention = get_intention_in_game(game_name)
         game: Game = find_game_by_name(game_name)
@@ -276,8 +265,8 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
         objective_player_card = find_card_by_id(game_data.card_id)
 
         process_card_exchange(game, player, objective_player,
-                            player_card, objective_player_card)
-        
+                              player_card, objective_player_card)
+
     clean_intention_in_game(game_name)
 
     with db_session:
@@ -379,23 +368,24 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
             "objective_player_id": intention.objective_player.id,
             "action_type": intention.action_type
         }
-        if 73<=defense_info.card_id and defense_info.card_id <= 76:
-            card_name = get_card_name_by_id(intention.exchange_payload["card_id"])
+        if 73 <= defense_info.card_id and defense_info.card_id <= 76:
+            card_name = get_card_name_by_id(
+                intention.exchange_payload["card_id"])
             json_msg["card_to_exchange"] = card_name
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
         defense = True
     else:
         process_intention_in_game(game_name)
-    
-    if (defense or intention.action_type!=ActionType.EXCHANGE_OFFER):
+
+    if (defense or intention.action_type != ActionType.EXCHANGE_OFFER):
         clean_intention_in_game(game_name)
-    
-    if (defense and intention.action_type==ActionType.EXCHANGE_OFFER):
+
+    if (defense and intention.action_type == ActionType.EXCHANGE_OFFER):
         services.update_game_turn(game_name)
         with db_session:
             game = find_game_by_name(game_name)
             player_id_turn = select(
-            p for p in game.players if p.position == game.turn).first().id
+                p for p in game.players if p.position == game.turn).first().id
 
         json_msg = {
             "event": utils.Events.NEW_TURN,
