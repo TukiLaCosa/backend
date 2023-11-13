@@ -379,6 +379,9 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
             "objective_player_id": intention.objective_player.id,
             "action_type": intention.action_type
         }
+        if 73<=defense_info.card_id and defense_info.card_id <= 76:
+            card_name = get_card_name_by_id(intention.exchange_payload["card_id"])
+            json_msg["card_to_exchange"] = card_name
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
         defense = True
     else:
