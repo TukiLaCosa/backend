@@ -123,7 +123,7 @@ def process_analysis_card(game: Game, player: Player, objective_player: Player):
     result['cards'] = [c.name for c in objective_player.hand]
     result['objective_player_name'] = objective_player.name
 
-    for i in range (len(result['cards'] - 1)):
+    for i in range (len(result['cards']) - 1):
         result["cards"][i] = result["cards"][i] + ", "
 
     asyncio.ensure_future(send_analysis_card_played_event(player.id, 
