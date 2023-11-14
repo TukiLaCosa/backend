@@ -36,8 +36,8 @@ def test_find_game_successfully():
     create_test_game(name="TestGame", min_players=4, max_players=6,
                      password="secret", host_player_id=test_player.id)
     response = find_game_by_name("TestGame")
-    assert response.name == "TestGame"
-    assert response.min_players == 4
-    assert response.max_players == 6
-    assert response.password == "secret"
+    assert response.name == "TestGame", "El nombre del juego no coincide con el esperado."
+    assert response.min_players == 4, "El número mínimo de jugadores no coincide con el esperado."
+    assert response.max_players == 6, "El número máximo de jugadores no coincide con el esperado."
+    assert response.password == "secret", "La contraseña del juego no coincide con la esperada."
     cleanup_database()

@@ -1,109 +1,108 @@
-4;THE_THING;La Cosa;Sos La Cosa.
-4;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-4;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-4;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-4;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-4;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-4;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-4;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-4;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-6;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-6;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-7;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-7;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-8;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-9;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-9;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-10;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-10;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-11;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-11;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-11;GET_AWAY;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
-4;GET_AWAY;Lanzallamas;Elimina de la partida a un jugador adyacente.
-4;GET_AWAY;Lanzallamas;Elimina de la partida a un jugador adyacente.
-6;GET_AWAY;Lanzallamas;Elimina de la partida a un jugador adyacente.
-9;GET_AWAY;Lanzallamas;Elimina de la partida a un jugador adyacente.
-11;GET_AWAY;Lanzallamas;Elimina de la partida a un jugador adyacente.
-5;GET_AWAY;Análisis;Mira la mano de cartas de un jugador adyacente.
-6;GET_AWAY;Análisis;Mira la mano de cartas de un jugador adyacente.
-9;GET_AWAY;Análisis;Mira la mano de cartas de un jugador adyacente.
-11;GET_AWAY;Análisis;Mira la mano de cartas de un jugador adyacente.
-4;GET_AWAY;Hacha;retira una carta “Puerta atrancada” o “Cuarentena” de ti mismo o de un jugador adyacente.
-9;GET_AWAY;Hacha;retira una carta “Puerta atrancada” o “Cuarentena” de ti mismo o de un jugador adyacente.
-4;GET_AWAY;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
-4;GET_AWAY;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
-4;GET_AWAY;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
-4;GET_AWAY;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
-7;GET_AWAY;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
-8;GET_AWAY;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
-9;GET_AWAY;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
-10;GET_AWAY;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
-4;GET_AWAY;Whisky;Muestra todas tus cartas a todos los jugadores. Sólo puedes jugar esta carta sobre ti mismo.
-6;GET_AWAY;Whisky;Muestra todas tus cartas a todos los jugadores. Sólo puedes jugar esta carta sobre ti mismo.
-10;GET_AWAY;Whisky;Muestra todas tus cartas a todos los jugadores. Sólo puedes jugar esta carta sobre ti mismo.
-4;GET_AWAY;Determinación;Roba 3 cartas “¡Aléjate!”, elige 1 para quedártela y descarta las demás. A continuación, juega o descarta 1 carta.
-4;GET_AWAY;Determinación;Roba 3 cartas “¡Aléjate!”, elige 1 para quedártela y descarta las demás. A continuación, juega o descarta 1 carta.
-6;GET_AWAY;Determinación;Roba 3 cartas “¡Aléjate!”, elige 1 para quedártela y descarta las demás. A continuación, juega o descarta 1 carta.
-9;GET_AWAY;Determinación;Roba 3 cartas “¡Aléjate!”, elige 1 para quedártela y descarta las demás. A continuación, juega o descarta 1 carta.
-10;GET_AWAY;Determinación;Roba 3 cartas “¡Aléjate!”, elige 1 para quedártela y descarta las demás. A continuación, juega o descarta 1 carta.
-4;GET_AWAY;¡Cambio de lugar!;Cámbiate de sitio con un jugador adyacente que no esté en Cuarentena o tras una Puerta atrancada.
-4;GET_AWAY;¡Cambio de lugar!;Cámbiate de sitio con un jugador adyacente que no esté en Cuarentena o tras una Puerta atrancada.
-7;GET_AWAY;¡Cambio de lugar!;Cámbiate de sitio con un jugador adyacente que no esté en Cuarentena o tras una Puerta atrancada.
-9;GET_AWAY;¡Cambio de lugar!;Cámbiate de sitio con un jugador adyacente que no esté en Cuarentena o tras una Puerta atrancada.
-11;GET_AWAY;¡Cambio de lugar!;Cámbiate de sitio con un jugador adyacente que no esté en Cuarentena o tras una Puerta atrancada.
-4;GET_AWAY;Vigila tus espaldas;Invierte el orden de juego. Ahora, tanto el orden de turnos como los intercambios de cartas van en el sentido contrario.
-9;GET_AWAY;Vigila tus espaldas;Invierte el orden de juego. Ahora, tanto el orden de turnos como los intercambios de cartas van en el sentido contrario.
-4;GET_AWAY;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
-4;GET_AWAY;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
-6;GET_AWAY;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
-7;GET_AWAY;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
-8;GET_AWAY;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
-10;GET_AWAY;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
-11;GET_AWAY;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
-4;GET_AWAY;Puerta atrancada;Coloca esta carta entre un jugador adyacente y tú. No se permiten acciones entre este jugador y tú.
-7;GET_AWAY;Puerta atrancada;Coloca esta carta entre un jugador adyacente y tú. No se permiten acciones entre este jugador y tú.
-11;GET_AWAY;Puerta atrancada;Coloca esta carta entre un jugador adyacente y tú. No se permiten acciones entre este jugador y tú.
-4;GET_AWAY;¡Más vale que corras!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena, ignorando cualquier puerta atrancada.
-4;GET_AWAY;¡Más vale que corras!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena, ignorando cualquier puerta atrancada.
-7;GET_AWAY;¡Más vale que corras!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena, ignorando cualquier puerta atrancada.
-9;GET_AWAY;¡Más vale que corras!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena, ignorando cualquier puerta atrancada.
-11;GET_AWAY;¡Más vale que corras!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena, ignorando cualquier puerta atrancada.
-4;GET_AWAY;Aquí estoy bien;Cancela una carta “¡Cambio de lugar!” o “¡Más vale que corras!” de la que seas objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-6;GET_AWAY;Aquí estoy bien;Cancela una carta “¡Cambio de lugar!” o “¡Más vale que corras!” de la que seas objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-11;GET_AWAY;Aquí estoy bien;Cancela una carta “¡Cambio de lugar!” o “¡Más vale que corras!” de la que seas objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-5;GET_AWAY;Aterrador;Niégate a un ofrecimiento de intercambio de cartas y mira la carta que te has negado a recibir. Roba 1 carta “Aléjate!” en sustitución de ésta.
-6;GET_AWAY;Aterrador;Niégate a un ofrecimiento de intercambio de cartas y mira la carta que te has negado a recibir. Roba 1 carta “Aléjate!” en sustitución de ésta.
-8;GET_AWAY;Aterrador;Niégate a un ofrecimiento de intercambio de cartas y mira la carta que te has negado a recibir. Roba 1 carta “Aléjate!” en sustitución de ésta.
-11;GET_AWAY;Aterrador;Niégate a un ofrecimiento de intercambio de cartas y mira la carta que te has negado a recibir. Roba 1 carta “Aléjate!” en sustitución de ésta.
-4;GET_AWAY;¡No, gracias!;Niégate a un ofrecimiento de intercambio de cartas. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-6;GET_AWAY;¡No, gracias!;Niégate a un ofrecimiento de intercambio de cartas. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-8;GET_AWAY;¡No, gracias!;Niégate a un ofrecimiento de intercambio de cartas. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-11;GET_AWAY;¡No, gracias!;Niégate a un ofrecimiento de intercambio de cartas. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-4;GET_AWAY;¡Fallaste!;El siguiente jugador después de ti realiza el intercambio de cartas en lugar de hacerlo tú. No queda Infectado si recibe una carta “¡Infectado!”. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-6;GET_AWAY;¡Fallaste!;El siguiente jugador después de ti realiza el intercambio de cartas en lugar de hacerlo tú. No queda Infectado si recibe una carta “¡Infectado!”. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-11;GET_AWAY;¡Fallaste!;El siguiente jugador después de ti realiza el intercambio de cartas en lugar de hacerlo tú. No queda Infectado si recibe una carta “¡Infectado!”. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-4;GET_AWAY;¡Nada de barbacoas!;Cancela una carta “Lanzallamas” que te tenga como objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-6;GET_AWAY;¡Nada de barbacoas!;Cancela una carta “Lanzallamas” que te tenga como objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-11;GET_AWAY;¡Nada de barbacoas!;Cancela una carta “Lanzallamas” que te tenga como objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
-5;GET_AWAY;Cuarentena;Durante 2 rondas, un jugador adyacente debe robar, descartar e intercambiar cartas boca arriba. No puede eliminar jugadores ni cambiar de sitio.
-9;GET_AWAY;Cuarentena;Durante 2 rondas, un jugador adyacente debe robar, descartar e intercambiar cartas boca arriba. No puede eliminar jugadores ni cambiar de sitio.
-8;PANIC;Revelaciones;Empezando por ti y siguiedo el orden del juego, cada jugador elige si revela o no su mano. La ronda de “Revelaciones” termina cuando un jugador muestre una carta “!Infectado!”, sin que tenga que revelar el resto de su mano.
-6;PANIC;Cuerdas podridas;¡Las viejas cuerdas que usaste son fáciles de romper! Todas las cartas “Cuarentena” que haya en juego son descartadas.
-9;PANIC;Cuerdas podridas;¡Las viejas cuerdas que usaste son fáciles de romper! Todas las cartas “Cuarentena” que haya en juego son descartadas.
-5;PANIC;¡Sal de aquí!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena.
-4;PANIC;Olvidadizo;Descarta 3 cartas de tu mano y roba 3 nuevas cartas “¡Aléjate!”, descartando cualquier carta de “¡Pánico!” robada.
-5;PANIC;Uno, dos…;… con La Cosa ve diciendo adiós. Cámbiate de sitio con el tercer jugador que tengas a tu izquierda o a tu derecha (a tu elección=, ignorando cualquier carta “Puerta atrancada” que haya en juego. Si tú o ese jugador está en Cuarentena, el cambio no tiene lugar.
-9;PANIC;Uno, dos…;… con La Cosa ve diciendo adiós. Cámbiate de sitio con el tercer jugador que tengas a tu izquierda o a tu derecha (a tu elección=, ignorando cualquier carta “Puerta atrancada” que haya en juego. Si tú o ese jugador está en Cuarentena, el cambio no tiene lugar.
-4;PANIC;Tres, cuatro…;… se cuela sin trabajo. Todas las cartas “Puerta atrancada” que haya en juego son descartadas.
-9;PANIC;Tres, cuatro…;… se cuela sin trabajo. Todas las cartas “Puerta atrancada” que haya en juego son descartadas.
-5;PANIC;¿Es aquí la fiesta?;Descarta todas las cartas “Cuarentena” y “Puerta atrancada” que haya en juego. A continuación, empezando por ti, todos los jugadores cambian de sitio por parejas, en el sentido de las agujas del reloj. Si hay un número impar de jugadores, el último jugador no se mueve.
-9;PANIC;¿Es aquí la fiesta?;Descarta todas las cartas “Cuarentena” y “Puerta atrancada” que haya en juego. A continuación, empezando por ti, todos los jugadores cambian de sitio por parejas, en el sentido de las agujas del reloj. Si hay un número impar de jugadores, el último jugador no se mueve.
-7;PANIC;Que quede entre nosotros…;Muéstrate todas las cartas de tu mano a un jugador adyacente de tu elección.
-9;PANIC;Que quede entre nosotros…;Muéstrate todas las cartas de tu mano a un jugador adyacente de tu elección.
-4;PANIC;Vuelta y vuelta;Todos los jugadores deben darle 1 carta al siguiente jugador que tengan al lado, simultáneamente y en el sentido de juego actual, ignorando cualquier carta “Puerta atrancada” y “Cuarentena” que haya en juego. No puedes usar ninguna carta para evitar este intercambio. La Cosa puede infectar a otro jugador de esta forma, pasándole una carta “¡Infectado!”. Tu turno termina.
-9;PANIC;Vuelta y vuelta;Todos los jugadores deben darle 1 carta al siguiente jugador que tengan al lado, simultáneamente y en el sentido de juego actual, ignorando cualquier carta “Puerta atrancada” y “Cuarentena” que haya en juego. No puedes usar ninguna carta para evitar este intercambio. La Cosa puede infectar a otro jugador de esta forma, pasándole una carta “¡Infectado!”. Tu turno termina.
-7;PANIC;¿No podemos ser amigos?;Intercambia 1 carta con cualquier jugador de tu elección que no esté en Cuarentena.
-9;PANIC;¿No podemos ser amigos?;Intercambia 1 carta con cualquier jugador de tu elección que no esté en Cuarentena.
-4;PANIC;Cita a ciegas;Intercambia una carta de tu mano con la primera carta del mazo, descartando cualquier carta de “¡Pánico!” robada. Tu turno termina.
-9;PANIC;Cita a ciegas;Intercambia una carta de tu mano con la primera carta del mazo, descartando cualquier carta de “¡Pánico!” robada. Tu turno termina.
-10;PANIC;¡Ups!;Muéstrales todas las cartas de tu mano a todos los jugadores.
+4;THE_THING;CONTAGION;La Cosa;Sos La Cosa.
+4;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+4;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+4;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+4;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+4;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+4;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+4;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+4;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+6;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+6;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+7;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+7;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+8;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+9;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+9;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+10;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+10;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+11;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+11;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+11;STAY_AWAY;CONTAGION;¡Infectado!;Si recibes esta carta de otro jugador, quedas Infectado y debes quedarte esta carta hasta el final de la partida.
+4;STAY_AWAY;ACTION;Lanzallamas;Elimina de la partida a un jugador adyacente.
+4;STAY_AWAY;ACTION;Lanzallamas;Elimina de la partida a un jugador adyacente.
+6;STAY_AWAY;ACTION;Lanzallamas;Elimina de la partida a un jugador adyacente.
+9;STAY_AWAY;ACTION;Lanzallamas;Elimina de la partida a un jugador adyacente.
+11;STAY_AWAY;ACTION;Lanzallamas;Elimina de la partida a un jugador adyacente.
+5;STAY_AWAY;ACTION;Análisis;Mira la mano de cartas de un jugador adyacente.
+6;STAY_AWAY;ACTION;Análisis;Mira la mano de cartas de un jugador adyacente.
+9;STAY_AWAY;ACTION;Análisis;Mira la mano de cartas de un jugador adyacente.
+4;STAY_AWAY;ACTION;Hacha;retira una carta “Puerta atrancada” o “Cuarentena” de ti mismo o de un jugador adyacente.
+9;STAY_AWAY;ACTION;Hacha;retira una carta “Puerta atrancada” o “Cuarentena” de ti mismo o de un jugador adyacente.
+4;STAY_AWAY;ACTION;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
+4;STAY_AWAY;ACTION;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
+4;STAY_AWAY;ACTION;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
+4;STAY_AWAY;ACTION;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
+7;STAY_AWAY;ACTION;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
+8;STAY_AWAY;ACTION;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
+9;STAY_AWAY;ACTION;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
+10;STAY_AWAY;ACTION;Sospecha;Mira 1 carta aleatoria de la mano de un jugador adyacente.
+4;STAY_AWAY;ACTION;Whisky;Muestra todas tus cartas a todos los jugadores. Sólo puedes jugar esta carta sobre ti mismo.
+6;STAY_AWAY;ACTION;Whisky;Muestra todas tus cartas a todos los jugadores. Sólo puedes jugar esta carta sobre ti mismo.
+10;STAY_AWAY;ACTION;Whisky;Muestra todas tus cartas a todos los jugadores. Sólo puedes jugar esta carta sobre ti mismo.
+4;STAY_AWAY;ACTION;Determinación;Roba 3 cartas “¡Aléjate!”, elige 1 para quedártela y descarta las demás. A continuación, juega o descarta 1 carta.
+4;STAY_AWAY;ACTION;Determinación;Roba 3 cartas “¡Aléjate!”, elige 1 para quedártela y descarta las demás. A continuación, juega o descarta 1 carta.
+6;STAY_AWAY;ACTION;Determinación;Roba 3 cartas “¡Aléjate!”, elige 1 para quedártela y descarta las demás. A continuación, juega o descarta 1 carta.
+9;STAY_AWAY;ACTION;Determinación;Roba 3 cartas “¡Aléjate!”, elige 1 para quedártela y descarta las demás. A continuación, juega o descarta 1 carta.
+10;STAY_AWAY;ACTION;Determinación;Roba 3 cartas “¡Aléjate!”, elige 1 para quedártela y descarta las demás. A continuación, juega o descarta 1 carta.
+4;STAY_AWAY;ACTION;¡Cambio de lugar!;Cámbiate de sitio con un jugador adyacente que no esté en Cuarentena o tras una Puerta atrancada.
+4;STAY_AWAY;ACTION;¡Cambio de lugar!;Cámbiate de sitio con un jugador adyacente que no esté en Cuarentena o tras una Puerta atrancada.
+7;STAY_AWAY;ACTION;¡Cambio de lugar!;Cámbiate de sitio con un jugador adyacente que no esté en Cuarentena o tras una Puerta atrancada.
+9;STAY_AWAY;ACTION;¡Cambio de lugar!;Cámbiate de sitio con un jugador adyacente que no esté en Cuarentena o tras una Puerta atrancada.
+11;STAY_AWAY;ACTION;¡Cambio de lugar!;Cámbiate de sitio con un jugador adyacente que no esté en Cuarentena o tras una Puerta atrancada.
+4;STAY_AWAY;ACTION;Vigila tus espaldas;Invierte el orden de juego. Ahora, tanto el orden de turnos como los intercambios de cartas van en el sentido contrario.
+9;STAY_AWAY;ACTION;Vigila tus espaldas;Invierte el orden de juego. Ahora, tanto el orden de turnos como los intercambios de cartas van en el sentido contrario.
+4;STAY_AWAY;ACTION;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
+4;STAY_AWAY;ACTION;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
+6;STAY_AWAY;ACTION;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
+7;STAY_AWAY;ACTION;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
+8;STAY_AWAY;ACTION;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
+10;STAY_AWAY;ACTION;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
+11;STAY_AWAY;ACTION;Seducción;Intercambia una carta con cualquier jugador de tu elección que no esté en Cuarentena. Tu turno termina.
+4;STAY_AWAY;OBSTACLE;Puerta atrancada;Coloca esta carta entre un jugador adyacente y tú. No se permiten acciones entre este jugador y tú.
+7;STAY_AWAY;OBSTACLE;Puerta atrancada;Coloca esta carta entre un jugador adyacente y tú. No se permiten acciones entre este jugador y tú.
+11;STAY_AWAY;OBSTACLE;Puerta atrancada;Coloca esta carta entre un jugador adyacente y tú. No se permiten acciones entre este jugador y tú.
+4;STAY_AWAY;ACTION;¡Más vale que corras!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena, ignorando cualquier puerta atrancada.
+4;STAY_AWAY;ACTION;¡Más vale que corras!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena, ignorando cualquier puerta atrancada.
+7;STAY_AWAY;ACTION;¡Más vale que corras!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena, ignorando cualquier puerta atrancada.
+9;STAY_AWAY;ACTION;¡Más vale que corras!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena, ignorando cualquier puerta atrancada.
+11;STAY_AWAY;ACTION;¡Más vale que corras!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena, ignorando cualquier puerta atrancada.
+4;STAY_AWAY;DEFENSE;Aquí estoy bien;Cancela una carta “¡Cambio de lugar!” o “¡Más vale que corras!” de la que seas objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+6;STAY_AWAY;DEFENSE;Aquí estoy bien;Cancela una carta “¡Cambio de lugar!” o “¡Más vale que corras!” de la que seas objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+11;STAY_AWAY;DEFENSE;Aquí estoy bien;Cancela una carta “¡Cambio de lugar!” o “¡Más vale que corras!” de la que seas objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+5;STAY_AWAY;DEFENSE;Aterrador;Niégate a un ofrecimiento de intercambio de cartas y mira la carta que te has negado a recibir. Roba 1 carta “Aléjate!” en sustitución de ésta.
+6;STAY_AWAY;DEFENSE;Aterrador;Niégate a un ofrecimiento de intercambio de cartas y mira la carta que te has negado a recibir. Roba 1 carta “Aléjate!” en sustitución de ésta.
+8;STAY_AWAY;DEFENSE;Aterrador;Niégate a un ofrecimiento de intercambio de cartas y mira la carta que te has negado a recibir. Roba 1 carta “Aléjate!” en sustitución de ésta.
+11;STAY_AWAY;DEFENSE;Aterrador;Niégate a un ofrecimiento de intercambio de cartas y mira la carta que te has negado a recibir. Roba 1 carta “Aléjate!” en sustitución de ésta.
+4;STAY_AWAY;DEFENSE;¡No, gracias!;Niégate a un ofrecimiento de intercambio de cartas. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+6;STAY_AWAY;DEFENSE;¡No, gracias!;Niégate a un ofrecimiento de intercambio de cartas. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+8;STAY_AWAY;DEFENSE;¡No, gracias!;Niégate a un ofrecimiento de intercambio de cartas. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+11;STAY_AWAY;DEFENSE;¡No, gracias!;Niégate a un ofrecimiento de intercambio de cartas. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+4;STAY_AWAY;DEFENSE;¡Fallaste!;El siguiente jugador después de ti realiza el intercambio de cartas en lugar de hacerlo tú. No queda Infectado si recibe una carta “¡Infectado!”. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+6;STAY_AWAY;DEFENSE;¡Fallaste!;El siguiente jugador después de ti realiza el intercambio de cartas en lugar de hacerlo tú. No queda Infectado si recibe una carta “¡Infectado!”. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+11;STAY_AWAY;DEFENSE;¡Fallaste!;El siguiente jugador después de ti realiza el intercambio de cartas en lugar de hacerlo tú. No queda Infectado si recibe una carta “¡Infectado!”. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+4;STAY_AWAY;DEFENSE;¡Nada de barbacoas!;Cancela una carta “Lanzallamas” que te tenga como objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+6;STAY_AWAY;DEFENSE;¡Nada de barbacoas!;Cancela una carta “Lanzallamas” que te tenga como objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+11;STAY_AWAY;DEFENSE;¡Nada de barbacoas!;Cancela una carta “Lanzallamas” que te tenga como objetivo. Roba 1 carta “¡Aléjate!” en sustitución de ésta.
+5;STAY_AWAY;OBSTACLE;Cuarentena;Durante 2 rondas, un jugador adyacente debe robar, descartar e intercambiar cartas boca arriba. No puede eliminar jugadores ni cambiar de sitio.
+9;STAY_AWAY;OBSTACLE;Cuarentena;Durante 2 rondas, un jugador adyacente debe robar, descartar e intercambiar cartas boca arriba. No puede eliminar jugadores ni cambiar de sitio.
+8;PANIC;PANIC;Revelaciones;Empezando por ti y siguiedo el orden del juego, cada jugador elige si revela o no su mano. La ronda de “Revelaciones” termina cuando un jugador muestre una carta “!Infectado!”, sin que tenga que revelar el resto de su mano.
+6;PANIC;PANIC;Cuerdas podridas;¡Las viejas cuerdas que usaste son fáciles de romper! Todas las cartas “Cuarentena” que haya en juego son descartadas.
+9;PANIC;PANIC;Cuerdas podridas;¡Las viejas cuerdas que usaste son fáciles de romper! Todas las cartas “Cuarentena” que haya en juego son descartadas.
+5;PANIC;PANIC;¡Sal de aquí!;Cámbiate de sitio con cualquier jugador de tu elección que no esté en Cuarentena.
+4;PANIC;PANIC;Olvidadizo;Descarta 3 cartas de tu mano y roba 3 nuevas cartas “¡Aléjate!”, descartando cualquier carta de “¡Pánico!” robada.
+5;PANIC;PANIC;Uno, dos…;… con La Cosa ve diciendo adiós. Cámbiate de sitio con el tercer jugador que tengas a tu izquierda o a tu derecha (a tu elección=, ignorando cualquier carta “Puerta atrancada” que haya en juego. Si tú o ese jugador está en Cuarentena, el cambio no tiene lugar.
+9;PANIC;PANIC;Uno, dos…;… con La Cosa ve diciendo adiós. Cámbiate de sitio con el tercer jugador que tengas a tu izquierda o a tu derecha (a tu elección=, ignorando cualquier carta “Puerta atrancada” que haya en juego. Si tú o ese jugador está en Cuarentena, el cambio no tiene lugar.
+4;PANIC;PANIC;Tres, cuatro…;… se cuela sin trabajo. Todas las cartas “Puerta atrancada” que haya en juego son descartadas.
+9;PANIC;PANIC;Tres, cuatro…;… se cuela sin trabajo. Todas las cartas “Puerta atrancada” que haya en juego son descartadas.
+5;PANIC;PANIC;¿Es aquí la fiesta?;Descarta todas las cartas “Cuarentena” y “Puerta atrancada” que haya en juego. A continuación, empezando por ti, todos los jugadores cambian de sitio por parejas, en el sentido de las agujas del reloj. Si hay un número impar de jugadores, el último jugador no se mueve.
+9;PANIC;PANIC;¿Es aquí la fiesta?;Descarta todas las cartas “Cuarentena” y “Puerta atrancada” que haya en juego. A continuación, empezando por ti, todos los jugadores cambian de sitio por parejas, en el sentido de las agujas del reloj. Si hay un número impar de jugadores, el último jugador no se mueve.
+7;PANIC;PANIC;Que quede entre nosotros…;Muéstrate todas las cartas de tu mano a un jugador adyacente de tu elección.
+9;PANIC;PANIC;Que quede entre nosotros…;Muéstrate todas las cartas de tu mano a un jugador adyacente de tu elección.
+4;PANIC;PANIC;Vuelta y vuelta;Todos los jugadores deben darle 1 carta al siguiente jugador que tengan al lado, simultáneamente y en el sentido de juego actual, ignorando cualquier carta “Puerta atrancada” y “Cuarentena” que haya en juego. No puedes usar ninguna carta para evitar este intercambio. La Cosa puede infectar a otro jugador de esta forma, pasándole una carta “¡Infectado!”. Tu turno termina.
+9;PANIC;PANIC;Vuelta y vuelta;Todos los jugadores deben darle 1 carta al siguiente jugador que tengan al lado, simultáneamente y en el sentido de juego actual, ignorando cualquier carta “Puerta atrancada” y “Cuarentena” que haya en juego. No puedes usar ninguna carta para evitar este intercambio. La Cosa puede infectar a otro jugador de esta forma, pasándole una carta “¡Infectado!”. Tu turno termina.
+7;PANIC;PANIC;¿No podemos ser amigos?;Intercambia 1 carta con cualquier jugador de tu elección que no esté en Cuarentena.
+9;PANIC;PANIC;¿No podemos ser amigos?;Intercambia 1 carta con cualquier jugador de tu elección que no esté en Cuarentena.
+4;PANIC;PANIC;Cita a ciegas;Intercambia una carta de tu mano con la primera carta del mazo, descartando cualquier carta de “¡Pánico!” robada. Tu turno termina.
+9;PANIC;PANIC;Cita a ciegas;Intercambia una carta de tu mano con la primera carta del mazo, descartando cualquier carta de “¡Pánico!” robada. Tu turno termina.
+10;PANIC;PANIC;¡Ups!;Muéstrales todas las cartas de tu mano a todos los jugadores.

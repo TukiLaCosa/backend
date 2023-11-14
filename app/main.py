@@ -4,7 +4,9 @@ from app.config.config import settings
 from app.routers.players import players
 from app.routers.games import games
 from app.routers.cards import cards
-from pony.orm import *
+from app.routers.websockets import websockets
+# from .utils import show_initial_image
+# import threading
 
 app = FastAPI()
 
@@ -21,8 +23,8 @@ app.add_middleware(
 app.include_router(players.router)
 app.include_router(games.router)
 app.include_router(cards.router)
+app.include_router(websockets.router)
 
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+# This displays the initial image with the sound
+# t = threading.Thread(target=show_initial_image)
+# t.start()

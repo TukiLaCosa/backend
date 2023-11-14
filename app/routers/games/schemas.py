@@ -1,7 +1,8 @@
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List, Optional
 from enum import Enum
-from ..players.schemas import PlayerResponse
+from ..players.schemas import PlayerResponse, PlayerInfo
+from ..cards.schemas import CardType, CardResponse
 
 
 class GameStatus(str, Enum):
@@ -86,3 +87,115 @@ class GameInformationOut(GameUpdateOut):
     host_player_id: int
     num_of_players: int
     list_of_players: List[PlayerResponse]
+
+
+class GameStartOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    list_of_players: List[PlayerResponse]
+    status: GameStatus
+    top_card_face: CardType
+
+
+class DiscardInformationIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    card_id: int
+
+
+class PlayInformation(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    card_id: int
+    player_id: int
+    objective_player_id: Optional[int] = Field(
+        None, description="Optional objective player."
+    )
+    card_to_exchange: Optional[int] = Field(
+        None, description="Optional card to exchange."
+    )
+
+
+class DrawInformationIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+
+
+class DrawInformationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    card: CardResponse
+    top_card_face: CardType
+
+
+class GameResult(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    reason: str
+    winners: List[PlayerInfo]
+    losers: List[PlayerInfo]
+
+
+class IntentionExchangeInformationIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int  # ID jugador que inicia la intencion
+    card_id: int  # Card ID del jugador que inicia la intencion
+
+
+class InterchangeInformationIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int  # ID jugador que recibe la intencion
+    card_id: int  # Card ID del jugador que recibe la intencion
+
+
+class InterchangeInformationVerify(InterchangeInformationIn):
+    objective_player_id: int
+    objective_card_id: int
+
+
+class ResoluteExchangeIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    card_in_hand: int
+    card_in_deck: int
+
+
+class PlayDefenseInformation(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    card_id: Optional[int] = Field(
+        None, description="Optional defense card.")
+
+
+class ShowRevelationsCardsIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    original_player_id: int  # ID del jugador que jugo la carta Revelaciones
+    show_my_cards: bool
+
+
+class ForgetfulExchangeIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    cards_for_exchange: List[int]
+
+
+class OneTwoEffectIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int
+    objective_player_id: int
+
+
+class TheThingEndGameIn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    player_id: int

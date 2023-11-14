@@ -1,6 +1,6 @@
 from pony.orm import *
 from fastapi import HTTPException, status
-from app.database.models import Player
+from app.database.models import Player, Card
 from .schemas import *
 
 
@@ -38,3 +38,9 @@ def update(id: int, update_data: PlayerUpdateIn) -> Player:
     player = find_player_by_id(id)
     player.set(name=update_data.name)
     return player
+
+
+@db_session
+def get_player_hand(player_id: int) -> List[Card]:
+    player = find_player_by_id(player_id)
+    return player.hand.select()[:]

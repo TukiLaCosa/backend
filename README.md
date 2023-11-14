@@ -42,6 +42,8 @@ In the Makefile, you have the following targets:
 
 `make run` starts the Uvicorn server with the application. If it's not defined in the .env file, de default port is 8000.
 
+`make create-seed-data` Populates the database with 6 players and 1 game.
+
 `make delete-db` deletes the application's database file if it exists. It will request confirmation before deletion.
 
 `make test-all` runs the application's tests using pytest and tracks code coverage.
@@ -56,3 +58,15 @@ In the Makefile, you have the following targets:
 
 **Remember to create a .env file with the necessary environment variables before using the Makefile**
 **To know the necessary environment variables you can see the `.env.example` file.**
+
+
+## Running the Application in Containers - Docker
+
+### Building the Docker Image
+`docker build -t backend-tuki .`
+
+### Run a container based on the built image
+`docker run --name backend-tuki-container -p 8000:8000 backend-tuki`
+
+## Running the Application in Containers - Docker Compose
+`docker-compose up --build`

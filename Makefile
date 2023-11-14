@@ -23,13 +23,32 @@ COV_GAMES_FILE = .coverage.games
 COV_CARDS_FILE = .coverage.cards
 
 # Define the UVicorn command
-UVICORN_CMD = uvicorn $(MAIN_FILE):$(APP_NAME) --port $(PORT) --reload
+UVICORN_CMD = uvicorn $(MAIN_FILE):$(APP_NAME) --port $(PORT) --reload --ws websockets
 
-.PHONY: run delete-db coverage-report coverage-clean test-all test-players test-games
+.PHONY: run delete-db coverage-report coverage-clean test-all test-players test-games help
+
+# Define the 'help' target to display Makefile usage information
+help:
+	@echo "Usage: make [target]"
+	@echo "Targets:"
+	@echo "  run                - Run the UVicorn server"
+	@echo "  create-seed-data   - Seed to plant 6 players and 1 Game in the Database"
+	@echo "  delete-db          - Delete the database file"
+	@echo "  coverage-report    - Generate coverage reports"
+	@echo "  coverage-clean     - Remove coverage reports"
+	@echo "  test-all           - Run all tests sequentially"
+	@echo "  test-players       - Run player tests"
+	@echo "  test-games         - Run game tests"
+	@echo "  test-cards         - Run card tests"
+	@echo "  autopep8           - Run autopep8 to format code"
+	@echo "  install            - Install dependencies and create virtual environment"
 
 # Define the 'run' target to run the UVicorn server within the virtual environment
 run: install
 	poetry run $(UVICORN_CMD)
+
+create-seed-data: install
+	poetry run python -c "from app.database.utils import create_seed_data; create_seed_data()"
 
 # Define the 'delete-db' target to delete the database file
 delete-db:
@@ -50,19 +69,19 @@ TEST_DIRECTORY = ./app/tests
 
 # Define the 'test-games' target to run game tests in the test environment
 test-games: install
-	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_GAMES_FILE) -m pytest -vv $(TEST_DIRECTORY)/game_tests; true
+	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_GAMES_FILE) -m pytest --tb=no -vv $(TEST_DIRECTORY)/game_tests; true
 	rm -f $(TEST_DB_FILE)
 	unset ENVIRONMENT
 
 # Define the 'test-players' target to run player tests in the test environment
 test-players: install
-	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_PLAYERS_FILE) -m pytest -vv $(TEST_DIRECTORY)/player_tests; true
+	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_PLAYERS_FILE) -m pytest --tb=no -vv $(TEST_DIRECTORY)/player_tests; true
 	rm -f $(TEST_DB_FILE)
 	unset ENVIRONMENT
 
 # Define the 'test-cards' target to run cards tests in the test environment
 test-cards: install
-	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_CARDS_FILE) -m pytest -vv $(TEST_DIRECTORY)/card_tests; true
+	ENVIRONMENT=test poetry run coverage run --data-file=$(COV_CARDS_FILE) -m pytest --tb=no -vv $(TEST_DIRECTORY)/card_tests; true
 	rm -f $(TEST_DB_FILE)
 	unset ENVIRONMENT
 
@@ -90,7 +109,8 @@ coverage-clean:
 
 # Define the 'autopep8' target for running autopep8
 autopep8:
-	poetry run autopep8 --in-place --recursive .
+	@echo "Standarizing all files to pep8..."
+	@poetry run autopep8 --in-place --recursive .
 
 # Define the 'install' target to install dependencies and create the virtual environment
 install: pyproject.toml

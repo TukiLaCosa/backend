@@ -1,0 +1,11 @@
+# Byte-compiled / optimized / DLL files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Tests directory
+./app/tests/
+
+# Database file
+./app/database/*.sqlite
