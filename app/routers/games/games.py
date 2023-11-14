@@ -289,6 +289,7 @@ async def card_interchange_response(game_name: str, game_data: InterchangeInform
         "round_direction": game.round_direction
     }
     await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
+    asyncio.sleep(1)
     return {"message": "Card interchange terminated."}
 
 
@@ -395,6 +396,7 @@ async def play_defense_card(game_name: str, defense_info: PlayDefenseInformation
             "next_player_id": player_id_turn,
             "round_direction": game.round_direction
         }
+        asyncio.sleep(1)
         await player_connections.send_event_to_all_players_in_game(game_name, json_msg)
 
 
