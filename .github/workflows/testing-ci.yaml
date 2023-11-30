@@ -1,5 +1,11 @@
 name: Tuki Testing CI
-on: [push]
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches:
+      - main
+      - develop
 
 jobs:
   test:
@@ -9,30 +15,34 @@ jobs:
       ENVIRONMENT: test
       TEST_DIRECTORY: ${{ github.workspace }}/app/tests
       TEST_DB_FILE: ${{ github.workspace }}/app/database/database_test.sqlite
+      PYTHON_VERSION: "3.10"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Install and caching poetry dependencies
+      - name: Install poetry
         run: pipx install poetry
 
-      - uses: actions/setup-python@v4
+      - name: Set up Python and dependency cache
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: "poetry"
-      - run: poetry install
+
+      - name: Install dependencies
+        run: poetry install
 
       - name: Test Game module
         run: |
-          poetry run coverage run -m pytest $TEST_DIRECTORY/game_tests
-          rm -f $TEST_DB_FILE
+          poetry run coverage run -m pytest ${{ env.TEST_DIRECTORY }}/game_tests
+          rm -f ${{ env.TEST_DB_FILE }}
 
       - name: Test Player module
         run: |
-          poetry run coverage run -m pytest $TEST_DIRECTORY/player_tests
-          rm -f $TEST_DB_FILE
+          poetry run coverage run -m pytest ${{ env.TEST_DIRECTORY }}/player_tests
+          rm -f ${{ env.TEST_DB_FILE }}
 
       - name: Test Card module
         run: |
-          poetry run coverage run -m pytest $TEST_DIRECTORY/card_tests
-          rm -f $TEST_DB_FILE
+          poetry run coverage run -m pytest ${{ env.TEST_DIRECTORY }}/card_tests
+          rm -f ${{ env.TEST_DB_FILE }}
