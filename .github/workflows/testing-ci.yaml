@@ -35,14 +35,14 @@ jobs:
       - name: Test Game module
         run: |
           poetry run coverage run -m pytest ${{ env.TEST_DIRECTORY }}/game_tests
-          rm -f $TEST_DB_FILE
+          rm -f ${{ env.TEST_DB_FILE }}
 
       - name: Test Player module
         run: |
           poetry run coverage run -m pytest ${{ env.TEST_DIRECTORY }}/player_tests
-          rm -f $TEST_DB_FILE
+          rm -f ${{ env.TEST_DB_FILE }}
 
       - name: Test Card module
         run: |
           poetry run coverage run -m pytest ${{ env.TEST_DIRECTORY }}/card_tests
-          rm -f $TEST_DB_FILE
+          rm -f ${{ env.TEST_DB_FILE }}
